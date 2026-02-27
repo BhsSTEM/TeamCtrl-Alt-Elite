@@ -12,7 +12,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.ctrl_alt_elite"
+        applicationId = "com.company.ctrl_alt_elite"
         minSdk = 24
         targetSdk = 36
         versionCode = 1
