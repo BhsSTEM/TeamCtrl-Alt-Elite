@@ -12,7 +12,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.CtrlAltElite">
         <activity
-            android:name=".MainActivity"
+            android:name=".MainActivity" <!-- this is the line that changes the main page on boot-->
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
