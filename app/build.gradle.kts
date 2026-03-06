@@ -48,5 +48,5 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:34.10.0"))
     implementation("com.google.firebase:firebase-firestore")
     implementation(libs.play.services.maps)
-
+    implementation("com.google.android.gms:play-services-location:21.3.0")
 }
