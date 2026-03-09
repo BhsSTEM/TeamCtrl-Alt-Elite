@@ -69,9 +69,27 @@ public class BaseActivity extends AppCompatActivity {
 
                 // Add your Map and Settings checks here once those activities exist
                 else if (id == R.id.nav_map) {
+                    /*
+                    if (!(this instanceof MapActivity)) {
+                        Intent intent = new Intent(this, MapActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                        startActivity(intent);
+                        overridePendingTransition(0, 0);
+                    }
+
+                     */
                     return true;
                 }
                 else if (id == R.id.nav_settings) {
+                    /*
+                    if (!(this instanceof SettingsActivity)) {
+                        Intent intent = new Intent(this, SettingsActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                        startActivity(intent);
+                        overridePendingTransition(0, 0);
+                    }
+
+                     */
                     return true;
                 }
 
