@@ -51,9 +51,11 @@ public class BaseActivity extends AppCompatActivity {
     }
 
     private void setupNavigation() {
+        // Finds the bottom navigation XML file
         BottomNavigationView bottomNav = findViewById(R.id.bottom_nav);
 
         if (bottomNav != null) {
+            // Sets up a listener for the bottom bar so it can find what gets pressed
             bottomNav.setOnItemSelectedListener(item -> {
                 int id = item.getItemId();
 
