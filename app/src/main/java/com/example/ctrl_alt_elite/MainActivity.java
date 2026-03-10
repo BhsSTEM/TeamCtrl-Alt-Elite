@@ -4,8 +4,6 @@ import android.os.Bundle;
 
 import androidx.activity.EdgeToEdge;
 
-import com.google.android.material.bottomnavigation.BottomNavigationView;
-
 public class MainActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
