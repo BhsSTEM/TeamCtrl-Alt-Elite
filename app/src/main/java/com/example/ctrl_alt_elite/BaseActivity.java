@@ -50,11 +50,22 @@ public class BaseActivity extends AppCompatActivity {
         setupNavigation();
     }
 
-    private void setupNavigation() {
+    public void setupNavigation() {
         // Finds the bottom navigation XML file
         BottomNavigationView bottomNav = findViewById(R.id.bottom_nav);
 
         if (bottomNav != null) {
+            bottomNav.setOnItemSelectedListener(null);
+
+            // Automatically highlight the correct icon based on the current class
+            if (this instanceof MainActivity) {
+                bottomNav.setSelectedItemId(R.id.nav_home);
+            } else if (this instanceof SettingsActivity) {
+                bottomNav.setSelectedItemId(R.id.nav_settings);
+            } else {
+                bottomNav.setSelectedItemId(R.id.nav_map);
+            }
+
             // Sets up a listener for the bottom bar so it can find what gets pressed
             bottomNav.setOnItemSelectedListener(item -> {
                 int id = item.getItemId();
@@ -83,15 +94,12 @@ public class BaseActivity extends AppCompatActivity {
                     return true;
                 }
                 else if (id == R.id.nav_settings) {
-                    /*
                     if (!(this instanceof SettingsActivity)) {
                         Intent intent = new Intent(this, SettingsActivity.class);
                         intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                         startActivity(intent);
                         overridePendingTransition(0, 0);
                     }
-
-                     */
                     return true;
                 }
 
