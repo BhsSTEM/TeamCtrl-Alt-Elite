@@ -22,5 +22,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Ctrl-Alt-Elite 👊"
+rootProject.name = "Ctrl-Alt-Elite"
 include(":app")
