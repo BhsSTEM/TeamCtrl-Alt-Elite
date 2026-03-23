@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <application
         android:allowBackup="true"
@@ -11,22 +12,19 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.CtrlAltElite">
 
-
-        <activity
-            android:name=".BaseActivity"
-            android:exported="false" />
+        <!-- this is the line that changes the main page on boot-->
         <activity
             android:name=".MainActivity"
-            android:exported="true"/>
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
 
         <activity
             android:name=".LoginPage"
-            android:exported="true">
-        <intent-filter>  <!-- this is the line that changes the main page on boot-->
-            <action android:name="android.intent.action.MAIN" />
-            <category android:name="android.intent.category.LAUNCHER" />
-        </intent-filter>
-    </activity>
+            android:exported="false" />
 
     </application>
 
