@@ -58,7 +58,7 @@ import java.util.List;
 /**
  * An activity that displays a map showing the place at the device's current location.
  */
-public class evansMapActivity extends AppCompatActivity
+public class evansMapActivity extends BaseActivity
         implements OnMapReadyCallback {
 
     private static final String TAG = evansMapActivity.class.getSimpleName();
@@ -111,7 +111,7 @@ public class evansMapActivity extends AppCompatActivity
         // [END_EXCLUDE]
 
         // Retrieve the content view that renders the map.
-        setContentView(R.layout.activity_evans_map);
+        setActivityContent(R.layout.activity_evans_map);
 
         // [START_EXCLUDE silent]
         // Construct a PlacesClient
@@ -129,6 +129,13 @@ public class evansMapActivity extends AppCompatActivity
         mapFragment.getMapAsync(this);
         // [END maps_current_place_map_fragment]
         // [END_EXCLUDE]
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Re-sync the navigation bar highlight every time the screen comes to the foreground
+        setupNavigation();
     }
     // [END maps_current_place_on_create]
 
