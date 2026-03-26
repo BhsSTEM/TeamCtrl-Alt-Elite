@@ -24,14 +24,14 @@
             android:name=".BaseActivity"
             android:exported="false" />
         <activity
-            android:name=".evansMapActivity"
+            android:name=".LoginPage"
             android:exported="true"/>
         <activity
             android:name=".MainActivity"
             android:exported="true"/>
 
         <activity
-            android:name=".LoginPage"
+            android:name=".evansMapActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
