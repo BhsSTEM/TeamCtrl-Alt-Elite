@@ -13,4 +13,6 @@
     <string name="role">Role</string>
     <string name="logout">Logout</string>
     <string name="change_password">Change Password</string>
+    <string name="machines">Machines</string>
+    <string name="tasks">Tasks</string>
 </resources>
