@@ -6,4 +6,8 @@
     <string name="default_info_title">Default Location</string>
     <string name="default_info_snippet">No place found at this location.</string>
     <string name="pick_place">Pick a place</string>
+    <string name="weather_loading">Loading weather...</string>
+    <string name="weather_temp_placeholder">--°F</string>
+    <string name="weather_format">%1$d°F</string>
+    <string name="weather_error">Error fetching weather</string>
 </resources>

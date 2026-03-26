@@ -13,7 +13,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.company.ctrl_alt_elite"
+        applicationId = "com.example.ctrl_alt_elite"
         minSdk = 24
         targetSdk = 36
         versionCode = 1
@@ -46,8 +46,12 @@ dependencies {
     implementation(libs.material)
     implementation(libs.activity)
     implementation(libs.constraintlayout)
-    implementation(libs.places)
-    implementation(libs.fragment)
+
+    // Weather API dependencies
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+    implementation(libs.glide)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
