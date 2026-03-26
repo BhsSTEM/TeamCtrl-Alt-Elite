@@ -14,21 +14,22 @@
 
 package com.example.ctrl_alt_elite;
 
+import android.animation.ValueAnimator;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.FrameLayout;
-import android.widget.TextView;
+import android.view.ViewGroup;
+import android.widget.EditText;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
@@ -51,6 +52,7 @@ import com.google.android.libraries.places.api.model.PlaceLikelihood;
 import com.google.android.libraries.places.api.net.FindCurrentPlaceRequest;
 import com.google.android.libraries.places.api.net.FindCurrentPlaceResponse;
 import com.google.android.libraries.places.api.net.PlacesClient;
+import com.google.android.material.chip.Chip;
 
 import java.util.Arrays;
 import java.util.List;
@@ -58,7 +60,7 @@ import java.util.List;
 /**
  * An activity that displays a map showing the place at the device's current location.
  */
-public class evansMapActivity extends AppCompatActivity
+public class evansMapActivity extends BaseActivity //extending baseactivity adds the bottom task bar
         implements OnMapReadyCallback {
 
     private static final String TAG = evansMapActivity.class.getSimpleName();
@@ -95,6 +97,9 @@ public class evansMapActivity extends AppCompatActivity
     private List[] likelyPlaceAttributions;
     private LatLng[] likelyPlaceLatLngs;
 
+    // Default collapsed height for chip3 (in pixels, will be measured)
+    private int collapsedHeight = 0;
+
     // [START maps_current_place_on_create]
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -111,7 +116,7 @@ public class evansMapActivity extends AppCompatActivity
         // [END_EXCLUDE]
 
         // Retrieve the content view that renders the map.
-        setContentView(R.layout.activity_evans_map);
+        setActivityContent(R.layout.activity_evans_map);
 
         // [START_EXCLUDE silent]
         // Construct a PlacesClient
@@ -129,13 +134,110 @@ public class evansMapActivity extends AppCompatActivity
         mapFragment.getMapAsync(this);
         // [END maps_current_place_map_fragment]
         // [END_EXCLUDE]
+
+        setupSearchAnimation();
     }
-    // [END maps_current_place_on_create]
+
+    private void setupSearchAnimation() {
+        final EditText searchInput = findViewById(R.id.editTextText2);
+        final Chip chip3 = findViewById(R.id.chip3);
+
+        if (searchInput != null && chip3 != null) {
+            // Store the initial height as the collapsed height
+            chip3.post(new Runnable() {
+                @Override
+                public void run() {
+                    collapsedHeight = chip3.getHeight();
+                }
+            });
+
+            // Expand when EditText is clicked
+            searchInput.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    animatePanelHeight(chip3, calculateTargetHeight());
+                }
+            });
+            
+            // Also trigger when it gains focus
+            searchInput.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+                @Override
+                public void onFocusChange(View v, boolean hasFocus) {
+                    if (hasFocus) {
+                        animatePanelHeight(chip3, calculateTargetHeight());
+                    }
+                }
+            });
+        }
+    }
+
+    private int calculateTargetHeight() {
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        return (displayMetrics.heightPixels * 5) / 12;
+    }
+
+    private void animatePanelHeight(final View panel, int targetHeight) {
+        ValueAnimator animator = ValueAnimator.ofInt(panel.getHeight(), targetHeight);
+        animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                int val = (Integer) animation.getAnimatedValue();
+                ViewGroup.LayoutParams layoutParams = panel.getLayoutParams();
+                layoutParams.height = val;
+                panel.setLayoutParams(layoutParams);
+            }
+        });
+        animator.setDuration(300);
+        animator.start();
+    }
+
+    /**
+     * Manipulates the map when it's available.
+     */
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        this.map = googleMap;
+
+        // [START map_current_place_set_info_window_adapter]
+        this.map.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
+            @Override
+            public View getInfoWindow(Marker arg0) { return null; }
+            @Override
+            public View getInfoContents(Marker marker) { return null; }
+        });
+        // [END map_current_place_set_info_window_adapter]
+
+        // Collapse search when map is clicked
+        this.map.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng latLng) {
+                final Chip chip3 = findViewById(R.id.chip3);
+                if (chip3 != null && collapsedHeight > 0) {
+                    animatePanelHeight(chip3, collapsedHeight);
+                    // Clear focus from search to allow it to be re-clicked
+                    View searchInput = findViewById(R.id.editTextText2);
+                    if (searchInput != null) {
+                        searchInput.clearFocus();
+                    }
+                }
+            }
+        });
+
+        getLocationPermission();
+        updateLocationUI();
+        getDeviceLocation();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        setupNavigation();
+    }
 
     /**
      * Saves the state of the map when the activity is paused.
      */
-    // [START maps_current_place_on_save_instance_state]
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         if (map != null) {
@@ -144,86 +246,17 @@ public class evansMapActivity extends AppCompatActivity
         }
         super.onSaveInstanceState(outState);
     }
-    // [END maps_current_place_on_save_instance_state]
 
-    /**
-     * Sets up the options menu.
-     * @param menu The options menu.
-     * @return Boolean.
-     */
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Commented out as the menu resource doesn't exist yet
-        // getMenuInflater().inflate(R.menu.current_place_menu, menu);
-        return true;
-    }
+    public boolean onCreateOptionsMenu(Menu menu) { return true; }
 
-    /**
-     * Handles a click on the menu option to get a place.
-     * @param item The menu item to handle.
-     * @return Boolean.
-     */
-    // [START maps_current_place_on_options_item_selected]
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Commented out as the menu item ID doesn't exist yet
-        // if (item.getItemId() == R.id.option_get_place) {
-        //    showCurrentPlace();
-        // }
-        return true;
-    }
-    // [END maps_current_place_on_options_item_selected]
-
-    /**
-     * Manipulates the map when it's available.
-     * This callback is triggered when the map is ready to be used.
-     */
-    // [START maps_current_place_on_map_ready]
-    @Override
-    public void onMapReady(GoogleMap map) {
-        this.map = map;
-
-        // [START_EXCLUDE]
-        // [START map_current_place_set_info_window_adapter]
-        // Use a custom info window adapter to handle multiple lines of text in the
-        // info window contents.
-        this.map.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
-
-            @Override
-            // Return null here, so that getInfoContents() is called next.
-            public View getInfoWindow(Marker arg0) {
-                return null;
-            }
-
-            @Override
-            public View getInfoContents(Marker marker) {
-                // Return null to use default info window since custom layouts don't exist yet
-                return null;
-            }
-        });
-        // [END map_current_place_set_info_window_adapter]
-
-        // Prompt the user for permission.
-        getLocationPermission();
-        // [END_EXCLUDE]
-
-        // Turn on the My Location layer and the related control on the map.
-        updateLocationUI();
-
-        // Get the current location of the device and set the position of the map.
-        getDeviceLocation();
-    }
-    // [END maps_current_place_on_map_ready]
+    public boolean onOptionsItemSelected(MenuItem item) { return true; }
 
     /**
      * Gets the current location of the device, and positions the map's camera.
      */
-    // [START maps_current_place_get_device_location]
     private void getDeviceLocation() {
-        /*
-         * Get the best and most recent location of the device, which may be null in rare
-         * cases when a location is not available.
-         */
         try {
             if (locationPermissionGranted) {
                 Task<Location> locationResult = fusedLocationProviderClient.getLastLocation();
@@ -231,7 +264,6 @@ public class evansMapActivity extends AppCompatActivity
                     @Override
                     public void onComplete(@NonNull Task<Location> task) {
                         if (task.isSuccessful()) {
-                            // Set the map's camera position to the current location of the device.
                             lastKnownLocation = task.getResult();
                             if (lastKnownLocation != null) {
                                 map.moveCamera(CameraUpdateFactory.newLatLngZoom(
@@ -239,10 +271,7 @@ public class evansMapActivity extends AppCompatActivity
                                                 lastKnownLocation.getLongitude()), DEFAULT_ZOOM));
                             }
                         } else {
-                            Log.d(TAG, "Current location is null. Using defaults.");
-                            Log.e(TAG, "Exception: " + task.getException());
-                            map.moveCamera(CameraUpdateFactory
-                                    .newLatLngZoom(defaultLocation, DEFAULT_ZOOM));
+                            map.moveCamera(CameraUpdateFactory.newLatLngZoom(defaultLocation, DEFAULT_ZOOM));
                             map.getUiSettings().setMyLocationButtonEnabled(false);
                         }
                     }
@@ -252,18 +281,8 @@ public class evansMapActivity extends AppCompatActivity
             Log.e(TAG, "Exception: " + e.getMessage(), e);
         }
     }
-    // [END maps_current_place_get_device_location]
 
-    /**
-     * Prompts the user for permission to use the device location.
-     */
-    // [START maps_current_place_location_permission]
     private void getLocationPermission() {
-        /*
-         * Request location permission, so that we can get the location of the
-         * device. The result of the permission request is handled by a callback,
-         * onRequestPermissionsResult.
-         */
         if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
                 android.Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
@@ -274,21 +293,12 @@ public class evansMapActivity extends AppCompatActivity
                     PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
         }
     }
-    // [END maps_current_place_location_permission]
 
-    /**
-     * Handles the result of the request for location permissions.
-     */
-    // [START maps_current_place_on_request_permissions_result]
     @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         locationPermissionGranted = false;
-        if (requestCode
-                == PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION) {// If request is cancelled, the result arrays are empty.
-            if (grantResults.length > 0
-                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+        if (requestCode == PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 locationPermissionGranted = true;
             }
         } else {
@@ -296,16 +306,9 @@ public class evansMapActivity extends AppCompatActivity
         }
         updateLocationUI();
     }
-    // [END maps_current_place_on_request_permissions_result]
 
-    /**
-     * Updates the map's UI settings based on whether the user has granted location permission.
-     */
-    // [START maps_current_place_update_location_ui]
     private void updateLocationUI() {
-        if (map == null) {
-            return;
-        }
+        if (map == null) return;
         try {
             if (locationPermissionGranted) {
                 map.setMyLocationEnabled(true);
@@ -320,123 +323,41 @@ public class evansMapActivity extends AppCompatActivity
             Log.e(TAG, "Exception: " + e.getMessage());
         }
     }
-    // [END maps_current_place_update_location_ui]
 
-    /**
-     * Prompts the user to select the current place from a list of likely places, and shows the
-     * current place on the map - provided the user has granted location permission.
-     */
-    // [START maps_current_place_show_current_place]
     private void showCurrentPlace() {
-        if (map == null) {
-            return;
-        }
-
+        if (map == null) return;
         if (locationPermissionGranted) {
-            // Use fields to define the data types to return.
-            List<Place.Field> placeFields = Arrays.asList(Place.Field.DISPLAY_NAME, Place.Field.FORMATTED_ADDRESS,
-                    Place.Field.LOCATION);
-
-            // Use the builder to create a FindCurrentPlaceRequest.
-            FindCurrentPlaceRequest request =
-                    FindCurrentPlaceRequest.newInstance(placeFields);
-
-            // Get the likely places - that is, the businesses and other points of interest that
-            // are at the device's current location.
-            @SuppressWarnings("MissingPermission") final
-            Task<FindCurrentPlaceResponse> placeResult =
-                    placesClient.findCurrentPlace(request);
+            List<Place.Field> placeFields = Arrays.asList(Place.Field.DISPLAY_NAME, Place.Field.FORMATTED_ADDRESS, Place.Field.LOCATION);
+            FindCurrentPlaceRequest request = FindCurrentPlaceRequest.newInstance(placeFields);
+            @SuppressWarnings("MissingPermission") final Task<FindCurrentPlaceResponse> placeResult = placesClient.findCurrentPlace(request);
             placeResult.addOnCompleteListener (new OnCompleteListener<FindCurrentPlaceResponse>() {
                 @Override
                 public void onComplete(@NonNull Task<FindCurrentPlaceResponse> task) {
                     if (task.isSuccessful() && task.getResult() != null) {
                         FindCurrentPlaceResponse likelyPlaces = task.getResult();
-
-                        // Set the count, handling cases where less than 5 entries are returned.
-                        int count;
-                        if (likelyPlaces.getPlaceLikelihoods().size() < M_MAX_ENTRIES) {
-                            count = likelyPlaces.getPlaceLikelihoods().size();
-                        } else {
-                            count = M_MAX_ENTRIES;
-                        }
-
-                        int i = 0;
+                        int count = Math.min(likelyPlaces.getPlaceLikelihoods().size(), M_MAX_ENTRIES);
                         likelyPlaceNames = new String[count];
                         likelyPlaceAddresses = new String[count];
-                        likelyPlaceAttributions = new List[count];
                         likelyPlaceLatLngs = new LatLng[count];
-
-                        for (PlaceLikelihood placeLikelihood : likelyPlaces.getPlaceLikelihoods()) {
-                            // Build a list of likely places to show the user.
+                        for (int i = 0; i < count; i++) {
+                            PlaceLikelihood placeLikelihood = likelyPlaces.getPlaceLikelihoods().get(i);
                             likelyPlaceNames[i] = placeLikelihood.getPlace().getDisplayName();
                             likelyPlaceAddresses[i] = placeLikelihood.getPlace().getFormattedAddress();
-                            likelyPlaceAttributions[i] = placeLikelihood.getPlace()
-                                    .getAttributions();
                             likelyPlaceLatLngs[i] = placeLikelihood.getPlace().getLocation();
-
-                            i++;
-                            if (i > (count - 1)) {
-                                break;
-                            }
                         }
-
-                        // Show a dialog offering the user the list of likely places, and add a
-                        // marker at the selected place.
-                        evansMapActivity.this.openPlacesDialog();
-                    }
-                    else {
-                        Log.e(TAG, "Exception: " + task.getException());
+                        openPlacesDialog();
                     }
                 }
             });
-        } else {
-            // The user has not granted permission.
-            Log.i(TAG, "The user did not grant location permission.");
-
-            // Add a default marker, because the user hasn't selected a place.
-            map.addMarker(new MarkerOptions()
-                    .title(getString(R.string.default_info_title))
-                    .position(defaultLocation)
-                    .snippet(getString(R.string.default_info_snippet)));
-
-            // Prompt the user for permission.
-            getLocationPermission();
         }
     }
-    // [END maps_current_place_show_current_place]
 
-    /**
-     * Displays a form allowing the user to select a place from a list of likely places.
-     */
     private void openPlacesDialog() {
-        // Ask the user to choose the place where they are now.
-        DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                // The "which" argument contains the position of the selected item.
-                LatLng markerLatLng = likelyPlaceLatLngs[which];
-                String markerSnippet = likelyPlaceAddresses[which];
-                if (likelyPlaceAttributions[which] != null) {
-                    markerSnippet = markerSnippet + "\n" + likelyPlaceAttributions[which];
-                }
-
-                // Add a marker for the selected place, with an info window
-                // showing information about that place.
-                map.addMarker(new MarkerOptions()
-                        .title(likelyPlaceNames[which])
-                        .position(markerLatLng)
-                        .snippet(markerSnippet));
-
-                // Position the map's camera at the location of the marker.
-                map.moveCamera(CameraUpdateFactory.newLatLngZoom(markerLatLng,
-                        DEFAULT_ZOOM));
-            }
+        DialogInterface.OnClickListener listener = (dialog, which) -> {
+            LatLng markerLatLng = likelyPlaceLatLngs[which];
+            map.addMarker(new MarkerOptions().title(likelyPlaceNames[which]).position(markerLatLng).snippet(likelyPlaceAddresses[which]));
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(markerLatLng, DEFAULT_ZOOM));
         };
-
-        // Display the dialog.
-        AlertDialog dialog = new AlertDialog.Builder(this)
-                .setTitle(R.string.pick_place)
-                .setItems(likelyPlaceNames, listener)
-                .show();
+        new AlertDialog.Builder(this).setTitle(R.string.pick_place).setItems(likelyPlaceNames, listener).show();
     }
 }
