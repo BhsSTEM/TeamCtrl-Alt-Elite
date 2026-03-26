@@ -15,23 +15,23 @@
         android:textSize="34sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.055"
+        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.023" />
+        app:layout_constraintVertical_bias="0.03" />
 
     <LinearLayout
-        android:layout_width="237dp"
-        android:layout_height="214dp"
+        android:layout_width="300dp"
+        android:layout_height="280dp"
         android:background="#E4E4E4"
         android:orientation="vertical"
         android:padding="10dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.091"
+        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.185">
+        app:layout_constraintVertical_bias="0.2">
 
         <TextView
             android:id="@+id/textView5"
@@ -41,28 +41,26 @@
             android:text="App"
             android:textSize="20sp" />
 
-        <Button
-            android:id="@+id/button1"
-            android:layout_width="wrap_content"
+        <Switch
+            android:id="@+id/switch1"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="15dp"
-            android:backgroundTint="#959595"
-            android:text="Logout" />
+            android:text="Dark Mode" />
 
     </LinearLayout>
 
     <LinearLayout
-        android:layout_width="237dp"
-        android:layout_height="214dp"
+        android:layout_width="300dp"
+        android:layout_height="300dp"
         android:background="#E4E4E4"
         android:orientation="vertical"
         android:padding="10dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.091"
+        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.69">
+        app:layout_constraintVertical_bias="0.9">
 
         <TextView
             android:id="@+id/textView6"
@@ -72,6 +70,18 @@
             android:text="Account"
             android:textSize="20sp" />
 
+        <TextView
+            android:id="@+id/textView3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Username" />
+
+        <TextView
+            android:id="@+id/textView4"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Role" />
+
         <Button
             android:id="@+id/button2"
             android:layout_width="wrap_content"
@@ -79,6 +89,14 @@
             android:layout_marginTop="15dp"
             android:backgroundTint="#959595"
             android:text="Logout" />
+
+        <Button
+            android:id="@+id/button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:alpha="0.8"
+            android:backgroundTint="#959595"
+            android:text="Change Password" />
 
     </LinearLayout>
 
