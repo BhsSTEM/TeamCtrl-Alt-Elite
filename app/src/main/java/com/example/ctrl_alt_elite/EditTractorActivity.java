@@ -14,4 +14,10 @@ public class EditTractorActivity extends BaseActivity {
         setActivityContent(R.layout.activity_edit_tractor);
 
     }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Re-sync the navigation bar highlight every time the screen comes to the foreground
+        setupNavigation();
+    }
 }
