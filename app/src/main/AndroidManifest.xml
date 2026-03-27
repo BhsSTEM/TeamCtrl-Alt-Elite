@@ -26,7 +26,7 @@
             android:name=".BaseActivity"
             android:exported="false" />
         <activity
-            android:name=".LoginPage"
+            android:name=".EditTractorActivity"
             android:exported="true"/>
         <activity
             android:name=".MainActivity"
@@ -34,6 +34,10 @@
 
         <activity
             android:name=".evansMapActivity"
+            android:exported="true"/>
+
+        <activity
+            android:name=".LoginPage"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

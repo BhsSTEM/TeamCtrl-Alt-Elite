@@ -41,8 +41,16 @@
             android:text="App"
             android:textSize="20sp" />
 
+        <Button
+            android:id="@+id/button4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:backgroundTint="#959595"
+            android:text="Edit Tractors" />
+
         <Switch
-            android:id="@+id/switch1"
+            android:id="@+id/switch2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Dark Mode" />
