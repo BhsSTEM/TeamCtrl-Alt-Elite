@@ -13,7 +13,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.company.ctrl_alt_elite"
+        applicationId = "com.example.ctrl_alt_elite"
         minSdk = 24
         targetSdk = 36
         versionCode = 1
@@ -46,12 +46,25 @@ dependencies {
     implementation(libs.material)
     implementation(libs.activity)
     implementation(libs.constraintlayout)
+
+    // Weather API dependencies
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+    implementation(libs.glide)
+
     implementation(libs.places)
+    implementation(libs.fragment)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
     implementation(platform("com.google.firebase:firebase-bom:34.10.0"))
+    implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-firestore")
     implementation(libs.play.services.maps)
     implementation("com.google.android.gms:play-services-location:21.3.0")
+    // Import the BoM (Bill of Materials) for the Firebase platform
+    implementation(platform("com.google.firebase:firebase-bom:34.11.0"))
+    // Add the dependency for the Firebase Authentication library
+    // When using the BoM, you don't specify versions in Firebase library dependencies
+    implementation("com.google.firebase:firebase-auth")
 }

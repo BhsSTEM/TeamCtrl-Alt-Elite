@@ -15,4 +15,8 @@
     <string name="change_password">Change Password</string>
     <string name="machines">Machines</string>
     <string name="tasks">Tasks</string>
+    <string name="weather_loading">Loading weather...</string>
+    <string name="weather_temp_placeholder">--°F</string>
+    <string name="weather_format">%1$d°F</string>
+    <string name="weather_error">Error fetching weather</string>
 </resources>

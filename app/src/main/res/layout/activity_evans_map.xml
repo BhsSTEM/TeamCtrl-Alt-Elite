@@ -1,8 +1,79 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.fragment.app.FragmentContainerView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/map"
-    android:name="com.google.android.gms.maps.SupportMapFragment"
+    android:id="@+id/mapLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".evansMapActivity" />
+    tools:context="com.example.ctrl_alt_elite.evansMapActivity">
+
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/map"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- chip3: Big box at the bottom. Height will be animated in Java. -->
+    <com.google.android.material.chip.Chip
+        android:id="@+id/chip3"
+        android:layout_width="0dp"
+        android:layout_height="100dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="12dp"
+        android:layout_marginBottom="2dp"
+        android:checkable="false"
+        android:clickable="false"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+    <!-- chip2: The search bar background. Fixed distance (20dp) from TOP of chip3. -->
+    <com.google.android.material.chip.Chip
+        android:id="@+id/chip2"
+        android:layout_width="0dp"
+        android:layout_height="54dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="12dp"
+        android:layout_marginTop="23dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:checkable="false"
+        app:layout_constraintEnd_toEndOf="@+id/chip3"
+        app:layout_constraintStart_toStartOf="@+id/chip3"
+        app:layout_constraintTop_toTopOf="@+id/chip3" />
+
+    <!-- Search icon hugging the LEFT side of chip2 -->
+    <ImageView
+        android:id="@+id/searchIcon"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginStart="16dp"
+        android:src="@android:drawable/ic_menu_search"
+        android:contentDescription="Search Icon"
+        android:clickable="true"
+        android:focusable="true"
+        app:layout_constraintBottom_toBottomOf="@+id/chip2"
+        app:layout_constraintStart_toStartOf="@+id/chip2"
+        app:layout_constraintTop_toTopOf="@+id/chip2" />
+
+    <!-- EditText hugging the LEFT side, directly after the icon -->
+    <EditText
+        android:id="@+id/editTextText2"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="16dp"
+        android:background="@android:color/transparent"
+        android:hint="Search"
+        android:inputType="text"
+        android:textColorHint="#757575"
+        android:gravity="start|center_vertical"
+        app:layout_constraintBottom_toBottomOf="@+id/chip2"
+        app:layout_constraintEnd_toEndOf="@+id/chip2"
+        app:layout_constraintStart_toEndOf="@+id/searchIcon"
+        app:layout_constraintTop_toTopOf="@+id/chip2" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
