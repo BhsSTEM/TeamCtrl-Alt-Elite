@@ -25,20 +25,28 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class MainActivity extends AppCompatActivity {
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import android.content.pm.PackageManager;
+import androidx.core.app.ActivityCompat;
+import android.Manifest;
+
+public class MainActivity extends BaseActivity {
 
     private TextView tempText;
     private TextView weatherDesc;
     private TextView rainInfo;
     private ImageView weatherIcon;
     private ImageView linkToNoaa;
+    private ImageView mapView;
+    private FusedLocationProviderClient fusedLocationClient;
     private static final String USER_AGENT = "TeamCtrlAltElite/1.0 (contact@example.com)";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_main);
+        setActivityContent(R.layout.activity_main);
         
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -66,6 +74,15 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             });
         }
+        // Set up the link to Map Activity
+        mapView = findViewById(R.id.MapView);
+        if (mapView != null){
+            mapView.setOnClickListener(v -> {
+                Intent intent = new Intent(MainActivity.this, evansMapActivity.class);
+                startActivity(intent);
+            });
+        }
+
     }
 
     private void fetchNoaaWeather(double lat, double lon) {

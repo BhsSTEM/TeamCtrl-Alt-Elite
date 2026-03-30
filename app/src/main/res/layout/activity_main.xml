@@ -103,19 +103,6 @@
     <!-- Weather Display UI -->
 
     <ImageView
-        android:id="@+id/LinkToNOAA"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="@+id/BlueBackground"
-        app:layout_constraintEnd_toStartOf="@+id/WeatherBoxRight"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toEndOf="@+id/WeatherBoxLeft"
-        app:layout_constraintTop_toTopOf="@+id/BlueBackground"
-        app:layout_constraintVertical_bias="0.0"
-        app:srcCompat="@android:drawable/screen_background_light_transparent"
-        app:tint="#00066CB6" />
-
-    <ImageView
         android:id="@+id/DescBackground"
         android:layout_width="0dp"
         android:layout_height="0dp"
@@ -346,5 +333,35 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.114"
         app:srcCompat="@drawable/line" />
+
+    <ImageView
+        android:id="@+id/LinkToNOAA"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?attr/selectableItemBackground"
+        app:layout_constraintBottom_toBottomOf="@+id/BlueBackground"
+        app:layout_constraintEnd_toStartOf="@+id/WeatherBoxRight"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toEndOf="@+id/WeatherBoxLeft"
+        app:layout_constraintTop_toTopOf="@+id/BlueBackground"
+        app:layout_constraintVertical_bias="0.0"
+        app:srcCompat="@android:drawable/screen_background_light_transparent"
+        app:tint="#00066CB6" />
+
+    <ImageView
+        android:id="@+id/MapView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:scaleType="centerCrop"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?attr/selectableItemBackground"
+        app:layout_constraintBottom_toTopOf="@+id/MapBoxBottom"
+        app:layout_constraintEnd_toStartOf="@+id/MapBoxRight"
+        app:layout_constraintStart_toEndOf="@+id/MapBoxLeft"
+        app:layout_constraintTop_toBottomOf="@+id/MapBoxTop"
+        app:srcCompat="@drawable/screenshot_2026_03_27_143012" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
