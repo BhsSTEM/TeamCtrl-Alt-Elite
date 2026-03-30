@@ -8,7 +8,7 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="com.company.ctrl_alt_elite" />
+                  <option name="appId" value="com.example.ctrl_alt_elite" />
                   <option name="mobileSdkAppId" value="1:576086632005:android:8afc9f6c86de457701252c" />
                   <option name="projectId" value="team-ctrl-alt-elite" />
                   <option name="projectNumber" value="576086632005" />
