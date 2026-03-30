@@ -40,12 +40,6 @@ public class MainActivity extends BaseActivity {
         EdgeToEdge.enable(this);
         setActivityContent(R.layout.activity_main);
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
-
         // Initialize Weather Views with your updated XML IDs
         tempText = findViewById(R.id.weather_temp);
         weatherDesc = findViewById(R.id.weather_desc);
@@ -66,6 +60,13 @@ public class MainActivity extends BaseActivity {
                 startActivity(intent);
             });
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Re-sync the navigation bar highlight every time the screen comes to the foreground
+        setupNavigation();
     }
 
     private void fetchNoaaWeather(double lat, double lon) {
