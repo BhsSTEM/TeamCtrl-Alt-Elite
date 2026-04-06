@@ -10,4 +10,10 @@
     <string name="weather_temp_placeholder">--°F</string>
     <string name="weather_format">%1$d°F</string>
     <string name="weather_error">Error fetching weather</string>
+    <string name="search_hint">Search</string>
+    <string name="search_icon_desc">Search Icon</string>
+    <string name="zoom_in_desc">Zoom In</string>
+    <string name="zoom_out_desc">Zoom Out</string>
+    <string name="my_location_desc">My Location</string>
+    <string name="map_type_desc">Map Type</string>
 </resources>
