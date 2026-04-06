@@ -229,12 +229,6 @@ public class evansMapActivity extends BaseActivity //extending baseactivity adds
         getDeviceLocation();
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        setupNavigation();
-    }
-
     /**
      * Saves the state of the map when the activity is paused.
      */

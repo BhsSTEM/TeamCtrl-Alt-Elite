@@ -13,6 +13,12 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.CtrlAltElite">
+        <activity
+            android:name=".TasksActivity"
+            android:exported="false" />
+        <activity
+            android:name=".MachinesActivity"
+            android:exported="false" />
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
@@ -20,22 +26,19 @@
 
         <activity
             android:name=".SettingsActivity"
-            android:exported="false" />
-        <!-- this is the line that changes the main page on boot -->
+            android:exported="false" /> <!-- this is the line that changes the main page on boot -->
         <activity
             android:name=".BaseActivity"
             android:exported="false" />
         <activity
             android:name=".EditTractorActivity"
-            android:exported="true"/>
+            android:exported="true" />
         <activity
             android:name=".MainActivity"
-            android:exported="true"/>
-
+            android:exported="true" />
         <activity
             android:name=".LoginPage"
-            android:exported="true"/>
-
+            android:exported="true" />
         <activity
             android:name=".evansMapActivity"
             android:exported="true">
@@ -45,11 +48,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <activity android:name=".signUpPage"
-            android:exported="true">
-        </activity>
-
+        <activity
+            android:name=".signUpPage"
+            android:exported="true" />
     </application>
 
 </manifest>

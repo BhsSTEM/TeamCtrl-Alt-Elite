@@ -2,13 +2,12 @@ package com.example.ctrl_alt_elite;
 
 import android.os.Bundle;
 
-public class SettingsActivity extends BaseActivity {
+public class TasksActivity extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // This puts activity_main INSIDE activity_base's FrameLayout
-        setActivityContent(R.layout.activity_settings);
-
+        setActivityContent(R.layout.activity_tasks);
     }
+
 }

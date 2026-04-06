@@ -7,12 +7,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
-
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.LazyHeaders;
@@ -37,7 +31,6 @@ public class MainActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setActivityContent(R.layout.activity_main);
 
         // Initialize Weather Views with your updated XML IDs
@@ -62,12 +55,6 @@ public class MainActivity extends BaseActivity {
         }
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        // Re-sync the navigation bar highlight every time the screen comes to the foreground
-        setupNavigation();
-    }
 
     private void fetchNoaaWeather(double lat, double lon) {
         Retrofit retrofit = new Retrofit.Builder()
