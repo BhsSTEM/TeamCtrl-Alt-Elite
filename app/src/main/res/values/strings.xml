@@ -19,4 +19,18 @@
     <string name="weather_temp_placeholder">--°F</string>
     <string name="weather_format">%1$d°F</string>
     <string name="weather_error">Error fetching weather</string>
+    <string name="settings_header">Settings</string>
+    <string name="settings_app_section">App</string>
+    <string name="settings_dark_mode">Dark Mode</string>
+    <string name="settings_account_section">Account</string>
+    <string name="settings_username">Username</string>
+    <string name="settings_role">Role</string>
+    <string name="settings_change_password">Change Password</string>
+    <string name="settings_logout">Logout</string>
+    <string name="tasks_header">Tasks</string>
+    <string name="tasks_add_task_content_desc">Add Task</string>
+    <string name="tasks_options_content_desc">Task Options</string>
+    <string name="tasks_title_placeholder">Task Title</string>
+    <string name="tasks_desc_placeholder">Description of the task goes here</string>
+    <string name="tasks_date_placeholder">May 1</string>
 </resources>
