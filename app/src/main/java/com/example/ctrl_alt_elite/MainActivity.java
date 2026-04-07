@@ -48,11 +48,7 @@ public class MainActivity extends BaseActivity {
         EdgeToEdge.enable(this);
         setActivityContent(R.layout.activity_main);
         
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
+
 
         // Initialize Weather Views with your updated XML IDs
         tempText = findViewById(R.id.weather_temp);
