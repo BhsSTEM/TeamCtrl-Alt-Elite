@@ -54,4 +54,29 @@
     <string name="hint_machine_year">Enter Year</string>
     <string name="hint_machine_status">Enter Current Status</string>
     <string name="hint_machine_location">Enter Last Location</string>
+
+    <!-- Add Task UI -->
+    <string name="add_task_header">Add New Task</string>
+    <string name="label_task_title">Title</string>
+    <string name="label_task_description">Description</string>
+    <string name="label_task_due_date">Due Date</string>
+    <string name="label_task_assign_to">Assign To</string>
+    <string name="label_task_priority">Priority</string>
+    <string name="hint_task_title">Enter task title</string>
+    <string name="hint_task_description">Enter task description</string>
+    <string name="hint_task_due_date">Select date</string>
+    <string name="hint_task_assign_to">Select employee</string>
+    <string name="priority_low">Low</string>
+    <string name="priority_medium">Medium</string>
+    <string name="priority_high">High</string>
+    <string name="button_create_task">Create Task</string>
+    <string name="go_back">Go Back</string>
+
+    <!-- New Task Options -->
+    <string name="label_task_repeat">Repeat Interval</string>
+    <string name="label_task_associate_tractor">Associate Tractor</string>
+    <string name="repeat_none">None</string>
+    <string name="repeat_daily">Daily</string>
+    <string name="repeat_weekly">Weekly</string>
+    <string name="repeat_monthly">Monthly</string>
 </resources>
