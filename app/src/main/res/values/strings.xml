@@ -33,4 +33,25 @@
     <string name="tasks_title_placeholder">Task Title</string>
     <string name="tasks_desc_placeholder">Description of the task goes here</string>
     <string name="tasks_date_placeholder">May 1</string>
+    <string name="machines_header">Machines</string>
+    <string name="machines_add_content_desc">Add Machine</string>
+    <string name="machines_options_content_desc">Machine Options</string>
+    <string name="machine_name_label">Name:</string>
+    <string name="machine_type_label">Model:</string>
+    <string name="machine_year_label">Year:</string>
+    <string name="machine_status_label">Status:</string>
+    <string name="machine_last_location_label">Last Location:</string>
+    <string name="machine_name_placeholder">Tractor Alpha</string>
+    <string name="machine_type_placeholder">John Deere 8R</string>
+    <string name="machine_year_placeholder">2023</string>
+    <string name="machine_status_placeholder">Operational</string>
+    <string name="machine_location_placeholder">North Field</string>
+    <string name="edit_machine_header">Edit Machine</string>
+    <string name="save_machine">Save</string>
+    <string name="cancel">Cancel</string>
+    <string name="hint_machine_name">Enter Machine Name</string>
+    <string name="hint_machine_type">Enter Model</string>
+    <string name="hint_machine_year">Enter Year</string>
+    <string name="hint_machine_status">Enter Current Status</string>
+    <string name="hint_machine_location">Enter Last Location</string>
 </resources>
