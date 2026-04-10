@@ -15,13 +15,6 @@ public class SettingsActivity extends BaseActivity {
         // This puts activity_settings INSIDE activity_base's FrameLayout
         setActivityContent(R.layout.activity_settings);
 
-        Button btnEditTractors = findViewById(R.id.button4);
-        if (btnEditTractors != null) {
-            btnEditTractors.setOnClickListener(v -> {
-                Intent intent = new Intent(SettingsActivity.this, ManageTractorsActivity.class);
-                startActivity(intent);
-            });
-        }
     }
 
     @Override
