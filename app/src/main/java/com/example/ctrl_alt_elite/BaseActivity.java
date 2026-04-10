@@ -27,6 +27,13 @@ public class BaseActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Re-sync the navigation bar highlight every time the screen comes to the foreground
+        setupNavigation();
+    }
+
     // Call this INSTEAD of setContentView in your other activities
     protected void setActivityContent(int layoutResId) {
         // 1. Inflate the base layout first
@@ -64,8 +71,10 @@ public class BaseActivity extends AppCompatActivity {
                 bottomNav.setSelectedItemId(R.id.nav_settings);
             } else if (this instanceof evansMapActivity) {
                 bottomNav.setSelectedItemId(R.id.nav_map);
-            } else if (this instanceof ManageTractorsActivity || this instanceof AddTractorActivity) {
-
+            } else if (this instanceof EditTractorActivity){
+                bottomNav.setSelectedItemId(R.id.nav_machines);
+            } else if (this instanceof TasksActivity) {
+                bottomNav.setSelectedItemId(R.id.nav_tasks);
             }
 
             // Sets up a listener for the bottom bar so it can find what gets pressed
@@ -81,6 +90,8 @@ public class BaseActivity extends AppCompatActivity {
                     }
                     return true;
                 }
+
+                // Add your Map and Settings checks here once those activities exist
                 else if (id == R.id.nav_map) {
                     if (!(this instanceof evansMapActivity)) {
                         Intent intent = new Intent(this, evansMapActivity.class);
@@ -93,6 +104,24 @@ public class BaseActivity extends AppCompatActivity {
                 else if (id == R.id.nav_settings) {
                     if (!(this instanceof SettingsActivity)) {
                         Intent intent = new Intent(this, SettingsActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                        startActivity(intent);
+                        overridePendingTransition(0, 0);
+                    }
+                    return true;
+                }
+                else if (id == R.id.nav_machines) {
+                    if (!(this instanceof EditTractorActivity)) {
+                        Intent intent = new Intent(this, EditTractorActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                        startActivity(intent);
+                        overridePendingTransition(0, 0);
+                    }
+                    return true;
+                }
+                else if (id == R.id.nav_tasks) {
+                    if (!(this instanceof TasksActivity)) {
+                        Intent intent = new Intent(this, TasksActivity.class);
                         intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                         startActivity(intent);
                         overridePendingTransition(0, 0);

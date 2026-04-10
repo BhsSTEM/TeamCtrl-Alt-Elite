@@ -51,6 +51,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.model.PlaceLikelihood;
@@ -196,7 +197,7 @@ public class evansMapActivity extends BaseActivity //extending baseactivity adds
 
     private void performSearch(String query) {
         if (query == null || query.isEmpty()) return;
-        
+
         Geocoder geocoder = new Geocoder(this, Locale.getDefault());
         try {
             List<Address> addresses = geocoder.getFromLocationName(query, 1);
@@ -242,6 +243,7 @@ public class evansMapActivity extends BaseActivity //extending baseactivity adds
     @Override
     public void onMapReady(GoogleMap googleMap) {
         this.map = googleMap;
+
         // [START map_current_place_set_info_window_adapter]
         this.map.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
             @Override
@@ -277,7 +279,7 @@ public class evansMapActivity extends BaseActivity //extending baseactivity adds
 
     private void setupCustomControls() {
         if (map == null) return;
-        
+
         // Disable default UI settings to use custom ones
         map.getUiSettings().setZoomControlsEnabled(false);
         map.getUiSettings().setMyLocationButtonEnabled(false);
@@ -363,6 +365,7 @@ public class evansMapActivity extends BaseActivity //extending baseactivity adds
                             }
                         } else {
                             map.moveCamera(CameraUpdateFactory.newLatLngZoom(defaultLocation, DEFAULT_ZOOM));
+                            map.getUiSettings().setMyLocationButtonEnabled(false);
                         }
                     }
                 });
@@ -402,8 +405,10 @@ public class evansMapActivity extends BaseActivity //extending baseactivity adds
         try {
             if (locationPermissionGranted) {
                 map.setMyLocationEnabled(true);
+                map.getUiSettings().setMyLocationButtonEnabled(true);
             } else {
                 map.setMyLocationEnabled(false);
+                map.getUiSettings().setMyLocationButtonEnabled(false);
                 lastKnownLocation = null;
                 getLocationPermission();
             }
