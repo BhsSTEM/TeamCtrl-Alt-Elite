@@ -29,7 +29,7 @@
 
         <activity
             android:name=".SettingsActivity"
-            android:exported="false" /> <!-- this is the line that changes the main page on boot -->
+            android:exported="false" />
         <activity
             android:name=".BaseActivity"
             android:exported="false" />
