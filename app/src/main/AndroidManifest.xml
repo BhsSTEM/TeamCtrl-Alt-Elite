@@ -4,6 +4,7 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
 
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -21,33 +22,37 @@
         <activity
             android:name=".SettingsActivity"
             android:exported="false" />
-        <!-- this is the line that changes the main page on boot -->
+
         <activity
             android:name=".BaseActivity"
             android:exported="false" />
+
         <activity
             android:name=".EditTractorActivity"
-            android:exported="true"/>
+            android:exported="false"/>
+
         <activity
             android:name=".MainActivity"
-            android:exported="true"/>
+            android:exported="false"/>
+
 
         <activity
             android:name=".LoginPage"
-            android:exported="true"/>
-
-        <activity
-            android:name=".evansMapActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-        <activity android:name=".signUpPage"
-            android:exported="true">
+        <activity
+            android:name=".evansMapActivity"
+            android:exported="false">
+        </activity>
+
+        <activity
+            android:name=".signUpPage"
+            android:exported="false">
         </activity>
 
     </application>
