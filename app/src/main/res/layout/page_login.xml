@@ -150,8 +150,10 @@
         android:scaleY="0.5"
         app:layout_constraintBottom_toTopOf="@+id/emailAddressInput"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0"
         app:srcCompat="@drawable/tractracklogo" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
