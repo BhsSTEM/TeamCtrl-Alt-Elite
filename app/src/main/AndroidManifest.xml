@@ -3,10 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.CAMERA" />
-    <uses-feature android:name="android.hardware.camera" android:required="false" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
-    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
 
     <application
         android:allowBackup="true"
@@ -17,12 +13,6 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.CtrlAltElite">
-        <activity
-            android:name=".TasksActivity"
-            android:exported="false" />
-        <activity
-            android:name=".AddTaskActivity"
-            android:exported="false" />
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
@@ -31,21 +21,19 @@
         <activity
             android:name=".SettingsActivity"
             android:exported="false" />
+        <!-- this is the line that changes the main page on boot -->
         <activity
             android:name=".BaseActivity"
             android:exported="false" />
         <activity
-            android:name=".AddTractorActivity"
-            android:exported="true"/>
-        <activity
-            android:name=".ManageTractorsActivity"
-            android:exported="true"/>
+            android:name=".EditTractorActivity"
+            android:exported="false"/>
+
         <activity
             android:name=".MainActivity"
-            android:exported="true" />
-        <activity
-            android:name=".evansMapActivity"
-            android:exported="true" />
+            android:exported="false"/>
+
+
         <activity
             android:name=".LoginPage"
             android:exported="true">
