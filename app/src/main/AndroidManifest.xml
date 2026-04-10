@@ -17,9 +17,6 @@
             android:name=".TasksActivity"
             android:exported="false" />
         <activity
-            android:name=".MachinesActivity"
-            android:exported="false" />
-        <activity
             android:name=".AddTaskActivity"
             android:exported="false" />
 
