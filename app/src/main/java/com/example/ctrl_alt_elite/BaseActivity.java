@@ -62,8 +62,10 @@ public class BaseActivity extends AppCompatActivity {
                 bottomNav.setSelectedItemId(R.id.nav_home);
             } else if (this instanceof SettingsActivity) {
                 bottomNav.setSelectedItemId(R.id.nav_settings);
-            } else {
+            } else if (this instanceof evansMapActivity) {
                 bottomNav.setSelectedItemId(R.id.nav_map);
+            } else if (this instanceof ManageTractorsActivity || this instanceof AddTractorActivity) {
+
             }
 
             // Sets up a listener for the bottom bar so it can find what gets pressed
@@ -79,8 +81,6 @@ public class BaseActivity extends AppCompatActivity {
                     }
                     return true;
                 }
-
-                // Add your Map and Settings checks here once those activities exist
                 else if (id == R.id.nav_map) {
                     if (!(this instanceof evansMapActivity)) {
                         Intent intent = new Intent(this, evansMapActivity.class);

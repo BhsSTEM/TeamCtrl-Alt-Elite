@@ -16,4 +16,17 @@
     <string name="zoom_out_desc">Zoom Out</string>
     <string name="my_location_desc">My Location</string>
     <string name="map_type_desc">Map Type</string>
+
+    <string name="back">Back</string>
+    <string name="add_tractor">Add Tractor</string>
+    <string name="tractor_name">Tractor Name</string>
+    <string name="enter_tractor_name">Enter tractor name</string>
+    <string name="year">Year</string>
+    <string name="select_year">Select Year</string>
+    <string name="model_number">Model Number</string>
+    <string name="enter_model_number">Enter model number</string>
+    <string name="pin">PIN</string>
+    <string name="tractor_image">Tractor Image</string>
+    <string name="upload_or_take_photo">Upload or Take Photo</string>
+    <string name="save_tractor">Save Tractor</string>
 </resources>
