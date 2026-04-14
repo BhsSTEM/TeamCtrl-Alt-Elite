@@ -69,9 +69,9 @@ public class BaseActivity extends AppCompatActivity {
                 bottomNav.setSelectedItemId(R.id.nav_home);
             } else if (this instanceof SettingsActivity) {
                 bottomNav.setSelectedItemId(R.id.nav_settings);
-            } else if (this instanceof evansMapActivity){
+            } else if (this instanceof evansMapActivity) {
                 bottomNav.setSelectedItemId(R.id.nav_map);
-            } else if (this instanceof EditTractorActivity){
+            } else if (this instanceof ManageTractorsActivity){
                 bottomNav.setSelectedItemId(R.id.nav_machines);
             } else if (this instanceof TasksActivity) {
                 bottomNav.setSelectedItemId(R.id.nav_tasks);
@@ -111,8 +111,8 @@ public class BaseActivity extends AppCompatActivity {
                     return true;
                 }
                 else if (id == R.id.nav_machines) {
-                    if (!(this instanceof EditTractorActivity)) {
-                        Intent intent = new Intent(this, EditTractorActivity.class);
+                    if (!(this instanceof ManageTractorsActivity)) {
+                        Intent intent = new Intent(this, ManageTractorsActivity.class);
                         intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                         startActivity(intent);
                         overridePendingTransition(0, 0);

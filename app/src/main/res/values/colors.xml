@@ -2,6 +2,13 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="header_green">#B0B0B0</color>
+    <color name="add_button_green">#B0B0B0</color>
+    <color name="background_dark">#2C2C2E</color>
+    <color name="card_background">#3A3A3C</color>
+    <color name="edit_blue">#FF000000</color>
+    <color name="remove_red">#FF000000</color>
+    <color name="text_grey">#B0B0B0</color>
     <color name="nav_selected_blue">#2196F3</color>
     <color name="nav_unselected_grey">#757575</color>
 </resources>
