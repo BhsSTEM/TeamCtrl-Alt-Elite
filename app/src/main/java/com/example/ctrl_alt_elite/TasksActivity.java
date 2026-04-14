@@ -17,8 +17,8 @@ public class TasksActivity extends BaseActivity {
             addTaskFab.setOnClickListener(v -> {
                 Intent intent = new Intent(TasksActivity.this, AddTaskActivity.class);
                 startActivity(intent);
-                // Slide in from right animation
-                overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
+                // Slide in from left (fast)
+                overridePendingTransition(R.anim.slide_in_left_fast, 0);
             });
         }
     }

@@ -33,7 +33,7 @@ public class AddTaskActivity extends AppCompatActivity {
     @Override
     public void finish() {
         super.finish();
-        // Simple slide animation out
-        overridePendingTransition(0, android.R.anim.slide_out_right);
+        // Slide out to the left (fast)
+        overridePendingTransition(0, R.anim.slide_out_left_fast);
     }
 }
