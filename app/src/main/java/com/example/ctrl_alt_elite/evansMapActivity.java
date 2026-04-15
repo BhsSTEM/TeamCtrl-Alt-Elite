@@ -17,16 +17,22 @@ package com.example.ctrl_alt_elite;
 import android.animation.ValueAnimator;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
-
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -53,9 +59,12 @@ import com.google.android.libraries.places.api.net.FindCurrentPlaceRequest;
 import com.google.android.libraries.places.api.net.FindCurrentPlaceResponse;
 import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.material.chip.Chip;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * An activity that displays a map showing the place at the device's current location.
@@ -136,6 +145,7 @@ public class evansMapActivity extends BaseActivity //extending baseactivity adds
         // [END_EXCLUDE]
 
         setupSearchAnimation();
+        setupSearchLogic();
     }
 
     private void setupSearchAnimation() {
@@ -168,6 +178,41 @@ public class evansMapActivity extends BaseActivity //extending baseactivity adds
                     }
                 }
             });
+        }
+    }
+
+    private void setupSearchLogic() {
+        EditText bottomSearchInput = findViewById(R.id.editTextText2);
+        if (bottomSearchInput != null) {
+            bottomSearchInput.setOnEditorActionListener((v, actionId, event) -> {
+                if (actionId == EditorInfo.IME_ACTION_SEARCH ||
+                    (event != null && event.getAction() == KeyEvent.ACTION_DOWN && event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) {
+                    performSearch(v.getText().toString());
+                    return true;
+                }
+                return false;
+            });
+        }
+    }
+
+    private void performSearch(String query) {
+        if (query == null || query.isEmpty()) return;
+
+        Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+        try {
+            List<Address> addresses = geocoder.getFromLocationName(query, 1);
+            if (addresses != null && !addresses.isEmpty()) {
+                Address address = addresses.get(0);
+                LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
+                map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, DEFAULT_ZOOM));
+                map.clear();
+                map.addMarker(new MarkerOptions().position(latLng).title(query));
+            } else {
+                Toast.makeText(this, "Location not found", Toast.LENGTH_SHORT).show();
+            }
+        } catch (IOException e) {
+            Log.e(TAG, "Search failed", e);
+            Toast.makeText(this, "Search failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -224,9 +269,57 @@ public class evansMapActivity extends BaseActivity //extending baseactivity adds
             }
         });
 
+        // Setup Custom UI Controls
+        setupCustomControls();
+
         getLocationPermission();
         updateLocationUI();
         getDeviceLocation();
+    }
+
+    private void setupCustomControls() {
+        if (map == null) return;
+
+        // Disable default UI settings to use custom ones
+        map.getUiSettings().setZoomControlsEnabled(false);
+        map.getUiSettings().setMyLocationButtonEnabled(false);
+        map.getUiSettings().setCompassEnabled(true); // Built-in compass appears when rotating
+
+        ImageButton btnZoomIn = findViewById(R.id.btnZoomIn);
+        if (btnZoomIn != null) {
+            btnZoomIn.setOnClickListener(v -> map.animateCamera(CameraUpdateFactory.zoomIn()));
+        }
+
+        ImageButton btnZoomOut = findViewById(R.id.btnZoomOut);
+        if (btnZoomOut != null) {
+            btnZoomOut.setOnClickListener(v -> map.animateCamera(CameraUpdateFactory.zoomOut()));
+        }
+
+        FloatingActionButton fabMyLocation = findViewById(R.id.fabMyLocation);
+        if (fabMyLocation != null) {
+            fabMyLocation.setOnClickListener(v -> getDeviceLocation());
+        }
+
+        FloatingActionButton fabLayers = findViewById(R.id.fabLayers);
+        if (fabLayers != null) {
+            fabLayers.setOnClickListener(v -> showMapTypeDialog());
+        }
+    }
+
+    private void showMapTypeDialog() {
+        final String[] types = {"Normal", "Satellite", "Terrain", "Hybrid"};
+        new AlertDialog.Builder(this)
+                .setTitle("Select Map Type")
+                .setItems(types, (dialog, which) -> {
+                    if (map == null) return;
+                    switch (which) {
+                        case 0: map.setMapType(GoogleMap.MAP_TYPE_NORMAL); break;
+                        case 1: map.setMapType(GoogleMap.MAP_TYPE_SATELLITE); break;
+                        case 2: map.setMapType(GoogleMap.MAP_TYPE_TERRAIN); break;
+                        case 3: map.setMapType(GoogleMap.MAP_TYPE_HYBRID); break;
+                    }
+                })
+                .show();
     }
 
     @Override
@@ -266,7 +359,7 @@ public class evansMapActivity extends BaseActivity //extending baseactivity adds
                         if (task.isSuccessful()) {
                             lastKnownLocation = task.getResult();
                             if (lastKnownLocation != null) {
-                                map.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                                map.animateCamera(CameraUpdateFactory.newLatLngZoom(
                                         new LatLng(lastKnownLocation.getLatitude(),
                                                 lastKnownLocation.getLongitude()), DEFAULT_ZOOM));
                             }

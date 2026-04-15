@@ -17,8 +17,13 @@
     <!-- Bottom Navigation -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_nav"
+        style="@style/Widget.App.BottomNavigationView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:menu="@menu/bottom_menu"/>
+        android:layout_height="100dp"
+        android:layout_gravity="bottom"
+        app:itemIconSize="28dp"
+        app:elevation="8dp"
+        app:itemRippleColor="@null"
+        app:menu="@menu/bottom_menu" />
 
 </LinearLayout>

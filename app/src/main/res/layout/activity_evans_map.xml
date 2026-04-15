@@ -17,7 +17,78 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- chip3: Big box at the bottom. Height will be animated in Java. -->
+    <!-- Map Type (Layers) Button -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabLayers"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:contentDescription="@string/map_type_desc"
+        app:srcCompat="@android:drawable/ic_menu_mapmode"
+        app:backgroundTint="@android:color/white"
+        app:fabSize="mini"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Custom Zoom Controls -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/zoomCard"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="12dp"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="4dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.6">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="2dp">
+
+            <ImageButton
+                android:id="@+id/btnZoomIn"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/zoom_in_desc"
+                android:src="@drawable/ic_add" />
+
+            <View
+                android:layout_width="30dp"
+                android:layout_height="1dp"
+                android:layout_gravity="center_horizontal"
+                android:background="#EEEEEE" />
+
+            <ImageButton
+                android:id="@+id/btnZoomOut"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/zoom_out_desc"
+                android:src="@drawable/ic_minus" />
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- My Location Button -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabMyLocation"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        android:contentDescription="@string/my_location_desc"
+        app:srcCompat="@android:drawable/ic_menu_mylocation"
+        app:backgroundTint="@android:color/white"
+        app:fabSize="mini"
+        app:layout_constraintBottom_toTopOf="@+id/chip3"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- chip3: Big box at the bottom (Expanded View) -->
     <com.google.android.material.chip.Chip
         android:id="@+id/chip3"
         android:layout_width="0dp"
@@ -30,50 +101,53 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
-    <!-- chip2: The search bar background. Fixed distance (20dp) from TOP of chip3. -->
-    <com.google.android.material.chip.Chip
-        android:id="@+id/chip2"
+
+    <!-- Google Maps Style Search Bar at the bottom (Moves with chip3) -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/bottomSearchCard"
         android:layout_width="0dp"
         android:layout_height="54dp"
-        android:layout_marginStart="12dp"
-        android:layout_marginEnd="12dp"
-        android:layout_marginTop="23dp"
-        android:clickable="true"
-        android:focusable="true"
-        android:checkable="false"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="16dp"
+        app:cardCornerRadius="27dp"
+        app:cardElevation="6dp"
         app:layout_constraintEnd_toEndOf="@+id/chip3"
         app:layout_constraintStart_toStartOf="@+id/chip3"
-        app:layout_constraintTop_toTopOf="@+id/chip3" />
+        app:layout_constraintTop_toTopOf="@+id/chip3">
 
-    <!-- Search icon hugging the LEFT side of chip2 -->
-    <ImageView
-        android:id="@+id/searchIcon"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:layout_marginStart="16dp"
-        android:src="@android:drawable/ic_menu_search"
-        android:contentDescription="Search Icon"
-        android:clickable="true"
-        android:focusable="true"
-        app:layout_constraintBottom_toBottomOf="@+id/chip2"
-        app:layout_constraintStart_toStartOf="@+id/chip2"
-        app:layout_constraintTop_toTopOf="@+id/chip2" />
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
-    <!-- EditText hugging the LEFT side, directly after the icon -->
-    <EditText
-        android:id="@+id/editTextText2"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="16dp"
-        android:background="@android:color/transparent"
-        android:hint="Search"
-        android:inputType="text"
-        android:textColorHint="#757575"
-        android:gravity="start|center_vertical"
-        app:layout_constraintBottom_toBottomOf="@+id/chip2"
-        app:layout_constraintEnd_toEndOf="@+id/chip2"
-        app:layout_constraintStart_toEndOf="@+id/searchIcon"
-        app:layout_constraintTop_toTopOf="@+id/chip2" />
+            <ImageView
+                android:id="@+id/searchIcon"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginStart="16dp"
+                android:contentDescription="@string/search_icon_desc"
+                android:src="@android:drawable/ic_menu_search"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <EditText
+                android:id="@+id/editTextText2"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_marginEnd="16dp"
+                android:background="@android:color/transparent"
+                android:hint="@string/search_hint"
+                android:imeOptions="actionSearch"
+                android:inputType="text"
+                android:textColorHint="#757575"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/searchIcon"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.google.android.material.card.MaterialCardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

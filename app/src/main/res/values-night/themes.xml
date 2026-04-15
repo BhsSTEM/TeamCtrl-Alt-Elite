@@ -4,4 +4,13 @@
         <!-- Customize your dark theme here. -->
         <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
     </style>
+
+    <style name="Widget.App.BottomNavigationView" parent="Widget.Material3.BottomNavigationView">
+        <item name="itemActiveIndicatorStyle">@null</item>
+        <item name="itemIconTint">@drawable/nav_item_color_state</item>
+        <item name="itemTextColor">@drawable/nav_item_color_state</item>
+        <item name="labelVisibilityMode">labeled</item>
+        <item name="itemTextAppearanceActive">@style/TextAppearance.App.BottomNavigation.Active</item>
+        <item name="itemTextAppearanceInactive">@style/TextAppearance.App.BottomNavigation.Inactive</item>
+    </style>
 </resources>
