@@ -17,4 +17,8 @@ public interface WeatherApiService {
     @Headers("User-Agent: TeamCtrlAltElite/1.0 (contact@example.com)")
     @GET
     Call<WeatherResponse> getForecast(@Url String url);
+
+    @Headers("User-Agent: TeamCtrlAltElite/1.0 (contact@example.com)")
+    @GET("alerts/active?point={lat},{lon}")
+    Call<WAlertsResponse> getActiveAlerts(@Path("lat") double lat, @Path("lon") double lon);
 }

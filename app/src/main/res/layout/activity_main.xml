@@ -9,15 +9,19 @@
 
     <TextView
         android:id="@+id/Notification"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="0dp"
+        android:layout_height="35dp"
+        android:layout_marginStart="24dp"
         android:text="Hello User!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.047"
+        android:textSize="25sp"
+        app:autoSizeMaxTextSize="40sp"
+        app:autoSizeMinTextSize="25sp"
+        app:layout_constraintBottom_toTopOf="@+id/NotificationUnderline"
+        app:layout_constraintEnd_toEndOf="@+id/WeatherBoxTop"
+        app:layout_constraintHorizontal_bias="0.1"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.022" />
+        app:layout_constraintVertical_bias="1.0" />
 
     <ImageView
         android:id="@+id/Bell"
@@ -36,58 +40,6 @@
     <!-- Top Section Lines (Weather Box) -->
 
     <ImageView
-        android:id="@+id/MapBoxLeft"
-        android:layout_width="3dp"
-        android:layout_height="0dp"
-        android:scaleType="center"
-        app:layout_constraintBottom_toBottomOf="@id/MapBoxBottom"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.132"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/MapBoxTop"
-        app:layout_constraintVertical_bias="0.0"
-        app:srcCompat="@drawable/line" />
-
-    <ImageView
-        android:id="@+id/MapBoxBottom"
-        android:layout_width="0dp"
-        android:layout_height="3dp"
-        android:scaleType="fitXY"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@id/MapBoxRight"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toStartOf="@id/MapBoxLeft"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.953"
-        app:srcCompat="@drawable/line" />
-
-    <ImageView
-        android:id="@+id/MapBoxRight"
-        android:layout_width="3dp"
-        android:layout_height="0dp"
-        android:scaleType="center"
-        app:layout_constraintBottom_toBottomOf="@id/MapBoxBottom"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.87"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/MapBoxTop"
-        app:layout_constraintVertical_bias="0.0"
-        app:srcCompat="@drawable/line" />
-
-    <ImageView
-        android:id="@+id/MapBoxTop"
-        android:layout_width="0dp"
-        android:layout_height="3dp"
-        android:scaleType="fitXY"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@id/MapBoxRight"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toStartOf="@id/MapBoxLeft"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.368"
-        app:srcCompat="@drawable/line" />
-
-    <ImageView
         android:id="@+id/NotificationUnderline"
         android:layout_width="170dp"
         android:layout_height="3dp"
@@ -101,45 +53,6 @@
         app:srcCompat="@drawable/line" />
 
     <!-- Weather Display UI -->
-
-    <ImageView
-        android:id="@+id/DescBackground"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="@+id/weather_desc"
-        app:layout_constraintEnd_toEndOf="@+id/weather_desc"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="@+id/weather_desc"
-        app:layout_constraintTop_toTopOf="@+id/weather_desc"
-        app:layout_constraintVertical_bias="0.0"
-        app:srcCompat="@android:drawable/screen_background_light_transparent"
-        app:tint="#0489D3" />
-
-    <ImageView
-        android:id="@+id/WeatherDescBottom"
-        android:layout_width="0dp"
-        android:layout_height="3dp"
-        android:scaleType="fitXY"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@id/WeatherBoxRight"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="@id/WeatherBoxLeft"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.324"
-        app:srcCompat="@drawable/line" />
-
-    <ImageView
-        android:id="@+id/WeatherBoxBottom"
-        android:layout_width="0dp"
-        android:layout_height="3dp"
-        android:scaleType="fitXY"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@id/WeatherBoxRight"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="@id/WeatherBoxLeft"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.278"
-        app:srcCompat="@drawable/line" />
 
     <ImageView
         android:id="@+id/BlueBackground"
@@ -164,7 +77,7 @@
         android:scaleType="center"
         app:layout_constraintBottom_toBottomOf="@id/WeatherBoxBottom"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.865"
+        app:layout_constraintHorizontal_bias="0.872"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@id/WeatherBoxTop"
         app:layout_constraintVertical_bias="0.0"
@@ -177,20 +90,7 @@
         android:scaleType="center"
         app:layout_constraintBottom_toBottomOf="@id/WeatherDescBottom"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.865"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/WeatherBoxBottom"
-        app:layout_constraintVertical_bias="0.0"
-        app:srcCompat="@drawable/line" />
-
-    <ImageView
-        android:id="@+id/WeatherDescLeft"
-        android:layout_width="3dp"
-        android:layout_height="0dp"
-        android:scaleType="center"
-        app:layout_constraintBottom_toBottomOf="@id/WeatherDescBottom"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.134"
+        app:layout_constraintHorizontal_bias="0.872"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@id/WeatherBoxBottom"
         app:layout_constraintVertical_bias="0.0"
@@ -302,6 +202,58 @@
         app:layout_constraintTop_toBottomOf="@+id/WeatherBoxBottom"
         app:layout_constraintVertical_bias="0.0" />
 
+    <ImageView
+        android:id="@+id/DescBackground"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="@+id/weather_desc"
+        app:layout_constraintEnd_toEndOf="@+id/weather_desc"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@+id/weather_desc"
+        app:layout_constraintTop_toTopOf="@+id/weather_desc"
+        app:layout_constraintVertical_bias="0.0"
+        app:srcCompat="@android:drawable/screen_background_light_transparent"
+        app:tint="#0489D3" />
+
+    <ImageView
+        android:id="@+id/WeatherDescBottom"
+        android:layout_width="0dp"
+        android:layout_height="3dp"
+        android:scaleType="fitXY"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@id/WeatherBoxRight"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@id/WeatherBoxLeft"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.381"
+        app:srcCompat="@drawable/line" />
+
+    <ImageView
+        android:id="@+id/WeatherBoxBottom"
+        android:layout_width="0dp"
+        android:layout_height="3dp"
+        android:scaleType="fitXY"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@id/WeatherBoxRight"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@id/WeatherBoxLeft"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.336"
+        app:srcCompat="@drawable/line" />
+
+    <ImageView
+        android:id="@+id/WeatherDescLeft"
+        android:layout_width="3dp"
+        android:layout_height="0dp"
+        android:scaleType="center"
+        app:layout_constraintBottom_toBottomOf="@id/WeatherDescBottom"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.134"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/WeatherBoxBottom"
+        app:layout_constraintVertical_bias="0.0"
+        app:srcCompat="@drawable/line" />
+
     <TextView
         android:id="@+id/RainInfo"
         android:layout_width="0dp"
@@ -331,7 +283,7 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="@id/WeatherBoxLeft"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.114"
+        app:layout_constraintVertical_bias="0.085"
         app:srcCompat="@drawable/line" />
 
     <ImageView
@@ -354,14 +306,68 @@
         android:id="@+id/MapView"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:scaleType="centerCrop"
         android:clickable="true"
         android:focusable="true"
         android:foreground="?attr/selectableItemBackground"
+        android:scaleType="centerCrop"
         app:layout_constraintBottom_toTopOf="@+id/MapBoxBottom"
         app:layout_constraintEnd_toStartOf="@+id/MapBoxRight"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toEndOf="@+id/MapBoxLeft"
         app:layout_constraintTop_toBottomOf="@+id/MapBoxTop"
+        app:layout_constraintVertical_bias="1.0"
         app:srcCompat="@drawable/screenshot_2026_03_27_143012" />
+
+    <ImageView
+        android:id="@+id/MapBoxLeft"
+        android:layout_width="3dp"
+        android:layout_height="0dp"
+        android:scaleType="center"
+        app:layout_constraintBottom_toBottomOf="@id/MapBoxBottom"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.134"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/MapBoxTop"
+        app:layout_constraintVertical_bias="1.0"
+        app:srcCompat="@drawable/line" />
+
+    <ImageView
+        android:id="@+id/MapBoxBottom"
+        android:layout_width="0dp"
+        android:layout_height="3dp"
+        android:scaleType="fitXY"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@id/MapBoxRight"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@id/MapBoxLeft"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.982"
+        app:srcCompat="@drawable/line" />
+
+    <ImageView
+        android:id="@+id/MapBoxRight"
+        android:layout_width="3dp"
+        android:layout_height="0dp"
+        android:scaleType="center"
+        app:layout_constraintBottom_toBottomOf="@id/MapBoxBottom"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.872"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/MapBoxTop"
+        app:layout_constraintVertical_bias="1.0"
+        app:srcCompat="@drawable/line" />
+
+    <ImageView
+        android:id="@+id/MapBoxTop"
+        android:layout_width="0dp"
+        android:layout_height="3dp"
+        android:scaleType="fitXY"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@id/MapBoxRight"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@id/MapBoxLeft"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.396"
+        app:srcCompat="@drawable/line" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
