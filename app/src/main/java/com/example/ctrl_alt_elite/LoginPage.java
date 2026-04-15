@@ -14,10 +14,9 @@ import com.google.firebase.auth.FirebaseUser;
 
 public class LoginPage extends AppCompatActivity {
 
-    // 1. Declare Firebase and UI variables at the class level
     private FirebaseAuth mAuth;
     private EditText emailInput, passwordInput;
-    private Button loginBtn, goToSignUpBtn;
+    private Button loginBtn, goToSignUpBtn, forgotPasswordBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,17 +24,16 @@ public class LoginPage extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.page_login);
 
-        // 2. Initialize Firebase Auth
         mAuth = FirebaseAuth.getInstance();
 
-        // 3. Link variables to your XML IDs
+        // Initialize UI Elements
         emailInput = findViewById(R.id.emailAddressInput);
         passwordInput = findViewById(R.id.passwordInput);
         loginBtn = findViewById(R.id.loginConfirmButton);
         goToSignUpBtn = findViewById(R.id.createAccountButton);
+        forgotPasswordBtn = findViewById(R.id.forgotPasswordButton);
 
-
-        // 4. Set the Login Button Logic
+        // Logic for Login Button
         loginBtn.setOnClickListener(v -> {
             String email = emailInput.getText().toString().trim();
             String password = passwordInput.getText().toString().trim();
@@ -47,27 +45,40 @@ public class LoginPage extends AppCompatActivity {
             }
         });
 
-        // 5. Link to SignUpPage
+        // Logic for Sign Up Transition
         goToSignUpBtn.setOnClickListener(v -> {
             startActivity(new Intent(LoginPage.this, signUpPage.class));
+        });
+
+
+        forgotPasswordBtn.setOnClickListener(v -> {
+            String email = emailInput.getText().toString().trim();
+
+            if (email.isEmpty()) {
+                Toast.makeText(LoginPage.this, "Please enter your email to reset password", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            mAuth.sendPasswordResetEmail(email)
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            Toast.makeText(LoginPage.this, "Reset email sent! Check your inbox.", Toast.LENGTH_LONG).show();
+                            Log.d("AUTH", "Email sent.");
+                        } else {
+                            Toast.makeText(LoginPage.this, "Error: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                        }
+                    });
         });
     }
 
     private void loginUser(String email, String password) {
-        // This is the core Firebase Authentication call
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
-                        // Login success!
                         Log.d("AUTH", "signInWithEmail:success");
-                        FirebaseUser user = mAuth.getCurrentUser();
-
-                        // Move to the Main screen (MainActivity)
-                        Intent intent = new Intent(LoginPage.this, MainActivity.class);
-                        startActivity(intent);
-                        finish(); // Closes Login page so user can't "back" into it
+                        startActivity(new Intent(LoginPage.this, MainActivity.class));
+                        finish();
                     } else {
-                        // If sign in fails, display a message to the user.
                         Log.w("AUTH", "signInWithEmail:failure", task.getException());
                         Toast.makeText(LoginPage.this, "Authentication failed: " + task.getException().getMessage(),
                                 Toast.LENGTH_LONG).show();
@@ -78,7 +89,6 @@ public class LoginPage extends AppCompatActivity {
     @Override
     public void onStart() {
         super.onStart();
-        // Check if user is already signed in and skip login if they are
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if(currentUser != null){
             startActivity(new Intent(LoginPage.this, MainActivity.class));
