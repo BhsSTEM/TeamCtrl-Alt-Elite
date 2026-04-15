@@ -21,14 +21,27 @@
         <activity
             android:name=".SettingsActivity"
             android:exported="false" />
-        <!-- this is the line that changes the main page on boot -->
         <activity
             android:name=".BaseActivity"
             android:exported="false" />
         <activity
             android:name=".EditTractorActivity"
             android:exported="false"/>
-
+        <activity
+            android:name=".TasksActivity"
+            android:exported="false" />
+        <activity
+            android:name=".AddTaskActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ManageTractorsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".AddTractorActivity"
+            android:exported="false" />
+        <activity
+            android:name=".evansMapActivity"
+            android:exported="false" />
         <activity
             android:name=".MainActivity"
             android:exported="false"/>
