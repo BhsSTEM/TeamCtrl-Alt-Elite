@@ -98,4 +98,5 @@
     <string name="repeat_daily">Daily</string>
     <string name="repeat_weekly">Weekly</string>
     <string name="repeat_monthly">Monthly</string>
+    <string name="settings_no_role">No Role Assigned</string>
 </resources>

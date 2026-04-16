@@ -96,6 +96,7 @@ public class signUpPage extends AppCompatActivity {
         Map<String, Object> user = new HashMap<>();
         user.put("email", email);
         user.put("uid", mAuth.getCurrentUser().getUid());
+        user.put("role", ""); // Initialize role as empty so it defaults to "No Role Assigned" in Settings
 
         db.collection("users").document(mAuth.getCurrentUser().getUid())
                 .set(user)
