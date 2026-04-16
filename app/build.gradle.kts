@@ -50,6 +50,7 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
     implementation(libs.glide)
+    implementation(libs.places)
 
     implementation(libs.places)
     implementation(libs.fragment)
