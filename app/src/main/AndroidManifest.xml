@@ -12,7 +12,7 @@
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@drawable/tractracklogo"
-        android:label="@string/app_name"
+        android:label="TracTrack"
         android:roundIcon="@drawable/tractracklogo"
         android:supportsRtl="true"
         android:theme="@style/Theme.CtrlAltElite">
