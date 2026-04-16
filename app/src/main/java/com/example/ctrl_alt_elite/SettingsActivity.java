@@ -23,13 +23,17 @@ public class SettingsActivity extends BaseActivity {
     private TextView usernameText;
     private TextView roleText;
 
+    private static final String PREFS_NAME = "ThemePrefs";
+    private static final String DARK_MODE_KEY = "isDarkMode";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setActivityContent(R.layout.activity_settings);
 
         mAuth = FirebaseAuth.getInstance();
-        db = FirebaseFirestore.getInstance();
+        // Pointing to the specific 'sign-ons' database
+        db = FirebaseFirestore.getInstance("sign-ons");
         
         logoutButton = findViewById(R.id.signOutButton);
         darkModeSwitch = findViewById(R.id.switch1);
@@ -53,12 +57,12 @@ public class SettingsActivity extends BaseActivity {
                             if (role != null && !role.isEmpty()) {
                                 roleText.setText(role);
                             } else {
-                                roleText.setText(getString(R.string.settings_no_role));
+                                roleText.setText("No Role Assigned");
                             }
                         }
                     } else {
                         if (roleText != null) {
-                            roleText.setText(getString(R.string.settings_no_role));
+                            roleText.setText("No Role Assigned");
                         }
                     }
                 });

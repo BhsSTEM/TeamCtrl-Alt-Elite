@@ -35,12 +35,12 @@ public class signUpPage extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // EdgeToEdge.enable(this); 
         setContentView(R.layout.page_signup);
 
         // Initialize Firebase
         mAuth = FirebaseAuth.getInstance();
-        db = FirebaseFirestore.getInstance();
+        // Pointing to the specific 'sign-ons' database
+        db = FirebaseFirestore.getInstance("sign-ons");
 
         // UI elements
         emailSignUpText = findViewById(R.id.emailSignUpInput);
