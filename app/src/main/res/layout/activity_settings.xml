@@ -93,18 +93,11 @@
                     android:text="@string/settings_role" />
 
                 <Button
-                    android:id="@+id/button"
-                    style="@style/Widget.Material3.Button.TonalButton"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:text="@string/settings_change_password" />
-
-                <Button
                     android:id="@+id/signOutButton"
                     style="@style/Widget.Material3.Button.TextButton"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
                     android:text="@string/settings_logout"
                     android:textColor="?attr/colorError" />
             </LinearLayout>
