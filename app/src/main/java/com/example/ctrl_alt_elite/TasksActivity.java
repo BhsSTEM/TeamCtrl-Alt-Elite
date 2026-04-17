@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.PopupMenu;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -22,6 +23,7 @@ public class TasksActivity extends BaseActivity {
     private TaskAdapter adapter;
     private List<Task> taskList;
     private FirebaseFirestore db;
+    private ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,6 +35,7 @@ public class TasksActivity extends BaseActivity {
         taskList = new ArrayList<>();
 
         recyclerView = findViewById(R.id.tasksRecyclerView);
+        progressBar = findViewById(R.id.tasksProgressBar);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         adapter = new TaskAdapter(taskList, this::showTaskMenu);
@@ -45,13 +48,17 @@ public class TasksActivity extends BaseActivity {
             addTaskFab.setOnClickListener(v -> {
                 Intent intent = new Intent(TasksActivity.this, AddTaskActivity.class);
                 startActivity(intent);
-                overridePendingTransition(R.anim.slide_in_right_fast, 0);
+                overridePendingTransition(R.anim.slide_in_right_fast, R.anim.slide_out_left_fast);
             });
         }
     }
 
     private void fetchTasks() {
+        if (progressBar != null) progressBar.setVisibility(View.VISIBLE);
+        
         db.collection("tasks").addSnapshotListener((value, error) -> {
+            if (progressBar != null) progressBar.setVisibility(View.GONE);
+
             if (error != null) {
                 Toast.makeText(this, "Error fetching tasks", Toast.LENGTH_SHORT).show();
                 return;
@@ -75,14 +82,26 @@ public class TasksActivity extends BaseActivity {
 
         popup.setOnMenuItemClickListener(item -> {
             if (item.getTitle().equals("Edit")) {
-                // Future: Add Edit Logic
-                Toast.makeText(this, "Edit: " + task.getTitle(), Toast.LENGTH_SHORT).show();
+                editTask(task);
             } else if (item.getTitle().equals("Delete")) {
                 deleteTask(task);
             }
             return true;
         });
         popup.show();
+    }
+
+    private void editTask(Task task) {
+        Intent intent = new Intent(TasksActivity.this, AddTaskActivity.class);
+        intent.putExtra("task_id", task.getId());
+        intent.putExtra("task_title", task.getTitle());
+        intent.putExtra("task_description", task.getDescription());
+        intent.putExtra("task_due_date", task.getDueDate());
+        intent.putExtra("task_assigned_to", task.getAssignedTo());
+        intent.putExtra("task_repeat", task.getRepeatInterval());
+        intent.putExtra("task_tractor", task.getTractorId());
+        startActivity(intent);
+        overridePendingTransition(R.anim.slide_in_right_fast, R.anim.slide_out_left_fast);
     }
 
     private void deleteTask(Task task) {

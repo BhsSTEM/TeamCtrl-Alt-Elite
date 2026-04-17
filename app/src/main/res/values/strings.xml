@@ -99,4 +99,8 @@
     <string name="repeat_weekly">Weekly</string>
     <string name="repeat_monthly">Monthly</string>
     <string name="settings_no_role">No Role Assigned</string>
+
+    <string name="label_day">DD</string>
+    <string name="label_month">MM</string>
+    <string name="label_year">20YY</string>
 </resources>

@@ -1,11 +1,14 @@
 package com.example.ctrl_alt_elite;
 
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -23,8 +26,12 @@ import java.util.UUID;
 public class AddTaskActivity extends AppCompatActivity {
 
     private FirebaseFirestore db;
-    private TextInputEditText titleInput, descriptionInput, dueDateInput;
+    private TextInputEditText titleInput, descriptionInput, dayInput, monthInput, yearInput;
     private AutoCompleteTextView assignToDropdown, repeatIntervalDropdown, tractorDropdown;
+    private TextView headerText;
+    private Button createTaskButton;
+    
+    private String existingTaskId = null; // Used if we are in Edit mode
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,14 +41,24 @@ public class AddTaskActivity extends AppCompatActivity {
         // Pointing to the specific 'tasks' database
         db = FirebaseFirestore.getInstance("tasks");
 
+        headerText = findViewById(R.id.addTaskHeader);
         titleInput = findViewById(R.id.taskTitleInput);
         descriptionInput = findViewById(R.id.taskDescriptionInput);
-        dueDateInput = findViewById(R.id.taskDueDateInput);
+        dayInput = findViewById(R.id.taskDayInput);
+        monthInput = findViewById(R.id.taskMonthInput);
+        yearInput = findViewById(R.id.taskYearInput);
         assignToDropdown = findViewById(R.id.assignToDropdown);
         repeatIntervalDropdown = findViewById(R.id.repeatIntervalDropdown);
         tractorDropdown = findViewById(R.id.associateTractorDropdown);
+        createTaskButton = findViewById(R.id.createTaskButton);
 
         setupDropdowns();
+        setupDateAutofill();
+
+        // Check if we are editing an existing task
+        if (getIntent().hasExtra("task_id")) {
+            loadExistingTaskData();
+        }
 
         // Back button
         ImageButton backButton = findViewById(R.id.backButton);
@@ -49,11 +66,52 @@ public class AddTaskActivity extends AppCompatActivity {
             backButton.setOnClickListener(v -> finish());
         }
 
-        // Create Task button
-        Button createTaskButton = findViewById(R.id.createTaskButton);
+        // Create/Update Task button
         if (createTaskButton != null) {
             createTaskButton.setOnClickListener(v -> saveTaskToFirestore());
         }
+    }
+
+    private void setupDateAutofill() {
+        addZeroPadWatcher(dayInput);
+        addZeroPadWatcher(monthInput);
+        addZeroPadWatcher(yearInput);
+    }
+
+    private void addZeroPadWatcher(TextInputEditText editText) {
+        editText.setOnFocusChangeListener((v, hasFocus) -> {
+            if (!hasFocus) {
+                String val = editText.getText().toString();
+                if (!val.isEmpty() && val.length() == 1) {
+                    editText.setText("0" + val);
+                }
+            }
+        });
+    }
+
+    private void loadExistingTaskData() {
+        existingTaskId = getIntent().getStringExtra("task_id");
+        
+        headerText.setText("Edit Task");
+        createTaskButton.setText("Update Task");
+
+        titleInput.setText(getIntent().getStringExtra("task_title"));
+        descriptionInput.setText(getIntent().getStringExtra("task_description"));
+        
+        // Handle splitting the saved date back into DD, MM, YY
+        String fullDate = getIntent().getStringExtra("task_due_date");
+        if (fullDate != null && fullDate.contains("/")) {
+            String[] parts = fullDate.split("/");
+            if (parts.length == 3) {
+                dayInput.setText(parts[0]);
+                monthInput.setText(parts[1]);
+                yearInput.setText(parts[2]);
+            }
+        }
+        
+        assignToDropdown.setText(getIntent().getStringExtra("task_assigned_to"), false);
+        repeatIntervalDropdown.setText(getIntent().getStringExtra("task_repeat"), false);
+        tractorDropdown.setText(getIntent().getStringExtra("task_tractor"), false);
     }
 
     private void setupDropdowns() {
@@ -95,7 +153,19 @@ public class AddTaskActivity extends AppCompatActivity {
     private void saveTaskToFirestore() {
         String title = titleInput.getText().toString().trim();
         String description = descriptionInput.getText().toString().trim();
-        String dueDate = dueDateInput.getText().toString().trim();
+        
+        // Combine the three date fields into a single string for storage
+        String day = dayInput.getText().toString().trim();
+        String month = monthInput.getText().toString().trim();
+        String year = yearInput.getText().toString().trim();
+
+        // Ensure padding if not already padded (e.g. if user didn't trigger focus change)
+        if (day.length() == 1) day = "0" + day;
+        if (month.length() == 1) month = "0" + month;
+        if (year.length() == 1) year = "0" + year;
+
+        String dueDate = day + "/" + month + "/" + year;
+
         String assignedTo = assignToDropdown.getText().toString();
         String repeat = repeatIntervalDropdown.getText().toString();
         String tractor = tractorDropdown.getText().toString();
@@ -104,8 +174,15 @@ public class AddTaskActivity extends AppCompatActivity {
             Toast.makeText(this, "Title is required", Toast.LENGTH_SHORT).show();
             return;
         }
+        
+        if (day.isEmpty() || month.isEmpty() || year.isEmpty()) {
+            Toast.makeText(this, "Full date is required", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-        String taskId = UUID.randomUUID().toString();
+        // Use existing ID if editing, otherwise generate a new one
+        String taskId = (existingTaskId != null) ? existingTaskId : UUID.randomUUID().toString();
+        
         Map<String, Object> task = new HashMap<>();
         task.put("id", taskId);
         task.put("title", title);
@@ -117,7 +194,8 @@ public class AddTaskActivity extends AppCompatActivity {
 
         db.collection("tasks").document(taskId).set(task)
                 .addOnSuccessListener(aVoid -> {
-                    Toast.makeText(this, "Task Created!", Toast.LENGTH_SHORT).show();
+                    String message = (existingTaskId != null) ? "Task Updated!" : "Task Created!";
+                    Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
                     finish();
                 })
                 .addOnFailureListener(e -> {
