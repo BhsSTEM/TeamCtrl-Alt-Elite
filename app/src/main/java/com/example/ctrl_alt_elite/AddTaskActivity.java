@@ -81,6 +81,8 @@ public class AddTaskActivity extends AppCompatActivity {
                 String val = editText.getText().toString();
                 if (val.length() == 1) {
                     editText.setText("0" + val);
+                } else if (val.length() > 2) {
+                    editText.setText(val.substring(val.length()-2));
                 }
             }
         });
