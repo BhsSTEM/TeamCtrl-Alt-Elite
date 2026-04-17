@@ -7,6 +7,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.EdgeToEdge;
+
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.LazyHeaders;
@@ -19,19 +21,30 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class MainActivity extends BaseActivity {
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import android.content.pm.PackageManager;
+import androidx.core.app.ActivityCompat;
+import android.Manifest;
 
+public class MainActivity extends BaseActivity {
+    //Variables
     private TextView tempText;
     private TextView weatherDesc;
     private TextView rainInfo;
     private ImageView weatherIcon;
     private ImageView linkToNoaa;
+    private ImageView mapView;
+    private FusedLocationProviderClient fusedLocationClient;
     private static final String USER_AGENT = "TeamCtrlAltElite/1.0 (contact@example.com)";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
         setActivityContent(R.layout.activity_main);
+        
+
 
         // Initialize Weather Views with your updated XML IDs
         tempText = findViewById(R.id.weather_temp);
@@ -40,22 +53,49 @@ public class MainActivity extends BaseActivity {
         weatherIcon = findViewById(R.id.weather_icon);
         linkToNoaa = findViewById(R.id.LinkToNOAA);
 
-        // Fetch weather using coordinates (Davenport, IA area)
-        double latitude = 41.5245;
-        double longitude = -90.5157;
-        fetchNoaaWeather(latitude, longitude);
+        // Initialize FusedLocationProviderClient
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        // Fetch weather using coordinates and finding location
+        getLastLocation();
 
-        // Set up the link to weather.gov
-        if (linkToNoaa != null) {
-            linkToNoaa.setOnClickListener(v -> {
-                String url = String.format(Locale.US, "https://forecast.weather.gov/MapClick.php?lat=%f&lon=%f", latitude, longitude);
-                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+        // Set up the link to Map Activity
+        mapView = findViewById(R.id.MapView);
+        if (mapView != null){
+            mapView.setOnClickListener(v -> {
+                Intent intent = new Intent(MainActivity.this, evansMapActivity.class);
                 startActivity(intent);
             });
         }
+
     }
+    private void getLastLocation(){
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 100);
+            return;
+        }
 
+        fusedLocationClient.getLastLocation().addOnSuccessListener(this, location -> {
+            if (location != null) {
+                double latitude = location.getLatitude();
+                double longitude = location.getLongitude();
 
+                // Fetch weather using coordinates
+                fetchNoaaWeather(latitude, longitude);
+
+                // Update UI with weather information
+                if (linkToNoaa != null) {
+                    linkToNoaa.setOnClickListener(v -> {
+                        String url = String.format(Locale.US, "https://forecast.weather.gov/MapClick.php?lat=%f&lon=%f", latitude, longitude);
+                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                        startActivity(intent);
+                    });
+                }
+            } else {
+                Toast.makeText(MainActivity.this, "Location Error", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
     private void fetchNoaaWeather(double lat, double lon) {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("https://api.weather.gov/")
