@@ -23,18 +23,13 @@ public class SettingsActivity extends BaseActivity {
     private TextView usernameText;
     private TextView roleText;
 
-    private static final String PREFS_NAME = "ThemePrefs";
-    private static final String DARK_MODE_KEY = "isDarkMode";
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setActivityContent(R.layout.activity_settings);
 
         mAuth = FirebaseAuth.getInstance();
-        // Pointing to the specific 'sign-ons' database
-        db = FirebaseFirestore.getInstance("sign-ons");
-        
+
         logoutButton = findViewById(R.id.signOutButton);
         darkModeSwitch = findViewById(R.id.switch1);
         usernameText = findViewById(R.id.textView3);
@@ -46,29 +41,9 @@ public class SettingsActivity extends BaseActivity {
             if (usernameText != null) {
                 usernameText.setText(user.getEmail());
             }
-            
-            // Fetch role from Firestore
-            db.collection("users").document(user.getUid()).get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful() && task.getResult() != null) {
-                        DocumentSnapshot document = task.getResult();
-                        String role = document.getString("role");
-                        if (roleText != null) {
-                            if (role != null && !role.isEmpty()) {
-                                roleText.setText(role);
-                            } else {
-                                roleText.setText("No Role Assigned");
-                            }
-                        }
-                    } else {
-                        if (roleText != null) {
-                            roleText.setText("No Role Assigned");
-                        }
-                    }
-                });
         }
 
-        // Load current dark mode preference
+        // Load current dark mode preference using keys from BaseActivity
         SharedPreferences prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         boolean isDarkMode = prefs.getBoolean(DARK_MODE_KEY, false);
         darkModeSwitch.setChecked(isDarkMode);

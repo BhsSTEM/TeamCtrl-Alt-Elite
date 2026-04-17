@@ -43,7 +43,7 @@
     <string name="settings_dark_mode">Dark Mode</string>
     <string name="settings_account_section">Account</string>
     <string name="settings_username">Username</string>
-    <string name="settings_role">Role</string>
+    <string name="settings_role">No Role Assigned</string>
     <string name="settings_change_password">Change Password</string>
     <string name="settings_logout">Logout</string>
     <string name="tasks_header">Tasks</string>
