@@ -1,9 +1,6 @@
 package com.example.ctrl_alt_elite;
 
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
@@ -82,7 +79,7 @@ public class AddTaskActivity extends AppCompatActivity {
         editText.setOnFocusChangeListener((v, hasFocus) -> {
             if (!hasFocus) {
                 String val = editText.getText().toString();
-                if (!val.isEmpty() && val.length() == 1) {
+                if (val.length() == 1) {
                     editText.setText("0" + val);
                 }
             }
