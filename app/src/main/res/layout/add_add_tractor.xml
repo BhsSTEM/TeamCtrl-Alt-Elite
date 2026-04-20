@@ -81,7 +81,7 @@
                         android:textStyle="bold" />
 
                     <EditText
-                        android:id="@+id/etTractorName"
+                        android:id="@+id/getTractorName"
                         android:layout_width="match_parent"
                         android:layout_height="44dp"
                         android:layout_marginTop="8dp"
@@ -121,7 +121,7 @@
                         android:textStyle="bold" />
 
                     <EditText
-                        android:id="@+id/etModelNumber"
+                        android:id="@+id/getModelNumber"
                         android:layout_width="match_parent"
                         android:layout_height="44dp"
                         android:layout_marginTop="8dp"
@@ -143,7 +143,7 @@
                         android:textStyle="bold" />
 
                     <EditText
-                        android:id="@+id/etPin"
+                        android:id="@+id/getPin"
                         android:layout_width="match_parent"
                         android:layout_height="44dp"
                         android:layout_marginTop="8dp"

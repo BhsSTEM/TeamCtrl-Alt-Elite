@@ -50,9 +50,9 @@ public class ManageTractorsActivity extends BaseActivity {
     }
 
     private void listenToFirestore() {
-        // only shows joemama, later change to FirebaseAuth.getInstance().getCurrentUser().getUid()
+
         db.collection("nineoneone")
-                .whereEqualTo("user", "joemama")
+                .whereEqualTo("user", FirebaseAuth.getInstance().getCurrentUser())
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
                     public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
