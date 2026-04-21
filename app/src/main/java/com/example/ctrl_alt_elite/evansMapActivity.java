@@ -1,22 +1,10 @@
-// Copyright 2020 Google LLC
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 package com.example.ctrl_alt_elite;
 
 import android.animation.ValueAnimator;
-import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -24,158 +12,103 @@ import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.CustomTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-
-import com.google.android.libraries.places.api.Places;
-import com.google.android.libraries.places.api.model.Place;
-import com.google.android.libraries.places.api.model.PlaceLikelihood;
-import com.google.android.libraries.places.api.net.FindCurrentPlaceRequest;
-import com.google.android.libraries.places.api.net.FindCurrentPlaceResponse;
-import com.google.android.libraries.places.api.net.PlacesClient;
-import com.google.android.material.chip.Chip;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.GeoPoint;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
-/**
- * An activity that displays a map showing the place at the device's current location.
- */
-public class evansMapActivity extends BaseActivity //extending baseactivity adds the bottom task bar
-        implements OnMapReadyCallback {
+public class evansMapActivity extends BaseActivity implements OnMapReadyCallback {
 
-    private static final String TAG = evansMapActivity.class.getSimpleName();
+    private static final String TAG = "EvansMapActivity";
     private GoogleMap map;
-    private CameraPosition cameraPosition;
-
-    // The entry point to the Places API.
-    private PlacesClient placesClient;
-
-    // The entry point to the Fused Location Provider.
     private FusedLocationProviderClient fusedLocationProviderClient;
 
-    // A default location (Sydney, Australia) and default zoom to use when location permission is
-    // not granted.
-    private final LatLng defaultLocation = new LatLng(-33.8523341, 151.2106085);
+    private final LatLng defaultLocation = new LatLng(41.5245, -90.5157);
     private static final int DEFAULT_ZOOM = 15;
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     private boolean locationPermissionGranted;
-
-    // The geographical location where the device is currently located. That is, the last-known
-    // location retrieved by the Fused Location Provider.
     private Location lastKnownLocation;
 
-    // Keys for storing activity state.
-    // [START maps_current_place_state_keys]
-    private static final String KEY_CAMERA_POSITION = "camera_position";
-    private static final String KEY_LOCATION = "location";
-    // [END maps_current_place_state_keys]
-
-    // Used for selecting the current place.
-    private static final int M_MAX_ENTRIES = 5;
-    private String[] likelyPlaceNames;
-    private String[] likelyPlaceAddresses;
-    private List[] likelyPlaceAttributions;
-    private LatLng[] likelyPlaceLatLngs;
-
-    // Default collapsed height for chip3 (in pixels, will be measured)
     private int collapsedHeight = 0;
+    private FirebaseFirestore db;
+    private List<Tractor> tractorList = new ArrayList<>();
+    private TractorAdapter adapter;
 
-    // [START maps_current_place_on_create]
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        // [START_EXCLUDE silent]
-        // [START maps_current_place_on_create_save_instance_state]
-        // Retrieve location and camera position from saved instance state.
-        if (savedInstanceState != null) {
-            lastKnownLocation = savedInstanceState.getParcelable(KEY_LOCATION);
-            cameraPosition = savedInstanceState.getParcelable(KEY_CAMERA_POSITION);
-        }
-        // [END maps_current_place_on_create_save_instance_state]
-        // [END_EXCLUDE]
-
-        // Retrieve the content view that renders the map.
         setActivityContent(R.layout.activity_evans_map);
 
-        // [START_EXCLUDE silent]
-        // Construct a PlacesClient
-        // Use the API key from BuildConfig (provided by the secrets gradle plugin)
-        Places.initialize(getApplicationContext(), com.example.ctrl_alt_elite.BuildConfig.MAPS_API_KEY);
-        placesClient = Places.createClient(this);
-
-        // Construct a FusedLocationProviderClient.
+        db = FirebaseFirestore.getInstance();
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
 
-        // Build the map.
-        // [START maps_current_place_map_fragment]
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
-        // [END maps_current_place_map_fragment]
-        // [END_EXCLUDE]
+        if (mapFragment != null) {
+            mapFragment.getMapAsync(this);
+        }
 
+        setupRecyclerView();
         setupSearchAnimation();
         setupSearchLogic();
     }
 
+    private void setupRecyclerView() {
+        RecyclerView rv = findViewById(R.id.rvTractorsMap);
+        if (rv != null) {
+            rv.setLayoutManager(new LinearLayoutManager(this));
+            adapter = new TractorAdapter(tractorList);
+            rv.setAdapter(adapter);
+        }
+    }
+
     private void setupSearchAnimation() {
         final EditText searchInput = findViewById(R.id.editTextText2);
-        final Chip chip3 = findViewById(R.id.chip3);
+        final View chip3 = findViewById(R.id.chip3);
 
         if (searchInput != null && chip3 != null) {
-            // Store the initial height as the collapsed height
-            chip3.post(new Runnable() {
-                @Override
-                public void run() {
-                    collapsedHeight = chip3.getHeight();
-                }
-            });
+            chip3.post(() -> collapsedHeight = chip3.getHeight());
 
-            // Expand when EditText is clicked
-            searchInput.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
+            searchInput.setOnFocusChangeListener((v, hasFocus) -> {
+                if (hasFocus) {
                     animatePanelHeight(chip3, calculateTargetHeight());
-                }
-            });
-            
-            // Also trigger when it gains focus
-            searchInput.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-                @Override
-                public void onFocusChange(View v, boolean hasFocus) {
-                    if (hasFocus) {
-                        animatePanelHeight(chip3, calculateTargetHeight());
-                    }
                 }
             });
         }
@@ -186,7 +119,7 @@ public class evansMapActivity extends BaseActivity //extending baseactivity adds
         if (bottomSearchInput != null) {
             bottomSearchInput.setOnEditorActionListener((v, actionId, event) -> {
                 if (actionId == EditorInfo.IME_ACTION_SEARCH ||
-                    (event != null && event.getAction() == KeyEvent.ACTION_DOWN && event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) {
+                        (event != null && event.getAction() == KeyEvent.ACTION_DOWN && event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) {
                     performSearch(v.getText().toString());
                     return true;
                 }
@@ -198,22 +131,26 @@ public class evansMapActivity extends BaseActivity //extending baseactivity adds
     private void performSearch(String query) {
         if (query == null || query.isEmpty()) return;
 
-        Geocoder geocoder = new Geocoder(this, Locale.getDefault());
-        try {
-            List<Address> addresses = geocoder.getFromLocationName(query, 1);
-            if (addresses != null && !addresses.isEmpty()) {
-                Address address = addresses.get(0);
-                LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
-                map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, DEFAULT_ZOOM));
-                map.clear();
-                map.addMarker(new MarkerOptions().position(latLng).title(query));
-            } else {
-                Toast.makeText(this, "Location not found", Toast.LENGTH_SHORT).show();
+        for (Tractor tractor : tractorList) {
+            if (tractor.getName() != null && tractor.getName().toLowerCase().contains(query.toLowerCase())) {
+                showTractorOnMap(tractor);
+                return;
             }
-        } catch (IOException e) {
-            Log.e(TAG, "Search failed", e);
-            Toast.makeText(this, "Search failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
+
+        LatLng latLng = parseLocation(query);
+        if (latLng != null) {
+            map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, DEFAULT_ZOOM));
+            map.addMarker(new MarkerOptions().position(latLng).title(query));
+        } else {
+            Toast.makeText(this, "Location not found", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void showTractorOnMap(Tractor tractor) {
+        LatLng pos = parseLocation(tractor.getLocation());
+        if (pos == null) return;
+        map.animateCamera(CameraUpdateFactory.newLatLngZoom(pos, 17));
     }
 
     private int calculateTargetHeight() {
@@ -223,87 +160,179 @@ public class evansMapActivity extends BaseActivity //extending baseactivity adds
     }
 
     private void animatePanelHeight(final View panel, int targetHeight) {
+        if (panel == null) return;
         ValueAnimator animator = ValueAnimator.ofInt(panel.getHeight(), targetHeight);
-        animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                int val = (Integer) animation.getAnimatedValue();
-                ViewGroup.LayoutParams layoutParams = panel.getLayoutParams();
-                layoutParams.height = val;
-                panel.setLayoutParams(layoutParams);
-            }
+        animator.addUpdateListener(animation -> {
+            int val = (Integer) animation.getAnimatedValue();
+            ViewGroup.LayoutParams layoutParams = panel.getLayoutParams();
+            layoutParams.height = val;
+            panel.setLayoutParams(layoutParams);
         });
         animator.setDuration(300);
         animator.start();
     }
 
-    /**
-     * Manipulates the map when it's available.
-     */
     @Override
     public void onMapReady(GoogleMap googleMap) {
         this.map = googleMap;
 
-        // [START map_current_place_set_info_window_adapter]
-        this.map.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
-            @Override
-            public View getInfoWindow(Marker arg0) { return null; }
-            @Override
-            public View getInfoContents(Marker marker) { return null; }
-        });
-        // [END map_current_place_set_info_window_adapter]
-
-        // Collapse search when map is clicked
-        this.map.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
-            @Override
-            public void onMapClick(LatLng latLng) {
-                final Chip chip3 = findViewById(R.id.chip3);
-                if (chip3 != null && collapsedHeight > 0) {
-                    animatePanelHeight(chip3, collapsedHeight);
-                    // Clear focus from search to allow it to be re-clicked
-                    View searchInput = findViewById(R.id.editTextText2);
-                    if (searchInput != null) {
-                        searchInput.clearFocus();
-                    }
-                }
+        this.map.setOnMapClickListener(latLng -> {
+            final View chip3 = findViewById(R.id.chip3);
+            if (chip3 != null && collapsedHeight > 0) {
+                animatePanelHeight(chip3, collapsedHeight);
+                View searchInput = findViewById(R.id.editTextText2);
+                if (searchInput != null) searchInput.clearFocus();
             }
         });
 
-        // Setup Custom UI Controls
+        loadTractorsFromFirebase();
         setupCustomControls();
-
         getLocationPermission();
         updateLocationUI();
         getDeviceLocation();
     }
 
+    private void loadTractorsFromFirebase() {
+        db.collection("nineoneone").whereEqualTo("user", "joemama@gmail.com").get().addOnCompleteListener(task -> {
+            if (task.isSuccessful() && task.getResult() != null) {
+                tractorList.clear();
+                Log.d(TAG, "Fetched " + task.getResult().size() + " tractors");
+                for (QueryDocumentSnapshot document : task.getResult()) {
+                    try {
+                        Map<String, Object> data = document.getData();
+                        Log.d(TAG, "Document data: " + data.toString());
+                        
+                        Tractor tractor = document.toObject(Tractor.class);
+                        
+                        Object locObj = document.get("location");
+                        if (locObj instanceof GeoPoint) {
+                            GeoPoint gp = (GeoPoint) locObj;
+                            tractor.setLocation(gp.getLatitude() + "," + gp.getLongitude());
+                        } else if (locObj instanceof String) {
+                            tractor.setLocation((String) locObj);
+                        }
+                        
+                        // Fallback name if toObject failed due to property naming mismatch
+                        if (tractor.getName() == null) {
+                            if (document.contains("tracterName")) {
+                                tractor.setName(document.getString("tracterName"));
+                            } else if (document.contains("name")) {
+                                tractor.setName(document.getString("name"));
+                            }
+                        }
+
+                        tractorList.add(tractor);
+                        addTractorMarker(tractor);
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error parsing tractor: " + document.getId(), e);
+                    }
+                }
+                if (adapter != null) adapter.notifyDataSetChanged();
+            } else {
+                Log.e(TAG, "Error getting documents: ", task.getException());
+            }
+        });
+    }
+
+    private LatLng parseLocation(String locationStr) {
+        if (locationStr == null || locationStr.isEmpty()) return null;
+        
+        // Try parsing as latitude,longitude first
+        String[] parts = locationStr.split(",");
+        if (parts.length == 2) {
+            try {
+                double lat = Double.parseDouble(parts[0].trim());
+                double lng = Double.parseDouble(parts[1].trim());
+                return new LatLng(lat, lng);
+            } catch (NumberFormatException ignored) {
+                // Not numbers, try geocoding it as an address below
+            }
+        }
+        
+        // Try geocoding it as an address string (e.g. "Kearney, NE")
+        Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+        try {
+            List<Address> addresses = geocoder.getFromLocationName(locationStr, 1);
+            if (addresses != null && !addresses.isEmpty()) {
+                Address address = addresses.get(0);
+                return new LatLng(address.getLatitude(), address.getLongitude());
+            }
+        } catch (IOException e) {
+            Log.e(TAG, "Geocoding failed for: " + locationStr, e);
+        }
+        
+        return null;
+    }
+
+    private void addTractorMarker(Tractor tractor) {
+        LatLng position = parseLocation(tractor.getLocation());
+        if (position == null) {
+            Log.d(TAG, "Invalid location for tractor: " + tractor.getName() + " (" + tractor.getLocation() + ")");
+            return;
+        }
+        
+        Object imageSource;
+        String imageUrl = tractor.getImageUrl();
+        
+        if (imageUrl == null || imageUrl.isEmpty() || imageUrl.equals("link")) {
+            // base image when not working
+            imageSource = R.drawable.pngimg_com___tractor_png101303_removebg_preview;
+        } else {
+            imageSource = imageUrl;
+        }
+
+        Glide.with(this)
+            .asBitmap()
+            .load(imageSource)
+            .override(100, 100)
+            .circleCrop()
+            .into(new CustomTarget<Bitmap>() {
+                @Override
+                public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                    if (map != null) {
+                        Marker marker = map.addMarker(new MarkerOptions()
+                            .position(position)
+                            .title(tractor.getName())
+                            .icon(BitmapDescriptorFactory.fromBitmap(resource)));
+                        if (marker != null) marker.setTag(tractor);
+                    }
+                }
+                @Override
+                public void onLoadCleared(@Nullable Drawable placeholder) {}
+
+                @Override
+                public void onLoadFailed(@Nullable Drawable errorDrawable) {
+                    addDefaultMarker(position, tractor);
+                }
+            });
+    }
+
+    private void addDefaultMarker(LatLng position, Tractor tractor) {
+        if (map != null) {
+            Marker marker = map.addMarker(new MarkerOptions()
+                .position(position)
+                .title(tractor.getName()));
+            if (marker != null) marker.setTag(tractor);
+        }
+    }
+
     private void setupCustomControls() {
         if (map == null) return;
-
-        // Disable default UI settings to use custom ones
         map.getUiSettings().setZoomControlsEnabled(false);
         map.getUiSettings().setMyLocationButtonEnabled(false);
-        map.getUiSettings().setCompassEnabled(true); // Built-in compass appears when rotating
+        map.getUiSettings().setCompassEnabled(true);
 
         ImageButton btnZoomIn = findViewById(R.id.btnZoomIn);
-        if (btnZoomIn != null) {
-            btnZoomIn.setOnClickListener(v -> map.animateCamera(CameraUpdateFactory.zoomIn()));
-        }
+        if (btnZoomIn != null) btnZoomIn.setOnClickListener(v -> map.animateCamera(CameraUpdateFactory.zoomIn()));
 
         ImageButton btnZoomOut = findViewById(R.id.btnZoomOut);
-        if (btnZoomOut != null) {
-            btnZoomOut.setOnClickListener(v -> map.animateCamera(CameraUpdateFactory.zoomOut()));
-        }
+        if (btnZoomOut != null) btnZoomOut.setOnClickListener(v -> map.animateCamera(CameraUpdateFactory.zoomOut()));
 
         FloatingActionButton fabMyLocation = findViewById(R.id.fabMyLocation);
-        if (fabMyLocation != null) {
-            fabMyLocation.setOnClickListener(v -> getDeviceLocation());
-        }
+        if (fabMyLocation != null) fabMyLocation.setOnClickListener(v -> getDeviceLocation());
 
         FloatingActionButton fabLayers = findViewById(R.id.fabLayers);
-        if (fabLayers != null) {
-            fabLayers.setOnClickListener(v -> showMapTypeDialog());
-        }
+        if (fabLayers != null) fabLayers.setOnClickListener(v -> showMapTypeDialog());
     }
 
     private void showMapTypeDialog() {
@@ -318,67 +347,29 @@ public class evansMapActivity extends BaseActivity //extending baseactivity adds
                         case 2: map.setMapType(GoogleMap.MAP_TYPE_TERRAIN); break;
                         case 3: map.setMapType(GoogleMap.MAP_TYPE_HYBRID); break;
                     }
-                })
-                .show();
+                }).show();
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        setupNavigation();
-    }
-
-    /**
-     * Saves the state of the map when the activity is paused.
-     */
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        if (map != null) {
-            outState.putParcelable(KEY_CAMERA_POSITION, map.getCameraPosition());
-            outState.putParcelable(KEY_LOCATION, lastKnownLocation);
-        }
-        super.onSaveInstanceState(outState);
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) { return true; }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) { return true; }
-
-    /**
-     * Gets the current location of the device, and positions the map's camera.
-     */
     private void getDeviceLocation() {
         try {
             if (locationPermissionGranted) {
-                Task<Location> locationResult = fusedLocationProviderClient.getLastLocation();
-                locationResult.addOnCompleteListener(this, new OnCompleteListener<Location>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Location> task) {
-                        if (task.isSuccessful()) {
-                            lastKnownLocation = task.getResult();
-                            if (lastKnownLocation != null) {
-                                map.animateCamera(CameraUpdateFactory.newLatLngZoom(
-                                        new LatLng(lastKnownLocation.getLatitude(),
-                                                lastKnownLocation.getLongitude()), DEFAULT_ZOOM));
-                            }
-                        } else {
-                            map.moveCamera(CameraUpdateFactory.newLatLngZoom(defaultLocation, DEFAULT_ZOOM));
-                            map.getUiSettings().setMyLocationButtonEnabled(false);
-                        }
+                fusedLocationProviderClient.getLastLocation().addOnCompleteListener(this, task -> {
+                    if (task.isSuccessful() && task.getResult() != null) {
+                        lastKnownLocation = task.getResult();
+                        map.animateCamera(CameraUpdateFactory.newLatLngZoom(
+                                new LatLng(lastKnownLocation.getLatitude(),
+                                        lastKnownLocation.getLongitude()), DEFAULT_ZOOM));
                     }
                 });
             }
-        } catch (SecurityException e)  {
+        } catch (SecurityException e) {
             Log.e(TAG, "Exception: " + e.getMessage(), e);
         }
     }
 
     private void getLocationPermission() {
         if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
-                android.Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
+                android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             locationPermissionGranted = true;
         } else {
             ActivityCompat.requestPermissions(this,
@@ -389,15 +380,13 @@ public class evansMapActivity extends BaseActivity //extending baseactivity adds
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        locationPermissionGranted = false;
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 locationPermissionGranted = true;
+                updateLocationUI();
             }
-        } else {
-            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         }
-        updateLocationUI();
     }
 
     private void updateLocationUI() {
@@ -405,52 +394,17 @@ public class evansMapActivity extends BaseActivity //extending baseactivity adds
         try {
             if (locationPermissionGranted) {
                 map.setMyLocationEnabled(true);
-                map.getUiSettings().setMyLocationButtonEnabled(true);
             } else {
                 map.setMyLocationEnabled(false);
-                map.getUiSettings().setMyLocationButtonEnabled(false);
-                lastKnownLocation = null;
-                getLocationPermission();
             }
-        } catch (SecurityException e)  {
+        } catch (SecurityException e) {
             Log.e(TAG, "Exception: " + e.getMessage());
         }
     }
 
-    private void showCurrentPlace() {
-        if (map == null) return;
-        if (locationPermissionGranted) {
-            List<Place.Field> placeFields = Arrays.asList(Place.Field.DISPLAY_NAME, Place.Field.FORMATTED_ADDRESS, Place.Field.LOCATION);
-            FindCurrentPlaceRequest request = FindCurrentPlaceRequest.newInstance(placeFields);
-            @SuppressWarnings("MissingPermission") final Task<FindCurrentPlaceResponse> placeResult = placesClient.findCurrentPlace(request);
-            placeResult.addOnCompleteListener (new OnCompleteListener<FindCurrentPlaceResponse>() {
-                @Override
-                public void onComplete(@NonNull Task<FindCurrentPlaceResponse> task) {
-                    if (task.isSuccessful() && task.getResult() != null) {
-                        FindCurrentPlaceResponse likelyPlaces = task.getResult();
-                        int count = Math.min(likelyPlaces.getPlaceLikelihoods().size(), M_MAX_ENTRIES);
-                        likelyPlaceNames = new String[count];
-                        likelyPlaceAddresses = new String[count];
-                        likelyPlaceLatLngs = new LatLng[count];
-                        for (int i = 0; i < count; i++) {
-                            PlaceLikelihood placeLikelihood = likelyPlaces.getPlaceLikelihoods().get(i);
-                            likelyPlaceNames[i] = placeLikelihood.getPlace().getDisplayName();
-                            likelyPlaceAddresses[i] = placeLikelihood.getPlace().getFormattedAddress();
-                            likelyPlaceLatLngs[i] = placeLikelihood.getPlace().getLocation();
-                        }
-                        openPlacesDialog();
-                    }
-                }
-            });
-        }
-    }
-
-    private void openPlacesDialog() {
-        DialogInterface.OnClickListener listener = (dialog, which) -> {
-            LatLng markerLatLng = likelyPlaceLatLngs[which];
-            map.addMarker(new MarkerOptions().title(likelyPlaceNames[which]).position(markerLatLng).snippet(likelyPlaceAddresses[which]));
-            map.moveCamera(CameraUpdateFactory.newLatLngZoom(markerLatLng, DEFAULT_ZOOM));
-        };
-        new AlertDialog.Builder(this).setTitle(R.string.pick_place).setItems(likelyPlaceNames, listener).show();
+    @Override
+    protected void onResume() {
+        super.onResume();
+        setupNavigation();
     }
 }
