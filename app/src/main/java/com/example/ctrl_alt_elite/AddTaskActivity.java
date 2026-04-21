@@ -8,13 +8,16 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,12 +26,19 @@ import java.util.UUID;
 public class AddTaskActivity extends AppCompatActivity {
 
     private FirebaseFirestore db;
+    private FirebaseFirestore userdb;
+
     private TextInputEditText titleInput, descriptionInput, dayInput, monthInput, yearInput;
     private AutoCompleteTextView assignToDropdown, repeatIntervalDropdown, tractorDropdown;
     private TextView headerText;
     private Button createTaskButton;
     
     private String existingTaskId = null; // Used if we are in Edit mode
+
+    // For multi-select Assign To
+    private String[] allUsers;
+    private boolean[] selectedUsers;
+    private List<String> finalSelectedUsers = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +47,7 @@ public class AddTaskActivity extends AppCompatActivity {
 
         // Pointing to the specific 'tasks' database
         db = FirebaseFirestore.getInstance("tasks");
+        userdb = FirebaseFirestore.getInstance("sign-up");
 
         headerText = findViewById(R.id.addTaskHeader);
         titleInput = findViewById(R.id.taskTitleInput);
@@ -108,7 +119,12 @@ public class AddTaskActivity extends AppCompatActivity {
             }
         }
         
-        assignToDropdown.setText(getIntent().getStringExtra("task_assigned_to"), false);
+        String assigned = getIntent().getStringExtra("task_assigned_to");
+        assignToDropdown.setText(assigned, false);
+        if (assigned != null && !assigned.isEmpty()) {
+            finalSelectedUsers = new ArrayList<>(Arrays.asList(assigned.split(", ")));
+        }
+
         repeatIntervalDropdown.setText(getIntent().getStringExtra("task_repeat"), false);
         tractorDropdown.setText(getIntent().getStringExtra("task_tractor"), false);
     }
@@ -124,19 +140,29 @@ public class AddTaskActivity extends AppCompatActivity {
         ArrayAdapter<String> intervalAdapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, intervals);
         repeatIntervalDropdown.setAdapter(intervalAdapter);
 
-        // Fetch Users (for Assign To)
-        db.collection("users").get().addOnCompleteListener(task -> {
+        // Fetch Users (for Multi-Select Assign To)
+        userdb.collection("users").get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
-                List<String> userEmails = new ArrayList<>();
+                List<String> userList = new ArrayList<>();
                 for (QueryDocumentSnapshot document : task.getResult()) {
-                    userEmails.add(document.getString("email"));
+                    String name = document.getString("name");
+                    if (name != null) userList.add(name);
                 }
-                ArrayAdapter<String> userAdapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, userEmails);
-                assignToDropdown.setAdapter(userAdapter);
+                allUsers = userList.toArray(new String[0]);
+                selectedUsers = new boolean[allUsers.length];
+
+                // Update selectedUsers based on finalSelectedUsers (useful for Edit mode)
+                for (int i = 0; i < allUsers.length; i++) {
+                    if (finalSelectedUsers.contains(allUsers[i])) {
+                        selectedUsers[i] = true;
+                    }
+                }
+
+                assignToDropdown.setOnClickListener(v -> showUserSelectionDialog());
             }
         });
 
-        // Fetch Tractors (assuming a "tractors" collection exists)
+        // Fetch Tractors
         db.collection("tractors").get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 List<String> tractorNames = new ArrayList<>();
@@ -149,22 +175,54 @@ public class AddTaskActivity extends AppCompatActivity {
         });
     }
 
+    private void showUserSelectionDialog() {
+        if (allUsers == null || allUsers.length == 0) {
+            Toast.makeText(this, "No users found", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this);
+        builder.setTitle("Select People");
+        builder.setMultiChoiceItems(allUsers, selectedUsers, (dialog, which, isChecked) -> {
+            selectedUsers[which] = isChecked;
+        });
+
+        builder.setPositiveButton("OK", (dialog, which) -> {
+            finalSelectedUsers.clear();
+            StringBuilder selectedText = new StringBuilder();
+            for (int i = 0; i < selectedUsers.length; i++) {
+                if (selectedUsers[i]) {
+                    finalSelectedUsers.add(allUsers[i]);
+                    if (selectedText.length() > 0) {
+                        selectedText.append(", ");
+                    }
+                    selectedText.append(allUsers[i]);
+                }
+            }
+            assignToDropdown.setText(selectedText.toString(), false);
+        });
+
+        builder.setNegativeButton("Cancel", null);
+        builder.show();
+    }
+
     private void saveTaskToFirestore() {
         String title = titleInput.getText().toString().trim();
         String description = descriptionInput.getText().toString().trim();
         
-        // Combine the three date fields into a single string for storage
         String day = dayInput.getText().toString().trim();
         String month = monthInput.getText().toString().trim();
         String year = yearInput.getText().toString().trim();
 
-        // Ensure padding if not already padded (e.g. if user didn't trigger focus change)
-        if (day.length() == 1) day = "0" + day;
-        if (month.length() == 1) month = "0" + month;
-        if (year.length() == 1) year = "0" + year;
+        String dueDate = "";
+        if (!day.isEmpty() && !month.isEmpty() && !year.isEmpty()) {
+            if (day.length() == 1) day = "0" + day;
+            if (month.length() == 1) month = "0" + month;
+            if (year.length() == 1) year = "0" + year;
+            dueDate = day + "/" + month + "/" + year;
+        }
 
-        String dueDate = day + "/" + month + "/" + year;
-
+        // assignedTo is now a comma-separated string from the dropdown text
         String assignedTo = assignToDropdown.getText().toString();
         String repeat = repeatIntervalDropdown.getText().toString();
         String tractor = tractorDropdown.getText().toString();
@@ -173,13 +231,7 @@ public class AddTaskActivity extends AppCompatActivity {
             Toast.makeText(this, "Title is required", Toast.LENGTH_SHORT).show();
             return;
         }
-        
-        if (day.isEmpty() || month.isEmpty() || year.isEmpty()) {
-            Toast.makeText(this, "Full date is required", Toast.LENGTH_SHORT).show();
-            return;
-        }
 
-        // Use existing ID if editing, otherwise generate a new one
         String taskId = (existingTaskId != null) ? existingTaskId : UUID.randomUUID().toString();
         
         Map<String, Object> task = new HashMap<>();

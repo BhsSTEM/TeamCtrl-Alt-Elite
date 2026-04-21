@@ -98,6 +98,7 @@ public class signUpPage extends AppCompatActivity {
         user.put("name", name);
         user.put("email", email);
         user.put("uid", mAuth.getCurrentUser().getUid());
+        user.put("role", "");// Blank for now and the foreseeable future
 
         db.collection("users").document(mAuth.getCurrentUser().getUid())
                 .set(user)
