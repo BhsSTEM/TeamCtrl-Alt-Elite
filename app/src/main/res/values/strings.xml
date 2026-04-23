@@ -43,7 +43,7 @@
     <string name="settings_dark_mode">Dark Mode</string>
     <string name="settings_account_section">Account</string>
     <string name="settings_username">Username</string>
-    <string name="settings_role">Role</string>
+    <string name="settings_role">No Role Assigned</string>
     <string name="settings_change_password">Change Password</string>
     <string name="settings_logout">Logout</string>
     <string name="tasks_header">Tasks</string>
@@ -98,6 +98,11 @@
     <string name="repeat_daily">Daily</string>
     <string name="repeat_weekly">Weekly</string>
     <string name="repeat_monthly">Monthly</string>
+    <string name="settings_no_role">No Role Assigned</string>
+
+    <string name="label_day">DD</string>
+    <string name="label_month">MM</string>
+    <string name="label_year">20YY</string>
 
     <string name="year_format">Year: %1$s</string>
     <string name="model_format">Model: %1$s</string>

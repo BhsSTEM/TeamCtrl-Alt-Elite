@@ -4,13 +4,11 @@ import static android.content.ContentValues.TAG;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -27,6 +25,7 @@ public class signUpPage extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
 
+    EditText nameSignUpText;
     EditText emailSignUpText;
     EditText passwordSignUpText;
     Button signUpButton;
@@ -35,14 +34,15 @@ public class signUpPage extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // EdgeToEdge.enable(this); 
         setContentView(R.layout.page_signup);
 
         // Initialize Firebase
         mAuth = FirebaseAuth.getInstance();
-        db = FirebaseFirestore.getInstance();
+        // Pointing to the specific 'sign-ons' database
+        db = FirebaseFirestore.getInstance("sign-up");
 
         // UI elements
+        nameSignUpText = findViewById(R.id.nameSignUpInput);
         emailSignUpText = findViewById(R.id.emailSignUpInput);
         passwordSignUpText = findViewById(R.id.passwordSignUpInput);
         backButton3 = findViewById(R.id.backButton3);
@@ -67,10 +67,11 @@ public class signUpPage extends AppCompatActivity {
     }
 
     private void registerUser() {
+        String name = nameSignUpText.getText().toString().trim();
         String email = emailSignUpText.getText().toString().trim();
         String password = passwordSignUpText.getText().toString().trim();
 
-        if (email.isEmpty() || password.isEmpty()) {
+        if (name.isEmpty() || email.isEmpty() || password.isEmpty()) {
             Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -84,7 +85,7 @@ public class signUpPage extends AppCompatActivity {
         mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
-                        saveUserToFirestore(email);
+                        saveUserToFirestore(name, email);
                     } else {
                         Toast.makeText(signUpPage.this, "Sign up failed: " + task.getException().getMessage(),
                                 Toast.LENGTH_SHORT).show();
@@ -92,10 +93,12 @@ public class signUpPage extends AppCompatActivity {
                 });
     }
 
-    private void saveUserToFirestore(String email) {
+    private void saveUserToFirestore(String name, String email) {
         Map<String, Object> user = new HashMap<>();
+        user.put("name", name);
         user.put("email", email);
         user.put("uid", mAuth.getCurrentUser().getUid());
+        user.put("role", "");// Blank for now and the foreseeable future
 
         db.collection("users").document(mAuth.getCurrentUser().getUid())
                 .set(user)
