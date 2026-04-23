@@ -98,4 +98,7 @@
     <string name="repeat_daily">Daily</string>
     <string name="repeat_weekly">Weekly</string>
     <string name="repeat_monthly">Monthly</string>
+
+    <string name="year_format">Year: %1$s</string>
+    <string name="model_format">Model: %1$s</string>
 </resources>
