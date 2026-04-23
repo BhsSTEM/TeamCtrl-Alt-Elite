@@ -5,10 +5,25 @@ import android.os.Bundle;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.button.MaterialButton;
+import com.google.firebase.Firebase;
+
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.QuerySnapshot;
+import android.util.Log;
+import androidx.annotation.Nullable;
+
 public class ManageTractorsActivity extends BaseActivity {
+
+    private FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private List<Tractor> tractorList = new ArrayList<>();
+    private TractorAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,17 +42,40 @@ public class ManageTractorsActivity extends BaseActivity {
         RecyclerView recyclerView = findViewById(R.id.tracters);
         if (recyclerView != null) {
             recyclerView.setLayoutManager(new LinearLayoutManager(this));
-            
-            // Dummy data for now so you can see it working
-            List<Tractor> dummyTractors = new ArrayList<>();
-            dummyTractors.add(new Tractor("John Deere 5050D", "2022", "5050D"));
-            dummyTractors.add(new Tractor("Mahindra Arjun", "2021", "555 DI"));
-            dummyTractors.add(new Tractor("Kubota MU4501", "2023", "MU4501"));
-            
-            TractorAdapter adapter = new TractorAdapter(dummyTractors);
+            adapter = new TractorAdapter(tractorList);
             recyclerView.setAdapter(adapter);
         }
+        listenToFirestore();
+
     }
+
+    private void listenToFirestore() {
+        // only shows joemama, later change to FirebaseAuth.getInstance().getCurrentUser().getUid()
+        db.collection("nineoneone")
+                .whereEqualTo("user", "joemama")
+                .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                    @Override
+                    public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
+                        if (error != null) {
+                            Log.e("FirestoreError", "Listen failed.", error);
+                            return;
+                        }
+
+                        if (value != null) {
+                            tractorList.clear();
+                            for (QueryDocumentSnapshot doc : value) {
+                                Tractor tractor = doc.toObject(Tractor.class);
+                                tractorList.add(tractor);
+                            }
+                            adapter.notifyDataSetChanged();
+                            Log.d("FirestoreData", "Tractors found: "+tractorList.size());
+                        }
+                    }
+                });
+        listenToFirestore();
+
+    }
+
 
     @Override
     protected void onResume() {

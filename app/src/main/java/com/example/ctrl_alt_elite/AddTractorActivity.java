@@ -10,6 +10,7 @@ import android.provider.MediaStore;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -21,16 +22,20 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 
-import com.google.android.material.card.MaterialCardView;
+import com.bumptech.glide.Glide;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
 public class AddTractorActivity extends BaseActivity {
-
+    private boolean isEditMode = false;
+    private Tractor existingTractor;
     private ImageView ivTractorImage;
     private Spinner spinnerYear;
+    private EditText etTractorName, etModelNumber, etPin;
+    private TextView titleText;
+    private Button btnSave;
 
     private final ActivityResultLauncher<String> requestPermissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
@@ -64,12 +69,30 @@ public class AddTractorActivity extends BaseActivity {
 
         ivTractorImage = findViewById(R.id.ivTractorImage);
         spinnerYear = findViewById(R.id.spinnerYear);
+        etTractorName = findViewById(R.id.etTractorName);
+        etModelNumber = findViewById(R.id.etModelNumber);
+        etPin = findViewById(R.id.etPin);
+        btnSave = findViewById(R.id.btnSaveTractor);
         
-        // Fix: btnUploadImage is a MaterialCardView in XML, not a Button
+        // Find the title TextView (second child of toolbar)
+        View toolbar = findViewById(R.id.toolbar);
+        if (toolbar instanceof androidx.constraintlayout.widget.ConstraintLayout) {
+             titleText = (TextView) ((androidx.constraintlayout.widget.ConstraintLayout) toolbar).getChildAt(1);
+        }
+
         View btnUploadImage = findViewById(R.id.btnUploadImage);
         TextView btnBack = findViewById(R.id.btnBack);
 
         setupYearSpinner();
+
+        // Check if we are in Edit Mode
+        if (getIntent().hasExtra("TRACTOR_DATA")) {
+            existingTractor = (Tractor) getIntent().getSerializableExtra("TRACTOR_DATA");
+            if (existingTractor != null) {
+                isEditMode = true;
+                preFillData();
+            }
+        }
 
         if (btnUploadImage != null) {
             btnUploadImage.setOnClickListener(v -> checkPermissionsAndShowOptions());
@@ -78,6 +101,38 @@ public class AddTractorActivity extends BaseActivity {
         if (btnBack != null) {
             btnBack.setOnClickListener(v -> finish());
         }
+
+        if (btnSave != null) {
+            btnSave.setOnClickListener(v -> saveTractor());
+        }
+    }
+
+    private void preFillData() {
+        if (titleText != null) titleText.setText("Edit Tractor");
+        if (btnSave != null) btnSave.setText("Update Tractor");
+        
+        if (etTractorName != null) etTractorName.setText(existingTractor.getName());
+        if (etModelNumber != null) etModelNumber.setText(existingTractor.getModel());
+        if (etPin != null) etPin.setText(existingTractor.getPin());
+        
+        // Set Year Spinner
+        String yearStr = String.valueOf(existingTractor.getYear());
+        ArrayAdapter adapter = (ArrayAdapter) spinnerYear.getAdapter();
+        if (adapter != null) {
+            int position = adapter.getPosition(yearStr);
+            if (position >= 0) spinnerYear.setSelection(position);
+        }
+
+        if (ivTractorImage != null && existingTractor.getImageUrl() != null) {
+            Glide.with(this).load(existingTractor.getImageUrl()).placeholder(android.R.drawable.ic_menu_camera).into(ivTractorImage);
+        }
+    }
+
+    private void saveTractor() {
+        // Logic to save to Firebase would go here
+        String action = isEditMode ? "updated" : "added";
+        Toast.makeText(this, "Tractor " + action + " successfully!", Toast.LENGTH_SHORT).show();
+        finish();
     }
 
     private void setupYearSpinner() {
