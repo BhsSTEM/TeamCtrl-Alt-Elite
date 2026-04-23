@@ -27,14 +27,30 @@
         <activity
             android:name=".BaseActivity"
             android:exported="false" />
-        <activity
-            android:name=".EditTractorActivity"
-            android:exported="false"/>
 
         <activity
             android:name=".MainActivity"
             android:exported="false"/>
 
+        <activity
+            android:name=".TasksActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".AddTaskActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".evansMapActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ManageTractorsActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".AddTractorActivity"
+            android:exported="false" />
 
         <activity
             android:name=".LoginPage"

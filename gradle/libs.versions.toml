@@ -18,6 +18,7 @@ glide = "4.16.0"
 firebaseAuth = "24.0.1"
 firebaseFirestore = "25.1.2"
 firebaseBom = "34.11.0"
+pdfInk = "1.0.0-alpha16"
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -38,6 +39,7 @@ firebase-auth = { group = "com.google.firebase", name = "firebase-auth", version
 firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore", version.ref = "firebaseFirestore" }
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
 firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics" }
+pdf-ink = { group = "androidx.pdf", name = "pdf-ink", version.ref = "pdfInk" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

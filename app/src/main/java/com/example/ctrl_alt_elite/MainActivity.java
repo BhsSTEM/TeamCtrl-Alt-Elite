@@ -21,10 +21,16 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
+import com.google.android.gms.location.Priority;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationResult;
+
 import android.content.pm.PackageManager;
+import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
+
 import android.Manifest;
 
 public class MainActivity extends BaseActivity {
@@ -43,8 +49,6 @@ public class MainActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setActivityContent(R.layout.activity_main);
-        
-
 
         // Initialize Weather Views with your updated XML IDs
         tempText = findViewById(R.id.weather_temp);
@@ -66,8 +70,8 @@ public class MainActivity extends BaseActivity {
                 startActivity(intent);
             });
         }
-
     }
+
     private void getLastLocation(){
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
                 ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -77,25 +81,49 @@ public class MainActivity extends BaseActivity {
 
         fusedLocationClient.getLastLocation().addOnSuccessListener(this, location -> {
             if (location != null) {
-                double latitude = location.getLatitude();
-                double longitude = location.getLongitude();
-
-                // Fetch weather using coordinates
-                fetchNoaaWeather(latitude, longitude);
-
-                // Update UI with weather information
-                if (linkToNoaa != null) {
-                    linkToNoaa.setOnClickListener(v -> {
-                        String url = String.format(Locale.US, "https://forecast.weather.gov/MapClick.php?lat=%f&lon=%f", latitude, longitude);
-                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-                        startActivity(intent);
-                    });
-                }
+                updateWeatherData(location.getLatitude(), location.getLongitude());
             } else {
-                Toast.makeText(MainActivity.this, "Location Error", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, "Requesting fresh location...", Toast.LENGTH_SHORT).show();
+                requestFreshLocation();
             }
         });
     }
+
+    private void requestFreshLocation() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+
+        com.google.android.gms.location.LocationRequest locationRequest = new com.google.android.gms.location.LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 10000)
+                .setMinUpdateIntervalMillis(5000)
+                .setMaxUpdates(1)
+                .build();
+
+        fusedLocationClient.requestLocationUpdates(locationRequest, new LocationCallback() {
+            @Override
+            public void onLocationResult(@NonNull LocationResult locationResult) {
+                if (locationResult.getLastLocation() != null) {
+                    updateWeatherData(locationResult.getLastLocation().getLatitude(), locationResult.getLastLocation().getLongitude());
+                }
+            }
+        }, getMainLooper());
+    }
+
+    private void updateWeatherData(double latitude, double longitude) {
+        // Fetch weather using coordinates
+        fetchNoaaWeather(latitude, longitude);
+
+        // Update UI with weather information link
+        if (linkToNoaa != null) {
+            linkToNoaa.setOnClickListener(v -> {
+                String url = String.format(Locale.US, "https://forecast.weather.gov/MapClick.php?lat=%f&lon=%f", latitude, longitude);
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                startActivity(intent);
+            });
+        }
+    }
+
     private void fetchNoaaWeather(double lat, double lon) {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("https://api.weather.gov/")
@@ -103,7 +131,7 @@ public class MainActivity extends BaseActivity {
                 .build();
 
         WeatherApiService service = retrofit.create(WeatherApiService.class);
-        
+
         service.getPoints(lat, lon).enqueue(new Callback<WeatherResponse>() {
             @Override
             public void onResponse(Call<WeatherResponse> call, Response<WeatherResponse> response) {
