@@ -113,6 +113,7 @@ public class MainActivity extends BaseActivity {
     private void updateWeatherData(double latitude, double longitude) {
         // Fetch weather using coordinates
         fetchNoaaWeather(latitude, longitude);
+        fetchWeatherAlerts(latitude, longitude);
 
         // Update UI with weather information link
         if (linkToNoaa != null) {
@@ -122,6 +123,39 @@ public class MainActivity extends BaseActivity {
                 startActivity(intent);
             });
         }
+    }
+
+    private void fetchWeatherAlerts(double lat, double lon) {
+        TextView notificationText = findViewById(R.id.Notification);
+        if (notificationText == null) return;
+
+        String point = String.format(Locale.US, "%.4f,%.4f", lat, lon);
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("https://api.weather.gov/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        WeatherApiService service = retrofit.create(WeatherApiService.class);
+
+        service.getActiveAlerts(point).enqueue(new Callback<WAlertsResponse>() {
+            @Override
+            public void onResponse(Call<WAlertsResponse> call, Response<WAlertsResponse> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().features != null && !response.body().features.isEmpty()) {
+                    String alertEvent = response.body().features.get(0).properties.event;
+                    notificationText.setText(String.format("ALERT: %s", alertEvent));
+                    notificationText.setTextColor(android.graphics.Color.RED);
+                } else {
+                    notificationText.setText("No Alerts");
+                    notificationText.setTextColor(android.graphics.Color.BLACK);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<WAlertsResponse> call, Throwable t) {
+                notificationText.setText("Hello User!");
+            }
+        });
     }
 
     private void fetchNoaaWeather(double lat, double lon) {
