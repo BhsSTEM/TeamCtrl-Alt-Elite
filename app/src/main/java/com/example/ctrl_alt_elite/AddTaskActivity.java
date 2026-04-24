@@ -8,13 +8,9 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
@@ -25,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-public class AddTaskActivity extends AppCompatActivity {
+public class AddTaskActivity extends BaseActivity {
 
     private FirebaseFirestore db;
     private FirebaseFirestore userdb;
@@ -47,7 +43,7 @@ public class AddTaskActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_add_task);
+        setActivityContent(R.layout.activity_add_task);
 
         // Pointing to the specific 'tasks' database
         db = FirebaseFirestore.getInstance("tasks");
@@ -86,6 +82,7 @@ public class AddTaskActivity extends AppCompatActivity {
     }
 
     private void fetchUserFarmIdAndSetup() {
+        if (mAuth.getCurrentUser() == null) return;
         String uid = mAuth.getCurrentUser().getUid();
         userdb.collection("users").document(uid).get().addOnCompleteListener(task -> {
             if (task.isSuccessful() && task.getResult() != null) {
@@ -102,6 +99,7 @@ public class AddTaskActivity extends AppCompatActivity {
     }
 
     private void addZeroPadWatcher(TextInputEditText editText) {
+        if (editText == null) return;
         editText.setOnFocusChangeListener((v, hasFocus) -> {
             if (!hasFocus) {
                 String val = editText.getText().toString();
@@ -117,31 +115,31 @@ public class AddTaskActivity extends AppCompatActivity {
     private void loadExistingTaskData() {
         existingTaskId = getIntent().getStringExtra("task_id");
         
-        headerText.setText("Edit Task");
-        createTaskButton.setText("Update Task");
+        if (headerText != null) headerText.setText("Edit Task");
+        if (createTaskButton != null) createTaskButton.setText("Update Task");
 
-        titleInput.setText(getIntent().getStringExtra("task_title"));
-        descriptionInput.setText(getIntent().getStringExtra("task_description"));
+        if (titleInput != null) titleInput.setText(getIntent().getStringExtra("task_title"));
+        if (descriptionInput != null) descriptionInput.setText(getIntent().getStringExtra("task_description"));
         
         // Handle splitting the saved date back into DD, MM, YY
         String fullDate = getIntent().getStringExtra("task_due_date");
         if (fullDate != null && fullDate.contains("/")) {
             String[] parts = fullDate.split("/");
             if (parts.length == 3) {
-                dayInput.setText(parts[0]);
-                monthInput.setText(parts[1]);
-                yearInput.setText(parts[2]);
+                if (dayInput != null) dayInput.setText(parts[0]);
+                if (monthInput != null) monthInput.setText(parts[1]);
+                if (yearInput != null) yearInput.setText(parts[2]);
             }
         }
         
         String assigned = getIntent().getStringExtra("task_assigned_to");
-        assignToDropdown.setText(assigned, false);
+        if (assignToDropdown != null) assignToDropdown.setText(assigned, false);
         if (assigned != null && !assigned.isEmpty()) {
             finalSelectedUsers = new ArrayList<>(Arrays.asList(assigned.split(", ")));
         }
 
-        repeatIntervalDropdown.setText(getIntent().getStringExtra("task_repeat"), false);
-        tractorDropdown.setText(getIntent().getStringExtra("task_tractor"), false);
+        if (repeatIntervalDropdown != null) repeatIntervalDropdown.setText(getIntent().getStringExtra("task_repeat"), false);
+        if (tractorDropdown != null) tractorDropdown.setText(getIntent().getStringExtra("task_tractor"), false);
     }
 
     private void setupDropdowns() {
@@ -153,7 +151,7 @@ public class AddTaskActivity extends AppCompatActivity {
                 getString(R.string.repeat_monthly)
         };
         ArrayAdapter<String> intervalAdapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, intervals);
-        repeatIntervalDropdown.setAdapter(intervalAdapter);
+        if (repeatIntervalDropdown != null) repeatIntervalDropdown.setAdapter(intervalAdapter);
 
         // Fetch Users filtered by farmId
         if (userFarmId != null) {
@@ -173,24 +171,9 @@ public class AddTaskActivity extends AppCompatActivity {
                         }
                     }
 
-                    assignToDropdown.setOnClickListener(v -> showUserSelectionDialog());
+                    if (assignToDropdown != null) assignToDropdown.setOnClickListener(v -> showUserSelectionDialog());
                 }
             });
-            
-            /* Fetch Tractors filtered by farmId (Once tractors have farm ID)
-
-            db.collection("tractors").whereEqualTo("farmId", userFarmId).get().addOnCompleteListener(task -> {
-                if (task.isSuccessful()) {
-                    List<String> tractorNames = new ArrayList<>();
-                    for (QueryDocumentSnapshot document : task.getResult()) {
-                        tractorNames.add(document.getString("name"));
-                    }
-                    ArrayAdapter<String> tractorAdapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, tractorNames);
-                    tractorDropdown.setAdapter(tractorAdapter);
-                }
-            });
-
-             */
         }
     }
 
@@ -218,7 +201,7 @@ public class AddTaskActivity extends AppCompatActivity {
                     selectedText.append(allUsers[i]);
                 }
             }
-            assignToDropdown.setText(selectedText.toString(), false);
+            if (assignToDropdown != null) assignToDropdown.setText(selectedText.toString(), false);
         });
 
         builder.setNegativeButton("Cancel", null);
@@ -226,12 +209,12 @@ public class AddTaskActivity extends AppCompatActivity {
     }
 
     private void saveTaskToFirestore() {
-        String title = titleInput.getText().toString().trim();
-        String description = descriptionInput.getText().toString().trim();
+        String title = titleInput != null ? titleInput.getText().toString().trim() : "";
+        String description = descriptionInput != null ? descriptionInput.getText().toString().trim() : "";
         
-        String day = dayInput.getText().toString().trim();
-        String month = monthInput.getText().toString().trim();
-        String year = yearInput.getText().toString().trim();
+        String day = dayInput != null ? dayInput.getText().toString().trim() : "";
+        String month = monthInput != null ? monthInput.getText().toString().trim() : "";
+        String year = yearInput != null ? yearInput.getText().toString().trim() : "";
 
         String dueDate = "";
         if (!day.isEmpty() && !month.isEmpty() && !year.isEmpty()) {
@@ -241,9 +224,9 @@ public class AddTaskActivity extends AppCompatActivity {
             dueDate = day + "/" + month + "/" + year;
         }
 
-        String assignedTo = assignToDropdown.getText().toString();
-        String repeat = repeatIntervalDropdown.getText().toString();
-        String tractor = tractorDropdown.getText().toString();
+        String assignedTo = assignToDropdown != null ? assignToDropdown.getText().toString() : "";
+        String repeat = repeatIntervalDropdown != null ? repeatIntervalDropdown.getText().toString() : "";
+        String tractor = tractorDropdown != null ? tractorDropdown.getText().toString() : "";
 
         if (title.isEmpty()) {
             Toast.makeText(this, "Title is required", Toast.LENGTH_SHORT).show();
