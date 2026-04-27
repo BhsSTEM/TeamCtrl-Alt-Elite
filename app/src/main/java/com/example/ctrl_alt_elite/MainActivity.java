@@ -26,6 +26,8 @@ import com.google.android.gms.location.LocationServices;
 import android.content.pm.PackageManager;
 import androidx.core.app.ActivityCompat;
 import android.Manifest;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 public class MainActivity extends BaseActivity {
     //Variables
@@ -41,12 +43,19 @@ public class MainActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Authentication Check
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) {
+            startActivity(new Intent(this, LoginPage.class));
+            finish();
+            return;
+        }
+
         EdgeToEdge.enable(this);
         setActivityContent(R.layout.activity_main);
-        
 
-
-        // Initialize Weather Views with your updated XML IDs
+        // Initialize Weather Views
         tempText = findViewById(R.id.weather_temp);
         weatherDesc = findViewById(R.id.weather_desc);
         rainInfo = findViewById(R.id.RainInfo);
@@ -55,7 +64,6 @@ public class MainActivity extends BaseActivity {
 
         // Initialize FusedLocationProviderClient
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-        // Fetch weather using coordinates and finding location
         getLastLocation();
 
         // Set up the link to Map Activity
@@ -66,8 +74,8 @@ public class MainActivity extends BaseActivity {
                 startActivity(intent);
             });
         }
-
     }
+
     private void getLastLocation(){
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
                 ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -79,11 +87,8 @@ public class MainActivity extends BaseActivity {
             if (location != null) {
                 double latitude = location.getLatitude();
                 double longitude = location.getLongitude();
-
-                // Fetch weather using coordinates
                 fetchNoaaWeather(latitude, longitude);
 
-                // Update UI with weather information
                 if (linkToNoaa != null) {
                     linkToNoaa.setOnClickListener(v -> {
                         String url = String.format(Locale.US, "https://forecast.weather.gov/MapClick.php?lat=%f&lon=%f", latitude, longitude);
@@ -96,6 +101,7 @@ public class MainActivity extends BaseActivity {
             }
         });
     }
+
     private void fetchNoaaWeather(double lat, double lon) {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("https://api.weather.gov/")
@@ -134,7 +140,6 @@ public class MainActivity extends BaseActivity {
                     if (tempText != null) tempText.setText(getString(R.string.weather_format, current.temperature));
                     if (weatherDesc != null) weatherDesc.setText(current.shortForecast);
                     
-                    // Display Precipitation Chance
                     if (rainInfo != null) {
                         if (current.probabilityOfPrecipitation != null && current.probabilityOfPrecipitation.value != null) {
                             rainInfo.setText(String.format(Locale.US, "Rain: %d%%", current.probabilityOfPrecipitation.value));
