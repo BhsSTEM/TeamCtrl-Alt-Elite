@@ -72,7 +72,10 @@ public class ManageTractorsActivity extends BaseActivity {
                         }
                     }
                 });
+        listenToFirestore();
+
     }
+
 
     @Override
     protected void onResume() {

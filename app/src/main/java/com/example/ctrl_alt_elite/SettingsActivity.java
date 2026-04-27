@@ -12,35 +12,45 @@ import com.google.android.material.materialswitch.MaterialSwitch;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.DocumentSnapshot;
 
 public class SettingsActivity extends BaseActivity {
 
-    private FirebaseAuth mAuth;
-    private FirebaseFirestore db;
-    private Button logoutButton;
-    private MaterialSwitch darkModeSwitch;
-    private TextView usernameText;
-    private TextView roleText;
+    private FirebaseFirestore userdb;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setActivityContent(R.layout.activity_settings);
 
-        mAuth = FirebaseAuth.getInstance();
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
+        userdb = FirebaseFirestore.getInstance("sign-up");
 
-        logoutButton = findViewById(R.id.signOutButton);
-        darkModeSwitch = findViewById(R.id.switch1);
-        usernameText = findViewById(R.id.textView3);
-        roleText = findViewById(R.id.textView4);
+        Button logoutButton = findViewById(R.id.signOutButton);
+        MaterialSwitch darkModeSwitch = findViewById(R.id.switch1);
+        TextView usernameText = findViewById(R.id.textView3);
+        TextView roleText = findViewById(R.id.textView4);
+        TextView farmPinText = findViewById(R.id.settingsFarmPin);
 
-        // Load current user info
+        // Load current user info from Firebase Auth and Firestore
         FirebaseUser user = mAuth.getCurrentUser();
         if (user != null) {
-            if (usernameText != null) {
-                usernameText.setText(user.getEmail());
-            }
+            userdb.collection("users").document(user.getUid()).get().addOnCompleteListener(task -> {
+                if (task.isSuccessful() && task.getResult() != null) {
+                    String name = task.getResult().getString("name");
+                    String role = task.getResult().getString("role");
+                    String farmId = task.getResult().getString("farmId");
+
+                    if (usernameText != null) {
+                        usernameText.setText("Username: " + (name != null ? name : user.getEmail()));
+                    }
+                    if (roleText != null) {
+                        roleText.setText("Role: " + (role != null && !role.isEmpty() ? role : "Not Assigned"));
+                    }
+                    if (farmPinText != null) {
+                        farmPinText.setText("Company ID: " + (farmId != null ? farmId : "None"));
+                    }
+                }
+            });
         }
 
         // Load current dark mode preference using keys from BaseActivity
@@ -57,21 +67,18 @@ public class SettingsActivity extends BaseActivity {
             });
         }
 
-        // Handle dark mode switch
-        if (darkModeSwitch != null) {
-            darkModeSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                // Save preference
-                SharedPreferences.Editor editor = prefs.edit();
-                editor.putBoolean(DARK_MODE_KEY, isChecked);
-                editor.apply();
+        darkModeSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            // Save preference
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putBoolean(DARK_MODE_KEY, isChecked);
+            editor.apply();
 
-                // Apply theme immediately
-                if (isChecked) {
-                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-                } else {
-                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-                }
-            });
-        }
+            // Apply theme immediately
+            if (isChecked) {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+            } else {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+            }
+        });
     }
 }

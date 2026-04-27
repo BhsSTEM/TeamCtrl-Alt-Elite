@@ -103,4 +103,7 @@
     <string name="label_day">DD</string>
     <string name="label_month">MM</string>
     <string name="label_year">20YY</string>
+
+    <string name="year_format">Year: %1$s</string>
+    <string name="model_format">Model: %1$s</string>
 </resources>

@@ -1,6 +1,25 @@
 package com.example.ctrl_alt_elite;
 
 
+import java.io.Serializable;
+
+public class Tractor implements Serializable {
+    private String name;
+    private String model;
+    private int year;
+    private String status;
+    private int fuel;
+    private String lastUpdated;
+    private String pin;
+    private String location;
+    private String imageUrl;
+    private String user;
+    public Tractor() {}
+
+    @PropertyName("tracterName")
+    public String getName() { return name; }
+    @PropertyName("tracterName")
+    public void setName(String name) { this.name = name; }
     public class Tractor {
         private String name;
         private String model;
@@ -20,10 +39,10 @@ package com.example.ctrl_alt_elite;
         @com.google.firebase.firestore.PropertyName("tracterName")
         public void setName(String name) { this.name = name; }
 
-        @com.google.firebase.firestore.PropertyName("modelNumber")
-        public String getModel() { return model; }
-        @com.google.firebase.firestore.PropertyName("modelNumber")
-        public void setModel(String model) { this.model = model; }
+    @PropertyName("modelNumber")
+    public String getModel() { return model; }
+    @PropertyName("modelNumber")
+    public void setModel(String model) { this.model = model; }
 
         @com.google.firebase.firestore.PropertyName("imageUrl")
         public String getImageUrl() { return imageUrl; }
@@ -42,4 +61,5 @@ package com.example.ctrl_alt_elite;
         public String getUser() { return userId; }
         public void setUser(String userId) { this.userId = userId; }
 
-}
+    public String getLocation() { return location; }
+    public void setLocation(String location) { this.location = location; }
