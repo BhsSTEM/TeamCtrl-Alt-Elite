@@ -8,28 +8,11 @@
 
     <View
         android:id="@+id/header_bg"
-        android:layout_width="match_parent"
-        android:layout_height="120dp"
+        android:layout_width="409dp"
+        android:layout_height="100dp"
         android:background="@color/header_green"
         app:layout_constraintTop_toTopOf="parent"
-        tools:layout_editor_absoluteX="0dp" />
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btn_add_tractor"
-        android:layout_width="128dp"
-        android:layout_height="94dp"
-        android:layout_marginEnd="16dp"
-        android:backgroundTint="@color/add_button_green"
-        android:text="Add Tractor"
-        android:textAllCaps="false"
-        android:textColor="@color/white"
-        android:textSize="16sp"
-        app:cornerRadius="8dp"
-        app:icon="@drawable/ic_add"
-        app:layout_constraintBottom_toBottomOf="@+id/header_bg"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/header_bg"
-        app:layout_constraintVertical_bias="0.615" />
+        tools:layout_editor_absoluteX="2dp" />
 
     <TextView
         android:id="@+id/title_manage_tractors"
@@ -40,8 +23,6 @@
         android:textSize="32sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="@id/header_bg"
-        app:layout_constraintEnd_toStartOf="@+id/btn_add_tractor"
-        app:layout_constraintHorizontal_bias="0.437"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@id/header_bg"
         app:layout_constraintVertical_bias="0.532" />

@@ -211,7 +211,7 @@ public class evansMapActivity extends BaseActivity implements OnMapReadyCallback
     }
 
     private void loadTractorsFromFirebase() {
-        db.collection("nineoneone").whereEqualTo("user", "joemama@gmail.com").get().addOnCompleteListener(task -> {
+        db.collection("nineoneone").whereEqualTo("user", "dummy").get().addOnCompleteListener(task -> {
             if (task.isSuccessful() && task.getResult() != null) {
                 tractorList.clear();
                 Log.d(TAG, "Fetched " + task.getResult().size() + " tractors");
