@@ -10,6 +10,7 @@ import android.provider.MediaStore;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -17,11 +18,11 @@ import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 
-import com.google.android.material.card.MaterialCardView;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -31,15 +32,12 @@ public class AddTractorActivity extends BaseActivity {
 
     private ImageView ivTractorImage;
     private Spinner spinnerYear;
+    
+    private EditText getTractorName;
+    private EditText getModelNumber;
+    private EditText getPin;
 
-    private final ActivityResultLauncher<String> requestPermissionLauncher =
-            registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
-                if (isGranted) {
-                    showImagePickerOptions();
-                } else {
-                    Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show();
-                }
-            });
+    private FirebaseFirestore db;
 
     private final ActivityResultLauncher<Intent> pickImageLauncher =
             registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
@@ -51,23 +49,44 @@ public class AddTractorActivity extends BaseActivity {
 
     private final ActivityResultLauncher<Intent> takePhotoLauncher =
             registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
-                if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                if (result.getResultCode() == RESULT_OK && result.getData() != null && result.getData().getExtras() != null) {
                     Bitmap photo = (Bitmap) result.getData().getExtras().get("data");
                     ivTractorImage.setImageBitmap(photo);
                 }
             });
 
+    private final ActivityResultLauncher<String> requestPermissionLauncher =
+            registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+                if (isGranted) {
+                    showImagePickerOptions();
+                } else {
+                    Toast.makeText(this, "Camera permission is required to take photos", Toast.LENGTH_SHORT).show();
+                }
+            });
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
+        String uid = mAuth.getUid();
         super.onCreate(savedInstanceState);
         setActivityContent(R.layout.add_add_tractor);
+
+        // Standard initialization for the default Firestore database
+        db = FirebaseFirestore.getInstance();
 
         ivTractorImage = findViewById(R.id.ivTractorImage);
         spinnerYear = findViewById(R.id.spinnerYear);
         
-        // Fix: btnUploadImage is a MaterialCardView in XML, not a Button
+        getTractorName = findViewById(R.id.getTractorName);
+        getModelNumber = findViewById(R.id.getModelNumber);
+        getPin = findViewById(R.id.getPin);
+        
+
         View btnUploadImage = findViewById(R.id.btnUploadImage);
         TextView btnBack = findViewById(R.id.btnBack);
+
+       Button btnSaveTractor = findViewById(R.id.btnSaveTractor);
 
         setupYearSpinner();
 
@@ -78,12 +97,16 @@ public class AddTractorActivity extends BaseActivity {
         if (btnBack != null) {
             btnBack.setOnClickListener(v -> finish());
         }
+
+        if (btnSaveTractor != null) {
+            btnSaveTractor.setOnClickListener(v -> saveTractorToFirebase());
+        }
     }
 
     private void setupYearSpinner() {
         List<String> years = new ArrayList<>();
         int currentYear = Calendar.getInstance().get(Calendar.YEAR);
-        for (int i = currentYear; i >= 1950; i--) {
+        for (int i = currentYear; i >= 1900; i--) {
             years.add(String.valueOf(i));
         }
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, years);
@@ -113,6 +136,42 @@ public class AddTractorActivity extends BaseActivity {
             }
         });
         builder.show();
+    }
+
+    private void saveTractorToFirebase() {
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
+        String uid = mAuth.getUid();
+        String name = getTractorName.getText().toString().trim();
+        String model = getModelNumber.getText().toString().trim();
+        String pin = getPin.getText().toString().trim();
+        String yearStr = spinnerYear.getSelectedItem().toString();
+
+        if (name.isEmpty() || model.isEmpty() || pin.isEmpty()) {
+            Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        int year = Integer.parseInt(yearStr);
+
+        Tractor tractor = new Tractor();
+        tractor.setUser(uid);
+        tractor.setName(name);
+        tractor.setModel(model);
+        tractor.setPin(pin);
+        tractor.setYear(year);
+        tractor.setStatus("Active"); // Default status
+        tractor.setFuel(100);       // Default fuel
+        tractor.setLastUpdated(java.text.DateFormat.getDateTimeInstance().format(new java.util.Date()));
+
+        db.collection("tractors")
+                .add(tractor)
+                .addOnSuccessListener(documentReference -> {
+                    Toast.makeText(AddTractorActivity.this, "Tractor added successfully!", Toast.LENGTH_SHORT).show();
+                    finish();
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(AddTractorActivity.this, "Error adding tractor: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
     }
 
     @Override
