@@ -1,5 +1,6 @@
 package com.example.ctrl_alt_elite;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -45,6 +46,26 @@ public class ManageTractorsActivity extends BaseActivity {
             adapter = new TractorAdapter(tractorList);
             recyclerView.setAdapter(adapter);
         }
+
+        db.collection("tractors").addSnapshotListener(new EventListener<QuerySnapshot>() {
+            @SuppressLint("NotifyDataSetChanged")
+            @Override
+            public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
+                if(error != null) {
+                    Log.e("Firestore Error", error.getMessage());
+                    return;
+                }
+
+                if(value != null) {
+                    tractorList.clear();
+                    for(QueryDocumentSnapshot doc : value) {
+                        Tractor tractor = doc.toObject(Tractor.class);
+                        tractorList.add(tractor);
+                    }
+                    adapter.notifyDataSetChanged();
+                }
+            }
+        });
     }
 
     @Override
