@@ -21,7 +21,7 @@ import androidx.annotation.Nullable;
 
 public class ManageTractorsActivity extends BaseActivity {
 
-    private FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private FirebaseFirestore db = FirebaseFirestore.getInstance("tractors");
     private List<Tractor> tractorList = new ArrayList<>();
     private TractorAdapter adapter;
 
@@ -51,8 +51,8 @@ public class ManageTractorsActivity extends BaseActivity {
 
     private void listenToFirestore() {
 
-        db.collection("nineoneone")
-                .whereEqualTo("user", FirebaseAuth.getInstance().getCurrentUser())
+        db.collection("tractors")
+                .whereEqualTo("user", "FirebaseAuth.getInstance().getCurrentUser()")
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
                     public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {

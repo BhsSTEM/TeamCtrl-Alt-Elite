@@ -1,5 +1,5 @@
 package com.example.ctrl_alt_elite;
-import com.google.firebase.firestore.PropertyName;
+
 
     public class Tractor {
         private String name;
@@ -9,6 +9,7 @@ import com.google.firebase.firestore.PropertyName;
         private int fuel;
         private String lastUpdated;
         private String pin;
+        private String userId;
 
         private String imageUrl;
 
@@ -38,9 +39,7 @@ import com.google.firebase.firestore.PropertyName;
         public void setYear(int year) { this.year = year; }
         public String getPin() { return pin; }
         public void setPin(String pin) { this.pin = pin; }
+        public String getUser() { return userId; }
+        public void setUser(String userId) { this.userId = userId; }
 
 }
-
-
-
-/////
