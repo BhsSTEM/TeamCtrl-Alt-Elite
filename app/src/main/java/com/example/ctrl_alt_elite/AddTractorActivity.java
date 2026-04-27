@@ -1,7 +1,6 @@
 package com.example.ctrl_alt_elite;
 
 import android.Manifest;
-import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -10,6 +9,7 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
@@ -20,6 +20,9 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -34,6 +37,8 @@ public class AddTractorActivity extends BaseActivity {
     private EditText getModelNumber;
     private EditText getPin;
 
+    private FirebaseFirestore db;
+
     private final ActivityResultLauncher<Intent> pickImageLauncher =
             registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
                 if (result.getResultCode() == RESULT_OK && result.getData() != null) {
@@ -44,7 +49,7 @@ public class AddTractorActivity extends BaseActivity {
 
     private final ActivityResultLauncher<Intent> takePhotoLauncher =
             registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
-                if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                if (result.getResultCode() == RESULT_OK && result.getData() != null && result.getData().getExtras() != null) {
                     Bitmap photo = (Bitmap) result.getData().getExtras().get("data");
                     ivTractorImage.setImageBitmap(photo);
                 }
@@ -59,22 +64,16 @@ public class AddTractorActivity extends BaseActivity {
                 }
             });
 
-    static final int REQUEST_VIDEO_CAPTURE = 1;
-
-    private void dispatchTakeVideoIntent() {
-        Intent takeVideoIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
-        if (takeVideoIntent.resolveActivity(getPackageManager()) != null) {
-            startActivityForResult(takeVideoIntent, REQUEST_VIDEO_CAPTURE);
-        }
-        else {
-            Toast.makeText(this, "Unable to open camera", Toast.LENGTH_SHORT).show();
-        }
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
+        String uid = mAuth.getUid();
         super.onCreate(savedInstanceState);
         setActivityContent(R.layout.add_add_tractor);
+
+        // Standard initialization for the default Firestore database
+        db = FirebaseFirestore.getInstance();
 
         ivTractorImage = findViewById(R.id.ivTractorImage);
         spinnerYear = findViewById(R.id.spinnerYear);
@@ -83,9 +82,11 @@ public class AddTractorActivity extends BaseActivity {
         getModelNumber = findViewById(R.id.getModelNumber);
         getPin = findViewById(R.id.getPin);
         
-        // Fix: btnUploadImage is a MaterialCardView in XML, not a Button
+
         View btnUploadImage = findViewById(R.id.btnUploadImage);
         TextView btnBack = findViewById(R.id.btnBack);
+
+       Button btnSaveTractor = findViewById(R.id.btnSaveTractor);
 
         setupYearSpinner();
 
@@ -95,6 +96,10 @@ public class AddTractorActivity extends BaseActivity {
         
         if (btnBack != null) {
             btnBack.setOnClickListener(v -> finish());
+        }
+
+        if (btnSaveTractor != null) {
+            btnSaveTractor.setOnClickListener(v -> saveTractorToFirebase());
         }
     }
 
@@ -132,7 +137,42 @@ public class AddTractorActivity extends BaseActivity {
         });
         builder.show();
     }
-    
+
+    private void saveTractorToFirebase() {
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
+        String uid = mAuth.getUid();
+        String name = getTractorName.getText().toString().trim();
+        String model = getModelNumber.getText().toString().trim();
+        String pin = getPin.getText().toString().trim();
+        String yearStr = spinnerYear.getSelectedItem().toString();
+
+        if (name.isEmpty() || model.isEmpty() || pin.isEmpty()) {
+            Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        int year = Integer.parseInt(yearStr);
+
+        Tractor tractor = new Tractor();
+        tractor.setUser(uid);
+        tractor.setName(name);
+        tractor.setModel(model);
+        tractor.setPin(pin);
+        tractor.setYear(year);
+        tractor.setStatus("Active"); // Default status
+        tractor.setFuel(100);       // Default fuel
+        tractor.setLastUpdated(java.text.DateFormat.getDateTimeInstance().format(new java.util.Date()));
+
+        db.collection("tractors")
+                .add(tractor)
+                .addOnSuccessListener(documentReference -> {
+                    Toast.makeText(AddTractorActivity.this, "Tractor added successfully!", Toast.LENGTH_SHORT).show();
+                    finish();
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(AddTractorActivity.this, "Error adding tractor: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+    }
 
     @Override
     protected void onResume() {
