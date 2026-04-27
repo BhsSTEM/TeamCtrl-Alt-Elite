@@ -95,24 +95,6 @@ public class evansMapActivity extends BaseActivity implements OnMapReadyCallback
         if (rv != null) {
             rv.setLayoutManager(new LinearLayoutManager(this));
             adapter = new TractorAdapter(tractorList);
-            adapter.setMapMode(true, new TractorAdapter.OnTractorClickListener() {
-                @Override
-                public void onGoToClick(Tractor tractor) {
-                    showTractorOnMap(tractor);
-                    // collapse panel after selecting
-                    final View chip3 = findViewById(R.id.chip3);
-                    if (chip3 != null && collapsedHeight > 0) {
-                        animatePanelHeight(chip3, collapsedHeight);
-                        View searchInput = findViewById(R.id.editTextText2);
-                        if (searchInput != null) searchInput.clearFocus();
-                    }
-                }
-
-                @Override
-                public void onRemoveClick(Tractor tractor) {
-                    // Not used in map mode, but interface needs it
-                }
-            });
             rv.setAdapter(adapter);
         }
     }
@@ -211,7 +193,7 @@ public class evansMapActivity extends BaseActivity implements OnMapReadyCallback
     }
 
     private void loadTractorsFromFirebase() {
-        db.collection("nineoneone").whereEqualTo("user", "dummy").get().addOnCompleteListener(task -> {
+        db.collection("nineoneone").whereEqualTo("user", "joemama@gmail.com").get().addOnCompleteListener(task -> {
             if (task.isSuccessful() && task.getResult() != null) {
                 tractorList.clear();
                 Log.d(TAG, "Fetched " + task.getResult().size() + " tractors");

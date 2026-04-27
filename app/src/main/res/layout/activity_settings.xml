@@ -92,12 +92,6 @@
                     android:layout_height="wrap_content"
                     android:text="@string/settings_role" />
 
-                <TextView
-                    android:id="@+id/settingsFarmPin"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Company ID: " />
-
                 <Button
                     android:id="@+id/signOutButton"
                     style="@style/Widget.Material3.Button.TextButton"

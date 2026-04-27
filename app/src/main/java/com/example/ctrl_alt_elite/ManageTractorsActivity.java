@@ -52,7 +52,7 @@ public class ManageTractorsActivity extends BaseActivity {
     private void listenToFirestore() {
         // only shows joemama, later change to FirebaseAuth.getInstance().getCurrentUser().getUid()
         db.collection("nineoneone")
-                .whereEqualTo("user", "dummy")
+                .whereEqualTo("user", "joemama")
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
                     public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
@@ -72,10 +72,35 @@ public class ManageTractorsActivity extends BaseActivity {
                         }
                     }
                 });
-
+        listenToFirestore();
 
     }
 
+    private void listenToFirestore() {
+        // only shows joemama, later change to FirebaseAuth.getInstance().getCurrentUser().getUid()
+
+        db.collection("nineoneone")
+                .whereEqualTo("user", "joemama@gmail.com")//only joemama stuff
+                .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                    @Override
+                    public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
+                        if (error != null) {
+                            Log.e("FirestoreError", "Listen failed.", error);
+                            return;
+                        }
+
+                        if (value != null) {
+                            tractorList.clear();
+                            for (QueryDocumentSnapshot doc : value) {
+                                Tractor tractor = doc.toObject(Tractor.class);
+                                tractorList.add(tractor);
+                            }
+                            adapter.notifyDataSetChanged();
+                            Log.d("FirestoreData", "Tractors found: "+tractorList.size());
+                        }
+                    }
+                });
+    }
 
     @Override
     protected void onResume() {
