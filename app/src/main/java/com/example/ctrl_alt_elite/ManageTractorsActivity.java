@@ -30,7 +30,7 @@ public class ManageTractorsActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setActivityContent(R.layout.add_tracter);
-
+//comment test
         MaterialButton btnAddTractor = findViewById(R.id.btn_add_tractor);
         if (btnAddTractor != null) {
             btnAddTractor.setOnClickListener(v -> {
