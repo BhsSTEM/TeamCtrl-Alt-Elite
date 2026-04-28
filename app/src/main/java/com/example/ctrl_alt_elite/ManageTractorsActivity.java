@@ -76,10 +76,4 @@ public class ManageTractorsActivity extends BaseActivity {
 
     }
 
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        setupNavigation();
-    }
 }

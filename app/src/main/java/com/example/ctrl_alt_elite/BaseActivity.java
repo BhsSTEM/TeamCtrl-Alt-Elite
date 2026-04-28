@@ -80,9 +80,9 @@ public class BaseActivity extends AppCompatActivity {
                 bottomNav.setSelectedItemId(R.id.nav_settings);
             } else if (this instanceof evansMapActivity) {
                 bottomNav.setSelectedItemId(R.id.nav_map);
-            } else if (this instanceof ManageTractorsActivity || this instanceof AddTractorActivity || this instanceof EditTractorActivity){
+            } else if (this instanceof ManageTractorsActivity){
                 bottomNav.setSelectedItemId(R.id.nav_machines);
-            } else if (this instanceof TasksActivity || this instanceof AddTaskActivity) {
+            } else if (this instanceof TasksActivity) {
                 bottomNav.setSelectedItemId(R.id.nav_tasks);
             }
 
