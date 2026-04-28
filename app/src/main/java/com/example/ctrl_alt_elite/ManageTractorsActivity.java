@@ -21,7 +21,7 @@ import androidx.annotation.Nullable;
 
 public class ManageTractorsActivity extends BaseActivity {
 
-    private FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private FirebaseFirestore db = FirebaseFirestore.getInstance("tractors");
     private List<Tractor> tractorList = new ArrayList<>();
     private TractorAdapter adapter;
 
@@ -50,9 +50,9 @@ public class ManageTractorsActivity extends BaseActivity {
     }
 
     private void listenToFirestore() {
-        // only shows joemama, later change to FirebaseAuth.getInstance().getCurrentUser().getUid()
-        db.collection("nineoneone")
-                .whereEqualTo("user", "joemama")
+
+        db.collection("tractors")
+                .whereEqualTo("user", "FirebaseAuth.getInstance().getCurrentUser()")
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
                     public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
@@ -76,6 +76,31 @@ public class ManageTractorsActivity extends BaseActivity {
 
     }
 
+    private void listenToFirestore() {
+        // only shows joemama, later change to FirebaseAuth.getInstance().getCurrentUser().getUid()
+
+        db.collection("nineoneone")
+                .whereEqualTo("user", "joemama@gmail.com")//only joemama stuff
+                .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                    @Override
+                    public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
+                        if (error != null) {
+                            Log.e("FirestoreError", "Listen failed.", error);
+                            return;
+                        }
+
+                        if (value != null) {
+                            tractorList.clear();
+                            for (QueryDocumentSnapshot doc : value) {
+                                Tractor tractor = doc.toObject(Tractor.class);
+                                tractorList.add(tractor);
+                            }
+                            adapter.notifyDataSetChanged();
+                            Log.d("FirestoreData", "Tractors found: "+tractorList.size());
+                        }
+                    }
+                });
+    }
 
     @Override
     protected void onResume() {

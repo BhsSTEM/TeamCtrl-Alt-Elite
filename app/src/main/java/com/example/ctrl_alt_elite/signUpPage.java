@@ -28,7 +28,6 @@ public class signUpPage extends AppCompatActivity {
     EditText nameSignUpText;
     EditText emailSignUpText;
     EditText passwordSignUpText;
-    EditText farmSignUpText;
     Button signUpButton;
     ImageButton backButton3;
 
@@ -39,14 +38,13 @@ public class signUpPage extends AppCompatActivity {
 
         // Initialize Firebase
         mAuth = FirebaseAuth.getInstance();
-        // Firestore that copies information
+        // Pointing to the specific 'sign-ons' database
         db = FirebaseFirestore.getInstance("sign-up");
 
         // UI elements
         nameSignUpText = findViewById(R.id.nameSignUpInput);
         emailSignUpText = findViewById(R.id.emailSignUpInput);
         passwordSignUpText = findViewById(R.id.passwordSignUpInput);
-        farmSignUpText = findViewById(R.id.farmSignUpInput);
         backButton3 = findViewById(R.id.backButton3);
         signUpButton = findViewById(R.id.signUpButton);
 
@@ -72,9 +70,8 @@ public class signUpPage extends AppCompatActivity {
         String name = nameSignUpText.getText().toString().trim();
         String email = emailSignUpText.getText().toString().trim();
         String password = passwordSignUpText.getText().toString().trim();
-        String farmPin = farmSignUpText.getText().toString().trim().toUpperCase();
 
-        if (name.isEmpty() || email.isEmpty() || password.isEmpty() || farmPin.isEmpty()) {
+        if (name.isEmpty() || email.isEmpty() || password.isEmpty()) {
             Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -84,16 +81,11 @@ public class signUpPage extends AppCompatActivity {
             return;
         }
 
-        if (farmPin.length() != 6) {
-            Toast.makeText(this, "Farm PIN must be exactly 6 characters", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
         // Create user in Firebase Auth
         mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
-                        saveUserToFirestore(name, email, farmPin);
+                        saveUserToFirestore(name, email);
                     } else {
                         Toast.makeText(signUpPage.this, "Sign up failed: " + task.getException().getMessage(),
                                 Toast.LENGTH_SHORT).show();
@@ -101,13 +93,12 @@ public class signUpPage extends AppCompatActivity {
                 });
     }
 
-    private void saveUserToFirestore(String name, String email, String farmPin) {
+    private void saveUserToFirestore(String name, String email) {
         Map<String, Object> user = new HashMap<>();
         user.put("name", name);
         user.put("email", email);
         user.put("uid", mAuth.getCurrentUser().getUid());
-        user.put("farmId", farmPin);
-        user.put("role", "");
+        user.put("role", "");// Blank for now and the foreseeable future
 
         db.collection("users").document(mAuth.getCurrentUser().getUid())
                 .set(user)
