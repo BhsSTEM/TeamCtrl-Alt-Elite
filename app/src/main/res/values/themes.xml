@@ -2,12 +2,13 @@
     <!-- Base application theme. -->
     <style name="Base.Theme.CtrlAltElite" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="android:windowBackground">@color/background_dark</item>
     </style>
 
     <style name="Theme.CtrlAltElite" parent="Base.Theme.CtrlAltElite" />
 
     <style name="Widget.App.BottomNavigationView" parent="Widget.Material3.BottomNavigationView">
+        <item name="android:background">@color/background_dark</item>
         <item name="itemActiveIndicatorStyle">@null</item>
         <item name="itemIconTint">@drawable/nav_item_color_state</item>
         <item name="itemTextColor">@drawable/nav_item_color_state</item>
@@ -17,11 +18,13 @@
     </style>
 
     <style name="TextAppearance.App.BottomNavigation.Active" parent="TextAppearance.Material3.LabelMedium">
+        <item name="android:textColor">@color/accent_green</item>
         <item name="android:textStyle">bold</item>
-        <item name="android:textSize">15sp</item>
+        <item name="android:textSize">14sp</item>
     </style>
 
     <style name="TextAppearance.App.BottomNavigation.Inactive" parent="TextAppearance.Material3.LabelMedium">
+        <item name="android:textColor">@color/text_grey</item>
         <item name="android:textStyle">normal</item>
         <item name="android:textSize">12sp</item>
     </style>
