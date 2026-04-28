@@ -21,6 +21,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 
+import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -36,8 +37,10 @@ public class AddTractorActivity extends BaseActivity {
     private EditText getTractorName;
     private EditText getModelNumber;
     private EditText getPin;
+    private TextView titleAddTractor;
 
     private FirebaseFirestore db;
+    private Tractor existingTractor;
 
     private final ActivityResultLauncher<Intent> pickImageLauncher =
             registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
@@ -67,28 +70,29 @@ public class AddTractorActivity extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        FirebaseAuth mAuth = FirebaseAuth.getInstance();
-        String uid = mAuth.getUid();
         super.onCreate(savedInstanceState);
         setActivityContent(R.layout.add_add_tractor);
 
-        // Standard initialization for the default Firestore database
         db = FirebaseFirestore.getInstance();
 
         ivTractorImage = findViewById(R.id.ivTractorImage);
         spinnerYear = findViewById(R.id.spinnerYear);
-        
         getTractorName = findViewById(R.id.getTractorName);
         getModelNumber = findViewById(R.id.getModelNumber);
         getPin = findViewById(R.id.getPin);
-        
+        titleAddTractor = findViewById(R.id.titleAddTractor);
 
         View btnUploadImage = findViewById(R.id.btnUploadImage);
         TextView btnBack = findViewById(R.id.btnBack);
-
-       Button btnSaveTractor = findViewById(R.id.btnSaveTractor);
+        Button btnSaveTractor = findViewById(R.id.btnSaveTractor);
 
         setupYearSpinner();
+
+        // Check if editing existing tractor
+        if (getIntent().hasExtra("TRACTOR_DATA")) {
+            existingTractor = (Tractor) getIntent().getSerializableExtra("TRACTOR_DATA");
+            populateFields(existingTractor);
+        }
 
         if (btnUploadImage != null) {
             btnUploadImage.setOnClickListener(v -> checkPermissionsAndShowOptions());
@@ -100,6 +104,22 @@ public class AddTractorActivity extends BaseActivity {
 
         if (btnSaveTractor != null) {
             btnSaveTractor.setOnClickListener(v -> saveTractorToFirebase());
+        }
+    }
+
+    private void populateFields(Tractor tractor) {
+        if (titleAddTractor != null) titleAddTractor.setText("Edit Tractor");
+        getTractorName.setText(tractor.getName());
+        getModelNumber.setText(tractor.getModel());
+        getPin.setText(tractor.getPin());
+        
+        // Set year in spinner
+        ArrayAdapter adapter = (ArrayAdapter) spinnerYear.getAdapter();
+        int position = adapter.getPosition(String.valueOf(tractor.getYear()));
+        if (position >= 0) spinnerYear.setSelection(position);
+
+        if (tractor.getImageUrl() != null && !tractor.getImageUrl().isEmpty() && !tractor.getImageUrl().equals("link")) {
+            Glide.with(this).load(tractor.getImageUrl()).into(ivTractorImage);
         }
     }
 
@@ -153,25 +173,39 @@ public class AddTractorActivity extends BaseActivity {
 
         int year = Integer.parseInt(yearStr);
 
-        Tractor tractor = new Tractor();
+        Tractor tractor = (existingTractor != null) ? existingTractor : new Tractor();
         tractor.setUser(uid);
         tractor.setName(name);
         tractor.setModel(model);
         tractor.setPin(pin);
         tractor.setYear(year);
-        tractor.setStatus("Active"); // Default status
-        tractor.setFuel(100);       // Default fuel
+        if (existingTractor == null) {
+            tractor.setStatus("Active");
+            tractor.setFuel(100);
+        }
         tractor.setLastUpdated(java.text.DateFormat.getDateTimeInstance().format(new java.util.Date()));
 
-        db.collection("tractors")
-                .add(tractor)
-                .addOnSuccessListener(documentReference -> {
-                    Toast.makeText(AddTractorActivity.this, "Tractor added successfully!", Toast.LENGTH_SHORT).show();
-                    finish();
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(AddTractorActivity.this, "Error adding tractor: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                });
+        if (existingTractor != null && existingTractor.getDocumentId() != null) {
+            // Update existing
+            db.collection("tractors").document(existingTractor.getDocumentId())
+                    .set(tractor)
+                    .addOnSuccessListener(aVoid -> {
+                        Toast.makeText(AddTractorActivity.this, "Tractor updated successfully!", Toast.LENGTH_SHORT).show();
+                        finish();
+                    })
+                    .addOnFailureListener(e -> Toast.makeText(this, "Update failed", Toast.LENGTH_SHORT).show());
+        } else {
+            // Add new
+            db.collection("tractors")
+                    .add(tractor)
+                    .addOnSuccessListener(documentReference -> {
+                        Toast.makeText(AddTractorActivity.this, "Tractor added successfully!", Toast.LENGTH_SHORT).show();
+                        finish();
+                    })
+                    .addOnFailureListener(e -> {
+                        Toast.makeText(AddTractorActivity.this, "Error adding tractor: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    });
+        }
     }
 
     @Override

@@ -31,6 +31,7 @@
             tools:ignore="UseCompatTextViewDrawableXml" />
 
         <TextView
+            android:id="@+id/titleAddTractor"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/add_tractor"
@@ -93,6 +94,28 @@
                         android:textSize="14sp" />
 
                     <!-- Year -->
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:text="@string/pin"
+                        android:textColor="@android:color/black"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+
+                    <EditText
+                        android:id="@+id/getPin"
+                        android:layout_width="match_parent"
+                        android:layout_height="44dp"
+                        android:layout_marginTop="8dp"
+                        android:background="@android:drawable/editbox_background"
+                        android:hint="•••••••"
+                        android:importantForAutofill="no"
+                        android:inputType="numberPassword"
+                        android:paddingHorizontal="12dp"
+                        android:textSize="14sp" />
+
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -133,26 +156,6 @@
                         android:textSize="14sp" />
 
                     <!-- PIN -->
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:text="@string/pin"
-                        android:textColor="@android:color/black"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
-
-                    <EditText
-                        android:id="@+id/getPin"
-                        android:layout_width="match_parent"
-                        android:layout_height="44dp"
-                        android:layout_marginTop="8dp"
-                        android:background="@android:drawable/editbox_background"
-                        android:hint="•••••"
-                        android:importantForAutofill="no"
-                        android:inputType="numberPassword"
-                        android:paddingHorizontal="12dp"
-                        android:textSize="14sp" />
 
                     <!-- Image Section -->
                     <TextView
