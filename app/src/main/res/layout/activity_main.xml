@@ -12,7 +12,7 @@
         android:layout_width="0dp"
         android:layout_height="35dp"
         android:layout_marginStart="24dp"
-        android:text="Hello User!"
+        android:text="Notifications"
         android:textSize="25sp"
         app:autoSizeMaxTextSize="40sp"
         app:autoSizeMinTextSize="25sp"
