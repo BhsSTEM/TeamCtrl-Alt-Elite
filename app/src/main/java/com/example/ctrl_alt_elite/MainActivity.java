@@ -21,13 +21,17 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
+import com.google.android.gms.location.Priority;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationResult;
+
 import android.content.pm.PackageManager;
+import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
+
 import android.Manifest;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 
 public class MainActivity extends BaseActivity {
     //Variables
@@ -43,19 +47,10 @@ public class MainActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        // Authentication Check
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if (user == null) {
-            startActivity(new Intent(this, LoginPage.class));
-            finish();
-            return;
-        }
-
         EdgeToEdge.enable(this);
         setActivityContent(R.layout.activity_main);
 
-        // Initialize Weather Views
+        // Initialize Weather Views with your updated XML IDs
         tempText = findViewById(R.id.weather_temp);
         weatherDesc = findViewById(R.id.weather_desc);
         rainInfo = findViewById(R.id.RainInfo);
@@ -64,6 +59,7 @@ public class MainActivity extends BaseActivity {
 
         // Initialize FusedLocationProviderClient
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        // Fetch weather using coordinates and finding location
         getLastLocation();
 
         // Set up the link to Map Activity
@@ -85,19 +81,79 @@ public class MainActivity extends BaseActivity {
 
         fusedLocationClient.getLastLocation().addOnSuccessListener(this, location -> {
             if (location != null) {
-                double latitude = location.getLatitude();
-                double longitude = location.getLongitude();
-                fetchNoaaWeather(latitude, longitude);
-
-                if (linkToNoaa != null) {
-                    linkToNoaa.setOnClickListener(v -> {
-                        String url = String.format(Locale.US, "https://forecast.weather.gov/MapClick.php?lat=%f&lon=%f", latitude, longitude);
-                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-                        startActivity(intent);
-                    });
-                }
+                updateWeatherData(location.getLatitude(), location.getLongitude());
             } else {
-                Toast.makeText(MainActivity.this, "Location Error", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, "Requesting fresh location...", Toast.LENGTH_SHORT).show();
+                requestFreshLocation();
+            }
+        });
+    }
+
+    private void requestFreshLocation() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+
+        com.google.android.gms.location.LocationRequest locationRequest = new com.google.android.gms.location.LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 10000)
+                .setMinUpdateIntervalMillis(5000)
+                .setMaxUpdates(1)
+                .build();
+
+        fusedLocationClient.requestLocationUpdates(locationRequest, new LocationCallback() {
+            @Override
+            public void onLocationResult(@NonNull LocationResult locationResult) {
+                if (locationResult.getLastLocation() != null) {
+                    updateWeatherData(locationResult.getLastLocation().getLatitude(), locationResult.getLastLocation().getLongitude());
+                }
+            }
+        }, getMainLooper());
+    }
+
+    private void updateWeatherData(double latitude, double longitude) {
+        // Fetch weather using coordinates
+        fetchNoaaWeather(latitude, longitude);
+        fetchWeatherAlerts(latitude, longitude);
+
+        // Update UI with weather information link
+        if (linkToNoaa != null) {
+            linkToNoaa.setOnClickListener(v -> {
+                String url = String.format(Locale.US, "https://forecast.weather.gov/MapClick.php?lat=%f&lon=%f", latitude, longitude);
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                startActivity(intent);
+            });
+        }
+    }
+
+    private void fetchWeatherAlerts(double lat, double lon) {
+        TextView notificationText = findViewById(R.id.Notification);
+        if (notificationText == null) return;
+
+        String point = String.format(Locale.US, "%.4f,%.4f", lat, lon);
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("https://api.weather.gov/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        WeatherApiService service = retrofit.create(WeatherApiService.class);
+
+        service.getActiveAlerts(point).enqueue(new Callback<WAlertsResponse>() {
+            @Override
+            public void onResponse(Call<WAlertsResponse> call, Response<WAlertsResponse> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().features != null && !response.body().features.isEmpty()) {
+                    String alertEvent = response.body().features.get(0).properties.event;
+                    notificationText.setText(String.format("ALERT: %s", alertEvent));
+                    notificationText.setTextColor(android.graphics.Color.RED);
+                } else {
+                    notificationText.setText("No Alerts");
+                    notificationText.setTextColor(android.graphics.Color.BLACK);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<WAlertsResponse> call, Throwable t) {
+                notificationText.setText("Hello User!");
             }
         });
     }
@@ -109,7 +165,7 @@ public class MainActivity extends BaseActivity {
                 .build();
 
         WeatherApiService service = retrofit.create(WeatherApiService.class);
-        
+
         service.getPoints(lat, lon).enqueue(new Callback<WeatherResponse>() {
             @Override
             public void onResponse(Call<WeatherResponse> call, Response<WeatherResponse> response) {
@@ -140,6 +196,7 @@ public class MainActivity extends BaseActivity {
                     if (tempText != null) tempText.setText(getString(R.string.weather_format, current.temperature));
                     if (weatherDesc != null) weatherDesc.setText(current.shortForecast);
                     
+                    // Display Precipitation Chance
                     if (rainInfo != null) {
                         if (current.probabilityOfPrecipitation != null && current.probabilityOfPrecipitation.value != null) {
                             rainInfo.setText(String.format(Locale.US, "Rain: %d%%", current.probabilityOfPrecipitation.value));

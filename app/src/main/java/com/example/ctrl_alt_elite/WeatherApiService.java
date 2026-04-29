@@ -4,6 +4,7 @@ import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Headers;
 import retrofit2.http.Path;
+import retrofit2.http.Query;
 import retrofit2.http.Url;
 
 public interface WeatherApiService {
@@ -19,6 +20,6 @@ public interface WeatherApiService {
     Call<WeatherResponse> getForecast(@Url String url);
 
     @Headers("User-Agent: TeamCtrlAltElite/1.0 (contact@example.com)")
-    @GET("alerts/active?point={lat},{lon}")
-    Call<WAlertsResponse> getActiveAlerts(@Path("lat") double lat, @Path("lon") double lon);
+    @GET("alerts/active")
+    Call<WAlertsResponse> getActiveAlerts(@Query("point") String point);
 }
