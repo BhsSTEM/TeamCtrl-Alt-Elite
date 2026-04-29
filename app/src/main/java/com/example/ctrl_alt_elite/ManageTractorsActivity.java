@@ -21,7 +21,7 @@ import androidx.annotation.Nullable;
 
 public class ManageTractorsActivity extends BaseActivity {
 
-    private FirebaseFirestore db = FirebaseFirestore.getInstance("tractors");
+    private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private List<Tractor> tractorList = new ArrayList<>();
     private TractorAdapter adapter;
 
@@ -29,7 +29,7 @@ public class ManageTractorsActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setActivityContent(R.layout.add_tracter);
-//comment test
+
         MaterialButton btnAddTractor = findViewById(R.id.btn_add_tractor);
         if (btnAddTractor != null) {
             btnAddTractor.setOnClickListener(v -> {
@@ -50,9 +50,15 @@ public class ManageTractorsActivity extends BaseActivity {
     }
 
     private void listenToFirestore() {
+        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
+            Log.e("FirestoreError", "User not logged in");
+            return;
+        }
+
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
         db.collection("tractors")
-                .whereEqualTo("user", "FirebaseAuth.getInstance().getCurrentUser()")
+                .whereEqualTo("user", userId)
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
                     public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
@@ -68,12 +74,10 @@ public class ManageTractorsActivity extends BaseActivity {
                                 tractorList.add(tractor);
                             }
                             adapter.notifyDataSetChanged();
-                            Log.d("FirestoreData", "Tractors found: "+tractorList.size());
+                            Log.d("FirestoreData", "Tractors found: " + tractorList.size());
                         }
                     }
                 });
-        listenToFirestore();
-
     }
 
 }
