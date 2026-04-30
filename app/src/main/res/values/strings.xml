@@ -100,9 +100,10 @@
     <string name="repeat_monthly">Monthly</string>
     <string name="settings_no_role">No Role Assigned</string>
 
-    <string name="label_day">DD</string>
-    <string name="label_month">MM</string>
-    <string name="label_year">20YY</string>
+    <string name="label_day">Day</string>
+    <string name="label_month">Month</string>
+    <string name="label_year">Year</string>
+    <string name="label_include_checklist">Include Checklist</string>
 
     <string name="year_format">Year: %1$s</string>
     <string name="model_format">Model: %1$s</string>
