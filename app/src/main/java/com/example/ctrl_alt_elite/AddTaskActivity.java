@@ -81,22 +81,30 @@ public class AddTaskActivity extends AppCompatActivity {
     }
 
     private void setupDateAutofill() {
-        addZeroPadWatcher(dayInput);
-        addZeroPadWatcher(monthInput);
-        addZeroPadWatcher(yearInput);
+        addZeroPadWatcher(dayInput, 2);
+        addZeroPadWatcher(monthInput, 2);
+        addZeroPadWatcher(yearInput, 4);
     }
 
-    private void addZeroPadWatcher(TextInputEditText editText) {
+    private void addZeroPadWatcher(TextInputEditText editText, int maxLength) {
         editText.setOnFocusChangeListener((v, hasFocus) -> {
             if (!hasFocus) {
                 String val = editText.getText().toString();
-                if (val.length() == 1) {
-                    editText.setText("0" + val);
-                } else if (val.length() > 2) {
-                    editText.setText(val.substring(val.length()-2));
+
+                if (val.length() > 0) {
+                    editText.setText(fillZeros(val, maxLength));
                 }
             }
         });
+    }
+
+    private String fillZeros(String val, int maxLength) {
+        if (val.length() < maxLength) {
+            val = "0" + val;
+            return fillZeros(val, maxLength);
+        }
+
+        return val;
     }
 
     private void loadExistingTaskData() {
