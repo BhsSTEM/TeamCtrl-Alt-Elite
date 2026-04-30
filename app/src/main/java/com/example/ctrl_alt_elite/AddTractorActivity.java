@@ -26,8 +26,10 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Random;
 
 public class AddTractorActivity extends BaseActivity {
 
@@ -88,6 +90,28 @@ public class AddTractorActivity extends BaseActivity {
 
         setupYearSpinner();
 
+        //asks to autofill data when pin entered
+        getPin.addTextChangedListener(new android.text.TextWatcher() {
+            @Override
+            //ignore this but keep
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+
+            @Override
+            //this one too, ignore it but keeep
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+
+            @Override
+            //this is the thing i care about, the other two were just needed to have this
+            public void afterTextChanged(android.text.Editable s) {
+                // number can be anything, just however long pins should be
+                if (s.length() >= 8 && titleAddTractor.getText().equals("Add Tractor")) {
+                    pinEntered();
+                }
+            }
+        });
+
         // Check if editing existing tractor
         if (getIntent().hasExtra("TRACTOR_DATA")) {
             existingTractor = (Tractor) getIntent().getSerializableExtra("TRACTOR_DATA");
@@ -105,6 +129,32 @@ public class AddTractorActivity extends BaseActivity {
         if (btnSaveTractor != null) {
             btnSaveTractor.setOnClickListener(v -> saveTractorToFirebase());
         }
+    }
+
+
+    private void pinEntered(){
+        new AlertDialog.Builder(this )
+                .setTitle("Tractor Found!")
+                .setMessage("Do you want to autofill the rest of the info using the data connected to your PIN?")
+                .setPositiveButton("Yes", (dialog, which) -> {
+                    autoFill();
+                })
+                .setNegativeButton("No", null)
+                .show();
+    }
+    private void autoFill(){
+        List<String> tractorNames = Arrays.asList(
+                "Composter", "Row Crop", "Scraper Special", "Utility Task", "Compact Utility", "Two-Track", "Small Frame", "Legacy Series", "Harvester", "PowerTech"
+        );
+        Random rando = new Random();
+        getTractorName.setText(tractorNames.get(rando.nextInt(tractorNames.size())));
+        getModelNumber.setText(String.valueOf(rando.nextInt(9000)+1000));
+        if (spinnerYear.getAdapter() != null){
+            ArrayAdapter adapter = (ArrayAdapter) spinnerYear.getAdapter();
+            int position = adapter.getPosition(String.valueOf(rando.nextInt(37) + 1990));
+            if (position >= 0) spinnerYear.setSelection(position);
+        }
+        Toast.makeText(this, "Tractor details auto-filled!", Toast.LENGTH_SHORT).show();
     }
 
     private void populateFields(Tractor tractor) {
