@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -19,9 +20,12 @@ import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.bumptech.glide.Glide;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -43,6 +47,7 @@ public class AddTractorActivity extends BaseActivity {
 
     private FirebaseFirestore db;
     private Tractor existingTractor;
+    private FusedLocationProviderClient fusedLocationClient;
 
     private final ActivityResultLauncher<Intent> pickImageLauncher =
             registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
@@ -69,6 +74,18 @@ public class AddTractorActivity extends BaseActivity {
                 }
             });
 
+    private final ActivityResultLauncher<String[]> locationPermissionLauncher =
+            registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result -> {
+                Boolean fineLocationGranted = result.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false);
+                Boolean coarseLocationGranted = result.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false);
+                if ((fineLocationGranted != null && fineLocationGranted) || (coarseLocationGranted != null && coarseLocationGranted)) {
+                    saveTractorWithLocation();
+                } else {
+                    Toast.makeText(this, "Location permission is needed to save tractor location", Toast.LENGTH_SHORT).show();
+                    saveTractorToFirebase("");
+                }
+            });
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,6 +93,7 @@ public class AddTractorActivity extends BaseActivity {
         setActivityContent(R.layout.add_add_tractor);
 
         db = FirebaseFirestore.getInstance();
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
         ivTractorImage = findViewById(R.id.ivTractorImage);
         spinnerYear = findViewById(R.id.spinnerYear);
@@ -127,8 +145,36 @@ public class AddTractorActivity extends BaseActivity {
         }
 
         if (btnSaveTractor != null) {
-            btnSaveTractor.setOnClickListener(v -> saveTractorToFirebase());
+            btnSaveTractor.setOnClickListener(v -> {
+                if (checkLocationPermissions()) {
+                    saveTractorWithLocation();
+                } else {
+                    locationPermissionLauncher.launch(new String[]{
+                            Manifest.permission.ACCESS_FINE_LOCATION,
+                            Manifest.permission.ACCESS_COARSE_LOCATION
+                    });
+                }
+            });
         }
+    }
+
+    private boolean checkLocationPermissions() {
+        return ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private void saveTractorWithLocation() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        fusedLocationClient.getLastLocation().addOnSuccessListener(this, location -> {
+            String locationStr = "";
+            if (location != null) {
+                locationStr = location.getLatitude() + "," + location.getLongitude();
+            }
+            saveTractorToFirebase(locationStr);
+        });
     }
 
 
@@ -208,7 +254,7 @@ public class AddTractorActivity extends BaseActivity {
         builder.show();
     }
 
-    private void saveTractorToFirebase() {
+    private void saveTractorToFirebase(String locationStr) {
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
         String uid = mAuth.getUid();
         String name = getTractorName.getText().toString().trim();
@@ -229,6 +275,11 @@ public class AddTractorActivity extends BaseActivity {
         tractor.setModel(model);
         tractor.setPin(pin);
         tractor.setYear(year);
+        
+        if (!locationStr.isEmpty()) {
+            tractor.setLocation(locationStr);
+        }
+
         if (existingTractor == null) {
             tractor.setStatus("Active");
             tractor.setFuel(100);
