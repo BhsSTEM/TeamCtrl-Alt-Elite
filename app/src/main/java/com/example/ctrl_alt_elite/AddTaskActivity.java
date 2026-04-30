@@ -1,17 +1,20 @@
 package com.example.ctrl_alt_elite;
 
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.materialswitch.MaterialSwitch;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -32,6 +35,10 @@ public class AddTaskActivity extends AppCompatActivity {
     private AutoCompleteTextView assignToDropdown, repeatIntervalDropdown, tractorDropdown;
     private TextView headerText;
     private Button createTaskButton;
+    
+    private MaterialSwitch enableChecklistSwitch;
+    private LinearLayout checklistSection, checklistInputContainer;
+    private Button addChecklistItemButton;
     
     private String existingTaskId = null; // Used if we are in Edit mode
 
@@ -60,8 +67,15 @@ public class AddTaskActivity extends AppCompatActivity {
         tractorDropdown = findViewById(R.id.associateTractorDropdown);
         createTaskButton = findViewById(R.id.createTaskButton);
 
+        // Checklist views
+        enableChecklistSwitch = findViewById(R.id.enableChecklistSwitch);
+        checklistSection = findViewById(R.id.checklistSection);
+        checklistInputContainer = findViewById(R.id.checklistInputContainer);
+        addChecklistItemButton = findViewById(R.id.addChecklistItemButton);
+
         setupDropdowns();
         setupDateAutofill();
+        setupChecklistLogic();
 
         // Check if we are editing an existing task
         if (getIntent().hasExtra("task_id")) {
@@ -78,6 +92,36 @@ public class AddTaskActivity extends AppCompatActivity {
         if (createTaskButton != null) {
             createTaskButton.setOnClickListener(v -> saveTaskToFirestore());
         }
+    }
+
+    private void setupChecklistLogic() {
+        enableChecklistSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            checklistSection.setVisibility(isChecked ? View.VISIBLE : View.GONE);
+            if (isChecked && checklistInputContainer.getChildCount() == 0) {
+                addChecklistItem("");
+            }
+        });
+
+        addChecklistItemButton.setOnClickListener(v -> addChecklistItem(""));
+    }
+
+    private void addChecklistItem(String initialText) {
+        View itemView = LayoutInflater.from(this).inflate(R.layout.item_checklist_input, checklistInputContainer, false);
+        TextInputEditText itemInput = itemView.findViewById(R.id.checklistItemInput);
+        ImageButton removeButton = itemView.findViewById(R.id.removeChecklistItemButton);
+        
+        if (itemInput != null) {
+            itemInput.setText(initialText);
+        }
+
+        removeButton.setOnClickListener(v -> {
+            checklistInputContainer.removeView(itemView);
+            if (checklistInputContainer.getChildCount() == 0) {
+                enableChecklistSwitch.setChecked(false);
+            }
+        });
+
+        checklistInputContainer.addView(itemView);
     }
 
     private void setupDateAutofill() {
@@ -135,6 +179,23 @@ public class AddTaskActivity extends AppCompatActivity {
 
         repeatIntervalDropdown.setText(getIntent().getStringExtra("task_repeat"), false);
         tractorDropdown.setText(getIntent().getStringExtra("task_tractor"), false);
+
+        // Load checklist items from Firestore since they are likely not in the intent
+        if (existingTaskId != null) {
+            db.collection("tasks").document(existingTaskId).get().addOnSuccessListener(documentSnapshot -> {
+                if (documentSnapshot.exists()) {
+                    List<Map<String, Object>> checklist = (List<Map<String, Object>>) documentSnapshot.get("checklist");
+                    if (checklist != null && !checklist.isEmpty()) {
+                        enableChecklistSwitch.setChecked(true);
+                        checklistInputContainer.removeAllViews(); // Clear the default empty item
+                        for (Map<String, Object> item : checklist) {
+                            String text = (String) item.get("text");
+                            addChecklistItem(text != null ? text : "");
+                        }
+                    }
+                }
+            });
+        }
     }
 
     private void setupDropdowns() {
@@ -160,9 +221,11 @@ public class AddTaskActivity extends AppCompatActivity {
                 selectedUsers = new boolean[allUsers.length];
 
                 // Update selectedUsers based on finalSelectedUsers (useful for Edit mode)
-                for (int i = 0; i < allUsers.length; i++) {
-                    if (finalSelectedUsers.contains(allUsers[i])) {
-                        selectedUsers[i] = true;
+                if (allUsers != null) {
+                    for (int i = 0; i < allUsers.length; i++) {
+                        if (finalSelectedUsers.contains(allUsers[i])) {
+                            selectedUsers[i] = true;
+                        }
                     }
                 }
 
@@ -242,6 +305,25 @@ public class AddTaskActivity extends AppCompatActivity {
 
         String taskId = (existingTaskId != null) ? existingTaskId : UUID.randomUUID().toString();
         
+        // Collect checklist items
+        List<Map<String, Object>> checklistItems = new ArrayList<>();
+        if (enableChecklistSwitch.isChecked()) {
+            for (int i = 0; i < checklistInputContainer.getChildCount(); i++) {
+                View child = checklistInputContainer.getChildAt(i);
+                TextInputEditText itemInput = child.findViewById(R.id.checklistItemInput);
+
+                if (itemInput != null) {
+                    String text = itemInput.getText().toString().trim();
+                    if (!text.isEmpty()) {
+                        Map<String, Object> item = new HashMap<>();
+                        item.put("text", text);
+                        item.put("completed", false);
+                        checklistItems.add(item);
+                    }
+                }
+            }
+        }
+
         Map<String, Object> task = new HashMap<>();
         task.put("id", taskId);
         task.put("title", title);
@@ -250,6 +332,7 @@ public class AddTaskActivity extends AppCompatActivity {
         task.put("assignedTo", assignedTo);
         task.put("repeatInterval", repeat);
         task.put("tractorId", tractor);
+        task.put("checklist", checklistItems);
 
         db.collection("tasks").document(taskId).set(task)
                 .addOnSuccessListener(aVoid -> {
