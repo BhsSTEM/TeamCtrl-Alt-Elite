@@ -6,10 +6,12 @@ import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+import com.bumptech.glide.Glide;
 import com.google.android.material.button.MaterialButton;
 import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.List;
@@ -39,11 +41,23 @@ public class TractorAdapter extends RecyclerView.Adapter<TractorAdapter.TractorV
     public void onBindViewHolder(@NonNull TractorViewHolder holder, int position) {
         Tractor tractor = tractorList.get(position);
         Context context = holder.itemView.getContext();
-        
+
         holder.txtName.setText(tractor.getName());
         holder.txtYear.setText(context.getString(R.string.year_format, String.valueOf(tractor.getYear())));
         holder.txtModel.setText(context.getString(R.string.model_format, tractor.getModel()));
         
+        // Load image using Glide
+        String imageUrl = tractor.getImageUrl();
+        if (imageUrl != null && !imageUrl.isEmpty() && !imageUrl.equals("link")) {
+            Glide.with(context)
+                    .load(imageUrl)
+                    .placeholder(R.drawable.placeholder_image)
+                    .error(R.drawable.pngimg_com___tractor_png101303_removebg_preview)
+                    .into(holder.imgTractor);
+        } else {
+            holder.imgTractor.setImageResource(R.drawable.pngimg_com___tractor_png101303_removebg_preview);
+        }
+
         // Edit button is always visible
         holder.btnEdit.setVisibility(View.VISIBLE);
         holder.btnEdit.setOnClickListener(v -> {
@@ -56,7 +70,7 @@ public class TractorAdapter extends RecyclerView.Adapter<TractorAdapter.TractorV
             // Map context: Show Map button, Hide Remove button
             holder.btnMap.setVisibility(View.VISIBLE);
             holder.btnRemove.setVisibility(View.GONE);
-            
+
             holder.btnMap.setOnClickListener(v -> {
                 if (context instanceof evansMapActivity) {
                     ((evansMapActivity) context).showTractorOnMap(tractor);
@@ -66,7 +80,7 @@ public class TractorAdapter extends RecyclerView.Adapter<TractorAdapter.TractorV
             // Manage context: Hide Map button, Show Remove button
             holder.btnMap.setVisibility(View.GONE);
             holder.btnRemove.setVisibility(View.VISIBLE);
-            
+
             holder.btnRemove.setOnClickListener(v -> {
                 showDeleteConfirmationDialog(context, tractor);
             });
@@ -108,6 +122,7 @@ public class TractorAdapter extends RecyclerView.Adapter<TractorAdapter.TractorV
 
     public static class TractorViewHolder extends RecyclerView.ViewHolder {
         TextView txtName, txtYear, txtModel;
+        ImageView imgTractor;
         MaterialButton btnEdit, btnRemove, btnMap;
 
         public TractorViewHolder(@NonNull View itemView) {
@@ -115,6 +130,7 @@ public class TractorAdapter extends RecyclerView.Adapter<TractorAdapter.TractorV
             txtName = itemView.findViewById(R.id.txt_tractor_name);
             txtYear = itemView.findViewById(R.id.txt_tractor_year);
             txtModel = itemView.findViewById(R.id.txt_tractor_model);
+            imgTractor = itemView.findViewById(R.id.img_tractor);
             btnEdit = itemView.findViewById(R.id.btn_edit);
             btnRemove = itemView.findViewById(R.id.btn_remove);
             btnMap = itemView.findViewById(R.id.btn_map);

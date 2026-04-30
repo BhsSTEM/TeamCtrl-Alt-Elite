@@ -73,27 +73,6 @@
                     android:padding="16dp">
 
                     <!-- Tractor Name -->
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="@string/tractor_name"
-                        android:textColor="@android:color/black"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
-
-                    <EditText
-                        android:id="@+id/getTractorName"
-                        android:layout_width="match_parent"
-                        android:layout_height="44dp"
-                        android:layout_marginTop="8dp"
-                        android:background="@android:drawable/editbox_background"
-                        android:hint="@string/enter_tractor_name"
-                        android:importantForAutofill="no"
-                        android:inputType="textCapWords"
-                        android:paddingHorizontal="12dp"
-                        android:textSize="14sp" />
-
-                    <!-- Year -->
 
                     <TextView
                         android:layout_width="match_parent"
@@ -116,6 +95,27 @@
                         android:paddingHorizontal="12dp"
                         android:textSize="14sp" />
 
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/tractor_name"
+                        android:textColor="@android:color/black"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+
+                    <EditText
+                        android:id="@+id/getTractorName"
+                        android:layout_width="match_parent"
+                        android:layout_height="44dp"
+                        android:layout_marginTop="8dp"
+                        android:background="@android:drawable/editbox_background"
+                        android:hint="@string/enter_tractor_name"
+                        android:importantForAutofill="no"
+                        android:inputType="textCapWords"
+                        android:paddingHorizontal="12dp"
+                        android:textSize="14sp" />
+
+                    <!-- Year -->
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"

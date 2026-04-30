@@ -44,9 +44,13 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.GeoPoint;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -70,6 +74,7 @@ public class evansMapActivity extends BaseActivity implements OnMapReadyCallback
     private FirebaseFirestore db;
     private List<Tractor> tractorList = new ArrayList<>();
     private TractorAdapter adapter;
+    private ListenerRegistration tractorListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -151,7 +156,7 @@ public class evansMapActivity extends BaseActivity implements OnMapReadyCallback
         LatLng pos = parseLocation(tractor.getLocation());
         if (pos == null) return;
         map.animateCamera(CameraUpdateFactory.newLatLngZoom(pos, 17));
-        
+
         // Collapse the search panel if open
         final View chip3 = findViewById(R.id.chip3);
         if (chip3 != null && collapsedHeight > 0) {
@@ -193,47 +198,62 @@ public class evansMapActivity extends BaseActivity implements OnMapReadyCallback
             }
         });
 
-        loadTractorsFromFirebase();
+        startTractorListener();
         setupCustomControls();
         getLocationPermission();
         updateLocationUI();
         getDeviceLocation();
     }
 
-    private void loadTractorsFromFirebase() {
-        db.collection("tractors").whereEqualTo("user", FirebaseAuth.getInstance().getCurrentUser().getUid()).get().addOnCompleteListener(task -> {
-            if (task.isSuccessful() && task.getResult() != null) {
-                tractorList.clear();
-                Log.d(TAG, "Fetched " + task.getResult().size() + " tractors");
-                for (QueryDocumentSnapshot document : task.getResult()) {
-                    try {
-                        Tractor tractor = document.toObject(Tractor.class);
-                        tractor.setDocumentId(document.getId());
-                        
-                        Object locObj = document.get("location");
-                        if (locObj instanceof GeoPoint) {
-                            GeoPoint gp = (GeoPoint) locObj;
-                            tractor.setLocation(gp.getLatitude() + "," + gp.getLongitude());
-                        } else if (locObj instanceof String) {
-                            tractor.setLocation((String) locObj);
+    private void startTractorListener() {
+        if (FirebaseAuth.getInstance().getCurrentUser() == null) return;
+
+        if (tractorListener != null) {
+            tractorListener.remove();
+        }
+
+        tractorListener = db.collection("tractors")
+                .whereEqualTo("user", FirebaseAuth.getInstance().getCurrentUser().getUid())
+                .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                    @Override
+                    public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
+                        if (error != null) {
+                            Log.e(TAG, "Listen failed.", error);
+                            return;
                         }
-                        
-                        tractorList.add(tractor);
-                        addTractorMarker(tractor);
-                    } catch (Exception e) {
-                        Log.e(TAG, "Error parsing tractor: " + document.getId(), e);
+
+                        if (value != null) {
+                            tractorList.clear();
+                            if (map != null) map.clear(); // Clear existing markers
+
+                            for (QueryDocumentSnapshot document : value) {
+                                try {
+                                    Tractor tractor = document.toObject(Tractor.class);
+                                    tractor.setDocumentId(document.getId());
+
+                                    Object locObj = document.get("location");
+                                    if (locObj instanceof GeoPoint) {
+                                        GeoPoint gp = (GeoPoint) locObj;
+                                        tractor.setLocation(gp.getLatitude() + "," + gp.getLongitude());
+                                    } else if (locObj instanceof String) {
+                                        tractor.setLocation((String) locObj);
+                                    }
+
+                                    tractorList.add(tractor);
+                                    addTractorMarker(tractor);
+                                } catch (Exception e) {
+                                    Log.e(TAG, "Error parsing tractor: " + document.getId(), e);
+                                }
+                            }
+                            if (adapter != null) adapter.notifyDataSetChanged();
+                        }
                     }
-                }
-                if (adapter != null) adapter.notifyDataSetChanged();
-            } else {
-                Log.e(TAG, "Error getting documents: ", task.getException());
-            }
-        });
+                });
     }
 
     private LatLng parseLocation(String locationStr) {
         if (locationStr == null || locationStr.isEmpty()) return null;
-        
+
         String[] parts = locationStr.split(",");
         if (parts.length == 2) {
             try {
@@ -242,7 +262,7 @@ public class evansMapActivity extends BaseActivity implements OnMapReadyCallback
                 return new LatLng(lat, lng);
             } catch (NumberFormatException ignored) {}
         }
-        
+
         Geocoder geocoder = new Geocoder(this, Locale.getDefault());
         try {
             List<Address> addresses = geocoder.getFromLocationName(locationStr, 1);
@@ -395,5 +415,17 @@ public class evansMapActivity extends BaseActivity implements OnMapReadyCallback
     protected void onResume() {
         super.onResume();
         setupNavigation();
+        if (tractorListener == null && map != null) {
+            startTractorListener();
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (tractorListener != null) {
+            tractorListener.remove();
+            tractorListener = null;
+        }
     }
 }

@@ -42,7 +42,6 @@ public class ManageTractorsActivity extends BaseActivity {
             recyclerView.setAdapter(adapter);
         }
         listenToFirestore();
-
     }
 
     private void listenToFirestore() {
