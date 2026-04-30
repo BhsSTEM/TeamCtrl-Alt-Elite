@@ -41,6 +41,7 @@ public class AddTaskActivity extends AppCompatActivity {
     private Button addChecklistItemButton;
     
     private String existingTaskId = null; // Used if we are in Edit mode
+    private boolean existingTaskCompleted = false;
 
     // For multi-select Assign To
     private String[] allUsers;
@@ -180,14 +181,16 @@ public class AddTaskActivity extends AppCompatActivity {
         repeatIntervalDropdown.setText(getIntent().getStringExtra("task_repeat"), false);
         tractorDropdown.setText(getIntent().getStringExtra("task_tractor"), false);
 
-        // Load checklist items from Firestore since they are likely not in the intent
+        // Load checklist and completion status from Firestore
         if (existingTaskId != null) {
             db.collection("tasks").document(existingTaskId).get().addOnSuccessListener(documentSnapshot -> {
                 if (documentSnapshot.exists()) {
+                    existingTaskCompleted = documentSnapshot.getBoolean("completed") != null && documentSnapshot.getBoolean("completed");
+                    
                     List<Map<String, Object>> checklist = (List<Map<String, Object>>) documentSnapshot.get("checklist");
                     if (checklist != null && !checklist.isEmpty()) {
                         enableChecklistSwitch.setChecked(true);
-                        checklistInputContainer.removeAllViews(); // Clear the default empty item
+                        checklistInputContainer.removeAllViews();
                         for (Map<String, Object> item : checklist) {
                             String text = (String) item.get("text");
                             addChecklistItem(text != null ? text : "");
@@ -333,6 +336,7 @@ public class AddTaskActivity extends AppCompatActivity {
         task.put("repeatInterval", repeat);
         task.put("tractorId", tractor);
         task.put("checklist", checklistItems);
+        task.put("completed", existingTaskCompleted); // Preserve completion status on edit
 
         db.collection("tasks").document(taskId).set(task)
                 .addOnSuccessListener(aVoid -> {

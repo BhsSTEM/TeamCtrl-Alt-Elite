@@ -1,5 +1,8 @@
 package com.example.ctrl_alt_elite;
 
+import java.util.List;
+import java.util.Map;
+
 public class Task {
     private String id;
     private String title;
@@ -8,6 +11,8 @@ public class Task {
     private String assignedTo;
     private String repeatInterval;
     private String tractorId;
+    private List<Map<String, Object>> checklist;
+    private boolean completed;
 
     public Task() {
         // Required for Firestore
@@ -43,4 +48,10 @@ public class Task {
 
     public String getTractorId() { return tractorId; }
     public void setTractorId(String tractorId) { this.tractorId = tractorId; }
+
+    public List<Map<String, Object>> getChecklist() { return checklist; }
+    public void setChecklist(List<Map<String, Object>> checklist) { this.checklist = checklist; }
+
+    public boolean isCompleted() { return completed; }
+    public void setCompleted(boolean completed) { this.completed = completed; }
 }

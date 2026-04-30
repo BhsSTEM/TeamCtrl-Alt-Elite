@@ -20,7 +20,15 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <CheckBox
+                android:id="@+id/taskCheckbox"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:buttonTint="@color/accent_green" />
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -75,7 +83,7 @@
 
         </LinearLayout>
 
-        <!-- Checklist Section (Hidden by default, populated dynamically) -->
+        <!-- Checklist Section -->
         <LinearLayout
             android:id="@+id/checklistContainer"
             android:layout_width="match_parent"
@@ -91,7 +99,11 @@
                 android:background="@color/black"
                 android:layout_marginBottom="8dp"/>
 
-            <!-- Checklist Items will be added here via code -->
+            <LinearLayout
+                android:id="@+id/checklistItemsList"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
 
             <LinearLayout
                 android:layout_width="match_parent"
