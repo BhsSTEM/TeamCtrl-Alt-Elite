@@ -5,40 +5,48 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/background_dark"
     tools:context=".AddTaskActivity">
+
+    <View
+        android:id="@+id/header_bg"
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:background="@color/header_green"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <ImageButton
         android:id="@+id/backButton"
         android:layout_width="48dp"
         android:layout_height="48dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginStart="8dp"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:contentDescription="@string/go_back"
         android:src="?attr/homeAsUpIndicator"
+        app:layout_constraintBottom_toBottomOf="@id/header_bg"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:tint="?attr/colorOnSurface" />
+        app:layout_constraintTop_toTopOf="@id/header_bg"
+        app:tint="@color/white" />
 
     <TextView
         android:id="@+id/addTaskHeader"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
         android:text="@string/add_task_header"
+        android:textColor="@color/white"
         android:textSize="28sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.05" />
+        app:layout_constraintBottom_toBottomOf="@id/header_bg"
+        app:layout_constraintStart_toEndOf="@id/backButton"
+        app:layout_constraintTop_toTopOf="@id/header_bg" />
 
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="16dp"
         app:layout_constraintBottom_toTopOf="@+id/createTaskButton"
-        app:layout_constraintTop_toBottomOf="@+id/addTaskHeader">
+        app:layout_constraintTop_toBottomOf="@+id/header_bg">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -51,12 +59,17 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                android:hint="@string/label_task_title">
+                android:hint="@string/label_task_title"
+                android:textColorHint="@color/text_grey"
+                app:hintTextColor="@color/accent_green"
+                app:boxStrokeColor="@color/accent_green">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/taskTitleInput"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:textColor="@color/white"
+                    android:textSize="18sp"
                     android:inputType="textCapSentences" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -65,13 +78,18 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                android:hint="@string/label_task_description">
+                android:hint="@string/label_task_description"
+                android:textColorHint="@color/text_grey"
+                app:hintTextColor="@color/accent_green"
+                app:boxStrokeColor="@color/accent_green">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/taskDescriptionInput"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="top"
+                    android:textColor="@color/white"
+                    android:textSize="18sp"
                     android:inputType="textMultiLine"
                     android:minLines="3" />
             </com.google.android.material.textfield.TextInputLayout>
@@ -82,7 +100,9 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
                 android:text="@string/label_task_due_date"
-                android:textSize="16sp" />
+                android:textColor="@color/white"
+                android:textSize="24sp"
+                android:fontFamily="sans-serif-medium" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -95,13 +115,18 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:layout_marginEnd="8dp"
-                    android:hint="@string/label_day">
+                    android:hint="@string/label_day"
+                    android:textColorHint="@color/text_grey"
+                    app:hintTextColor="@color/accent_green"
+                    app:boxStrokeColor="@color/accent_green">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/taskDayInput"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:gravity="center"
+                        android:textColor="@color/white"
+                        android:textSize="18sp"
                         android:inputType="number"
                         android:maxLength="2" />
                 </com.google.android.material.textfield.TextInputLayout>
@@ -111,13 +136,18 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:layout_marginEnd="8dp"
-                    android:hint="@string/label_month">
+                    android:hint="@string/label_month"
+                    android:textColorHint="@color/text_grey"
+                    app:hintTextColor="@color/accent_green"
+                    app:boxStrokeColor="@color/accent_green">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/taskMonthInput"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:gravity="center"
+                        android:textColor="@color/white"
+                        android:textSize="18sp"
                         android:inputType="number"
                         android:maxLength="2" />
                 </com.google.android.material.textfield.TextInputLayout>
@@ -126,13 +156,18 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1.5"
-                    android:hint="@string/label_year">
+                    android:hint="@string/label_year"
+                    android:textColorHint="@color/text_grey"
+                    app:hintTextColor="@color/accent_green"
+                    app:boxStrokeColor="@color/accent_green">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/taskYearInput"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:gravity="center"
+                        android:textColor="@color/white"
+                        android:textSize="18sp"
                         android:inputType="number"
                         android:maxLength="4" />
                 </com.google.android.material.textfield.TextInputLayout>
@@ -145,7 +180,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                android:hint="@string/label_task_assign_to">
+                android:hint="@string/label_task_assign_to"
+                android:textColorHint="@color/text_grey"
+                app:hintTextColor="@color/accent_green"
+                app:boxStrokeColor="@color/accent_green">
 
                 <AutoCompleteTextView
                     android:id="@+id/assignToDropdown"
@@ -153,6 +191,8 @@
                     android:layout_height="wrap_content"
                     android:focusable="false"
                     android:clickable="true"
+                    android:textColor="@color/white"
+                    android:textSize="18sp"
                     android:inputType="none" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -162,12 +202,17 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                android:hint="@string/label_task_repeat">
+                android:hint="@string/label_task_repeat"
+                android:textColorHint="@color/text_grey"
+                app:hintTextColor="@color/accent_green"
+                app:boxStrokeColor="@color/accent_green">
 
                 <AutoCompleteTextView
                     android:id="@+id/repeatIntervalDropdown"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:textColor="@color/white"
+                    android:textSize="18sp"
                     android:inputType="none" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -177,12 +222,17 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                android:hint="@string/label_task_associate_tractor">
+                android:hint="@string/label_task_associate_tractor"
+                android:textColorHint="@color/text_grey"
+                app:hintTextColor="@color/accent_green"
+                app:boxStrokeColor="@color/accent_green">
 
                 <AutoCompleteTextView
                     android:id="@+id/associateTractorDropdown"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:textColor="@color/white"
+                    android:textSize="18sp"
                     android:inputType="none" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -195,6 +245,8 @@
         android:layout_height="wrap_content"
         android:layout_margin="24dp"
         android:text="@string/button_create_task"
+        android:textColor="@color/white"
+        app:backgroundTint="@color/accent_green"
         app:layout_constraintBottom_toBottomOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -38,7 +38,7 @@
             android:exported="false" />
 
         <activity
-            android:name=".MainActivity"
+            android:name=".LoginPage"
             android:exported="false"/>
 
         <activity
@@ -50,16 +50,19 @@
             android:exported="false" />
 
         <activity
+            android:name=".AddTractorActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".EditTractorActivity"
+            android:exported="false" />
+
+        <activity
             android:name=".ManageTractorsActivity"
             android:exported="false" />
 
         <activity
-            android:name=".AddTractorActivity"
-            android:exported="false" />
-
-
-        <activity
-            android:name=".LoginPage"
+            android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

@@ -1,8 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="Base.Theme.CtrlAltElite" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
     </style>
 
     <style name="Theme.CtrlAltElite" parent="Base.Theme.CtrlAltElite" />
@@ -18,7 +16,7 @@
 
     <style name="TextAppearance.App.BottomNavigation.Active" parent="TextAppearance.Material3.LabelMedium">
         <item name="android:textStyle">bold</item>
-        <item name="android:textSize">15sp</item>
+        <item name="android:textSize">14sp</item>
     </style>
 
     <style name="TextAppearance.App.BottomNavigation.Inactive" parent="TextAppearance.Material3.LabelMedium">
