@@ -59,6 +59,9 @@ public class Tractor implements Serializable {
     @PropertyName("imageUrl")
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
 
+    @PropertyName("user")
     public String getUser() { return userId; }
+    
+    @PropertyName("user")
     public void setUser(String userId) { this.userId = userId; }
 }

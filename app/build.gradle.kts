@@ -59,6 +59,7 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth)
     implementation(libs.firebase.firestore)
+    implementation(libs.firebase.storage)
     implementation(libs.firebase.analytics)
 
     implementation(libs.play.services.maps)
@@ -67,8 +68,8 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
-    
-    // Google Cloud Firestore (Optional, usually for server-side or advanced use cases. 
+
+    // Google Cloud Firestore (Optional, usually for server-side or advanced use cases.
     // If you only need Firebase Firestore for Android, the firebase-firestore dependency above is enough.)
     // implementation(platform("com.google.cloud:libraries-bom:26.78.0"))
     // implementation("com.google.cloud:google-cloud-firestore")
