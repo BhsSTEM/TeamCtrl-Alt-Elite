@@ -16,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.materialswitch.MaterialSwitch;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
@@ -30,6 +31,7 @@ public class AddTaskActivity extends BaseActivity {
 
     private FirebaseFirestore db;
     private FirebaseFirestore userdb;
+    private FirebaseAuth mAuth;
 
     private TextInputEditText titleInput, descriptionInput, dayInput, monthInput, yearInput;
     private AutoCompleteTextView assignToDropdown, repeatIntervalDropdown, tractorDropdown;
@@ -42,6 +44,7 @@ public class AddTaskActivity extends BaseActivity {
     
     private String existingTaskId = null; // Used if we are in Edit mode
     private boolean existingTaskCompleted = false;
+    private String userCompanyId = null;
 
     // For multi-select Assign To
     private String[] allUsers;
@@ -56,6 +59,7 @@ public class AddTaskActivity extends BaseActivity {
         // Pointing to the specific 'tasks' database
         db = FirebaseFirestore.getInstance("tasks");
         userdb = FirebaseFirestore.getInstance("sign-up");
+        mAuth = FirebaseAuth.getInstance();
 
         headerText = findViewById(R.id.addTaskHeader);
         titleInput = findViewById(R.id.taskTitleInput);
@@ -74,6 +78,7 @@ public class AddTaskActivity extends BaseActivity {
         checklistInputContainer = findViewById(R.id.checklistInputContainer);
         addChecklistItemButton = findViewById(R.id.addChecklistItemButton);
 
+        fetchUserCompanyId();
         setupDropdowns();
         setupDateAutofill();
         setupChecklistLogic();
@@ -92,6 +97,22 @@ public class AddTaskActivity extends BaseActivity {
         // Create/Update Task button
         if (createTaskButton != null) {
             createTaskButton.setOnClickListener(v -> saveTaskToFirestore());
+        }
+    }
+
+    private void fetchUserCompanyId() {
+        if (mAuth.getCurrentUser() != null) {
+            String uid = mAuth.getCurrentUser().getUid();
+            userdb.collection("users").document(uid).get().addOnSuccessListener(documentSnapshot -> {
+                if (documentSnapshot.exists()) {
+                    userCompanyId = documentSnapshot.getString("farmId");
+                    if (userCompanyId == null || userCompanyId.trim().isEmpty()) {
+                        userCompanyId = "";
+                    }
+                } else {
+                    userCompanyId = "";
+                }
+            });
         }
     }
 
@@ -186,6 +207,12 @@ public class AddTaskActivity extends BaseActivity {
             db.collection("tasks").document(existingTaskId).get().addOnSuccessListener(documentSnapshot -> {
                 if (documentSnapshot.exists()) {
                     existingTaskCompleted = documentSnapshot.getBoolean("completed") != null && documentSnapshot.getBoolean("completed");
+                    String cid = documentSnapshot.getString("companyId");
+                    if (cid == null || cid.trim().isEmpty()) {
+                        userCompanyId = "";
+                    } else {
+                        userCompanyId = cid;
+                    }
                     
                     List<Map<String, Object>> checklist = (List<Map<String, Object>>) documentSnapshot.get("checklist");
                     if (checklist != null && !checklist.isEmpty()) {
@@ -212,7 +239,7 @@ public class AddTaskActivity extends BaseActivity {
         ArrayAdapter<String> intervalAdapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, intervals);
         repeatIntervalDropdown.setAdapter(intervalAdapter);
 
-        // Fetch Users (for Multi-Select Assign To)
+        // Fetch Users
         userdb.collection("users").get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 List<String> userList = new ArrayList<>();
@@ -223,7 +250,7 @@ public class AddTaskActivity extends BaseActivity {
                 allUsers = userList.toArray(new String[0]);
                 selectedUsers = new boolean[allUsers.length];
 
-                // Update selectedUsers based on finalSelectedUsers (useful for Edit mode)
+                // Update selectedUsers based on finalSelectedUsers
                 if (allUsers != null) {
                     for (int i = 0; i < allUsers.length; i++) {
                         if (finalSelectedUsers.contains(allUsers[i])) {
@@ -306,6 +333,11 @@ public class AddTaskActivity extends BaseActivity {
             return;
         }
 
+        if (userCompanyId == null) {
+            Toast.makeText(this, "Waiting for company data...", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         String taskId = (existingTaskId != null) ? existingTaskId : UUID.randomUUID().toString();
         
         // Collect checklist items
@@ -329,6 +361,7 @@ public class AddTaskActivity extends BaseActivity {
 
         Map<String, Object> task = new HashMap<>();
         task.put("id", taskId);
+        task.put("companyId", userCompanyId);
         task.put("title", title);
         task.put("description", description);
         task.put("dueDate", dueDate);
