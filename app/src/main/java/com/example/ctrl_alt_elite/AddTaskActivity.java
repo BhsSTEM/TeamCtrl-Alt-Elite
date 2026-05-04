@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-public class AddTaskActivity extends AppCompatActivity {
+public class AddTaskActivity extends BaseActivity {
 
     private FirebaseFirestore db;
     private FirebaseFirestore userdb;
@@ -51,7 +51,7 @@ public class AddTaskActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_add_task);
+        setActivityContent(R.layout.activity_add_task);
 
         // Pointing to the specific 'tasks' database
         db = FirebaseFirestore.getInstance("tasks");

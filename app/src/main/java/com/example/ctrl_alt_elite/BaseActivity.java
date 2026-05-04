@@ -63,7 +63,7 @@ public class BaseActivity extends AppCompatActivity {
                 bottomNav.setSelectedItemId(R.id.nav_map);
             } else if (this instanceof ManageTractorsActivity || this instanceof AddTractorActivity || this instanceof EditTractorActivity){
                 bottomNav.setSelectedItemId(R.id.nav_machines);
-            } else if (this instanceof TasksActivity) {
+            } else if (this instanceof TasksActivity || this instanceof AddTaskActivity) {
                 bottomNav.setSelectedItemId(R.id.nav_tasks);
             }
 
