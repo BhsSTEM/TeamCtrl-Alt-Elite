@@ -5,7 +5,20 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".MainActivity"
+    android:background="@color/background_dark">
+
+    <View
+        android:id="@+id/header_bg2"
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:background="@color/header_green"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0" />
 
     <TextView
         android:id="@+id/Notification"
@@ -13,6 +26,7 @@
         android:layout_height="35dp"
         android:layout_marginStart="24dp"
         android:text="Notifications"
+        android:textColor="#FFFFFF"
         android:textSize="25sp"
         app:autoSizeMaxTextSize="40sp"
         app:autoSizeMinTextSize="25sp"
@@ -23,36 +37,37 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="1.0" />
 
-    <ImageView
-        android:id="@+id/Bell"
-        android:layout_width="26dp"
-        android:layout_height="26dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.958"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.022"
-        app:srcCompat="@drawable/bell" />
-
     <!-- Boundary Lines -->
 
     <!-- Top Section Lines (Weather Box) -->
 
     <ImageView
+        android:id="@+id/Bell"
+        android:layout_width="26dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="@+id/header_bg2"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.958"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0"
+        app:srcCompat="@drawable/bell" />
+
+    <!-- Weather Display UI -->
+
+    <ImageView
         android:id="@+id/NotificationUnderline"
         android:layout_width="170dp"
         android:layout_height="3dp"
+        android:layout_marginBottom="15dp"
         android:scaleType="center"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toBottomOf="@+id/header_bg2"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.071"
+        app:layout_constraintVertical_bias="0.903"
         app:srcCompat="@drawable/line" />
-
-    <!-- Weather Display UI -->
 
     <ImageView
         android:id="@+id/BlueBackground"
@@ -100,7 +115,7 @@
         android:id="@+id/weather_icon"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:scaleType="fitXY"
+        android:scaleType="centerCrop"
         app:layout_constraintBottom_toTopOf="@+id/WeatherBoxBottom"
         app:layout_constraintEnd_toStartOf="@+id/WeatherBoxRight"
         app:layout_constraintHorizontal_bias="0.0"
@@ -225,7 +240,7 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="@id/WeatherBoxLeft"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.381"
+        app:layout_constraintVertical_bias="0.38"
         app:srcCompat="@drawable/line" />
 
     <ImageView
@@ -238,7 +253,7 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="@id/WeatherBoxLeft"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.336"
+        app:layout_constraintVertical_bias="0.332"
         app:srcCompat="@drawable/line" />
 
     <ImageView
@@ -282,8 +297,8 @@
         app:layout_constraintEnd_toEndOf="@id/WeatherBoxRight"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="@id/WeatherBoxLeft"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.085"
+        app:layout_constraintTop_toBottomOf="@+id/NotificationUnderline"
+        app:layout_constraintVertical_bias="0.008"
         app:srcCompat="@drawable/line" />
 
     <ImageView
@@ -364,10 +379,10 @@
         android:scaleType="fitXY"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@id/MapBoxRight"
-        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="@id/MapBoxLeft"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.396"
+        app:layout_constraintVertical_bias="0.402"
         app:srcCompat="@drawable/line" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
