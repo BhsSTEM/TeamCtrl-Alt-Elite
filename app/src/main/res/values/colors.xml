@@ -11,4 +11,8 @@
     <color name="text_grey">#B0B0B0</color>
     <color name="nav_unselected_grey">#757575</color>
     <color name="accent_green">#1B5E20</color>
+    <color name="brand_yellow">#FFDE00</color>
+    <color name="status_green">#4CAF50</color>
+    <color name="dark_grey_input">#444444</color>
+    <color name="hint_white_low_alpha">#66FFFFFF</color>
 </resources>

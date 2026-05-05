@@ -8,6 +8,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -30,6 +31,7 @@ public class EditTractorActivity extends BaseActivity {
     private List<Task> taskList;
     private Tractor currentTractor;
     private FirebaseFirestore db;
+    private boolean alertShown = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +47,7 @@ public class EditTractorActivity extends BaseActivity {
         if (currentTractor != null) {
             populateTractorData();
             fetchMaintenanceTasks();
+            checkMaintenanceStatus();
         } else {
             Toast.makeText(this, getString(R.string.error_machine_data), Toast.LENGTH_SHORT).show();
             finish();
@@ -132,6 +135,17 @@ public class EditTractorActivity extends BaseActivity {
         }
     }
 
+    private void checkMaintenanceStatus() {
+        if ("Maintenance Required".equals(currentTractor.getStatus()) && !alertShown) {
+            new AlertDialog.Builder(this)
+                    .setTitle("Maintenance Required")
+                    .setMessage("This tractor requires immediate maintenance. Please check the schedule.")
+                    .setPositiveButton("OK", null)
+                    .show();
+            alertShown = true;
+        }
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -150,6 +164,7 @@ public class EditTractorActivity extends BaseActivity {
                             updatedTractor.setDocumentId(documentSnapshot.getId());
                             currentTractor = updatedTractor;
                             populateTractorData();
+                            checkMaintenanceStatus();
                         }
                     }
                 });

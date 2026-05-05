@@ -5,14 +5,12 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
@@ -22,6 +20,7 @@ import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
@@ -106,7 +105,6 @@ public class AddTractorActivity extends BaseActivity {
         setActivityContent(R.layout.add_add_tractor);
 
         db = FirebaseFirestore.getInstance();
-        // Initialize with explicit bucket URL from your google-services.json to prevent "not found" errors
         storage = FirebaseStorage.getInstance("gs://team-ctrl-alt-elite.appspot.com");
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
@@ -117,9 +115,13 @@ public class AddTractorActivity extends BaseActivity {
         getPin = findViewById(R.id.getPin);
         titleAddTractor = findViewById(R.id.titleAddTractor);
 
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        if (toolbar != null) {
+            toolbar.setNavigationOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
+        }
+
         View btnUploadImage = findViewById(R.id.btnUploadImage);
-        TextView btnBack = findViewById(R.id.btnBack);
-        Button btnSaveTractor = findViewById(R.id.btnSaveTractor);
+        View btnSaveTractor = findViewById(R.id.btnSaveTractor);
 
         setupYearSpinner();
 
@@ -132,13 +134,12 @@ public class AddTractorActivity extends BaseActivity {
 
             @Override
             public void afterTextChanged(android.text.Editable s) {
-                if (s.length() >= 8 && titleAddTractor.getText().equals("Add Tractor")) {
+                if (s.length() >= 8 && titleAddTractor.getText().toString().equals("Add Tractor")) {
                     pinEntered();
                 }
             }
         });
 
-        // Check if editing existing tractor
         if (getIntent().hasExtra("TRACTOR_DATA")) {
             existingTractor = (Tractor) getIntent().getSerializableExtra("TRACTOR_DATA");
             populateFields(existingTractor);
@@ -146,10 +147,6 @@ public class AddTractorActivity extends BaseActivity {
 
         if (btnUploadImage != null) {
             btnUploadImage.setOnClickListener(v -> checkPermissionsAndShowOptions());
-        }
-        
-        if (btnBack != null) {
-            btnBack.setOnClickListener(v -> finish());
         }
 
         if (btnSaveTractor != null) {
@@ -286,7 +283,6 @@ public class AddTractorActivity extends BaseActivity {
     }
 
     private void uploadBitmap(Bitmap bitmap, String locationStr) {
-        // Explicit path in the default bucket
         StorageReference ref = storage.getReference().child("tractor_images/" + UUID.randomUUID().toString() + ".jpg");
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -337,9 +333,15 @@ public class AddTractorActivity extends BaseActivity {
             tractor.setLocation(locationStr);
         }
 
+        Random random = new Random();
         if (existingTractor == null) {
-            tractor.setStatus("Active");
-            tractor.setFuel(100);
+            // New tractor: randomize fuel and maintenance status
+            tractor.setFuel(random.nextInt(100) + 1);
+            if (random.nextInt(5) == 0) { // 20% chance
+                tractor.setStatus("Maintenance Required");
+            } else {
+                tractor.setStatus("Active");
+            }
         }
         tractor.setLastUpdated(java.text.DateFormat.getDateTimeInstance().format(new java.util.Date()));
 
