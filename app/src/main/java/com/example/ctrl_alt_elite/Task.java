@@ -1,5 +1,6 @@
 package com.example.ctrl_alt_elite;
 
+import com.google.firebase.firestore.PropertyName;
 import java.util.List;
 import java.util.Map;
 
@@ -33,7 +34,10 @@ public class Task {
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
 
+    @PropertyName("CompanyId")
     public String getCompanyId() { return companyId; }
+    
+    @PropertyName("CompanyId")
     public void setCompanyId(String companyId) { this.companyId = companyId; }
 
     public String getTitle() { return title; }

@@ -79,7 +79,7 @@ public class AddTaskActivity extends BaseActivity {
         addChecklistItemButton = findViewById(R.id.addChecklistItemButton);
 
         fetchUserCompanyId();
-        setupDropdowns();
+        setupRepeatIntervalDropdown();
         setupDateAutofill();
         setupChecklistLogic();
 
@@ -105,15 +105,75 @@ public class AddTaskActivity extends BaseActivity {
             String uid = mAuth.getCurrentUser().getUid();
             userdb.collection("users").document(uid).get().addOnSuccessListener(documentSnapshot -> {
                 if (documentSnapshot.exists()) {
-                    userCompanyId = documentSnapshot.getString("farmId");
+                    userCompanyId = documentSnapshot.getString("companyId");
                     if (userCompanyId == null || userCompanyId.trim().isEmpty()) {
                         userCompanyId = "";
                     }
                 } else {
                     userCompanyId = "";
                 }
+                // Once we have the company ID, fetch users from the same company
+                fetchCompanyUsers();
+                fetchCompanyTractors();
             });
         }
+    }
+
+    private void fetchCompanyUsers() {
+        if (userCompanyId == null) return;
+
+        userdb.collection("users")
+                .whereEqualTo("companyId", userCompanyId)
+                .get()
+                .addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                List<String> userList = new ArrayList<>();
+                for (QueryDocumentSnapshot document : task.getResult()) {
+                    String name = document.getString("name");
+                    if (name != null) userList.add(name);
+                }
+                allUsers = userList.toArray(new String[0]);
+                selectedUsers = new boolean[allUsers.length];
+
+                // Update selectedUsers based on finalSelectedUsers
+                if (allUsers != null) {
+                    for (int i = 0; i < allUsers.length; i++) {
+                        if (finalSelectedUsers.contains(allUsers[i])) {
+                            selectedUsers[i] = true;
+                        }
+                    }
+                }
+
+                assignToDropdown.setOnClickListener(v -> showUserSelectionDialog());
+            }
+        });
+    }
+
+    private void fetchCompanyTractors() {
+        // Assuming tractors are also company specific. If not, remove the whereEqualTo
+        db.collection("tractors")
+                .get()
+                .addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                List<String> tractorNames = new ArrayList<>();
+                for (QueryDocumentSnapshot document : task.getResult()) {
+                    tractorNames.add(document.getString("name"));
+                }
+                ArrayAdapter<String> tractorAdapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, tractorNames);
+                tractorDropdown.setAdapter(tractorAdapter);
+            }
+        });
+    }
+
+    private void setupRepeatIntervalDropdown() {
+        String[] intervals = {
+                getString(R.string.repeat_none),
+                getString(R.string.repeat_daily),
+                getString(R.string.repeat_weekly),
+                getString(R.string.repeat_monthly)
+        };
+        ArrayAdapter<String> intervalAdapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, intervals);
+        repeatIntervalDropdown.setAdapter(intervalAdapter);
     }
 
     private void setupChecklistLogic() {
@@ -228,57 +288,9 @@ public class AddTaskActivity extends BaseActivity {
         }
     }
 
-    private void setupDropdowns() {
-        // Repeat Intervals
-        String[] intervals = {
-                getString(R.string.repeat_none),
-                getString(R.string.repeat_daily),
-                getString(R.string.repeat_weekly),
-                getString(R.string.repeat_monthly)
-        };
-        ArrayAdapter<String> intervalAdapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, intervals);
-        repeatIntervalDropdown.setAdapter(intervalAdapter);
-
-        // Fetch Users
-        userdb.collection("users").get().addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                List<String> userList = new ArrayList<>();
-                for (QueryDocumentSnapshot document : task.getResult()) {
-                    String name = document.getString("name");
-                    if (name != null) userList.add(name);
-                }
-                allUsers = userList.toArray(new String[0]);
-                selectedUsers = new boolean[allUsers.length];
-
-                // Update selectedUsers based on finalSelectedUsers
-                if (allUsers != null) {
-                    for (int i = 0; i < allUsers.length; i++) {
-                        if (finalSelectedUsers.contains(allUsers[i])) {
-                            selectedUsers[i] = true;
-                        }
-                    }
-                }
-
-                assignToDropdown.setOnClickListener(v -> showUserSelectionDialog());
-            }
-        });
-
-        // Fetch Tractors
-        db.collection("tractors").get().addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                List<String> tractorNames = new ArrayList<>();
-                for (QueryDocumentSnapshot document : task.getResult()) {
-                    tractorNames.add(document.getString("name"));
-                }
-                ArrayAdapter<String> tractorAdapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, tractorNames);
-                tractorDropdown.setAdapter(tractorAdapter);
-            }
-        });
-    }
-
     private void showUserSelectionDialog() {
         if (allUsers == null || allUsers.length == 0) {
-            Toast.makeText(this, "No users found", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "No users found in your company", Toast.LENGTH_SHORT).show();
             return;
         }
 

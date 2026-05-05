@@ -66,9 +66,9 @@ public class TasksActivity extends BaseActivity {
         String uid = mAuth.getCurrentUser().getUid();
         userdb.collection("users").document(uid).get().addOnCompleteListener(task -> {
             if (task.isSuccessful() && task.getResult() != null) {
-                userCompanyId = task.getResult().getString("farmId");
-                
-                // If farmId is null or empty, use the shared default company ID
+                userCompanyId = task.getResult().getString("companyId");
+
+                // If companyId is null or empty, use the shared default company ID
                 if (userCompanyId == null || userCompanyId.trim().isEmpty()) {
                     userCompanyId = "";
                 }
