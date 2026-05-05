@@ -26,6 +26,8 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import android.content.pm.PackageManager;
 import androidx.annotation.NonNull;
@@ -41,6 +43,7 @@ public class MainActivity extends BaseActivity {
     private ImageView weatherIcon;
     private ImageView linkToNoaa;
     private ImageView mapView;
+    private FirebaseAuth mAuth;
     private FusedLocationProviderClient fusedLocationClient;
     private static final String USER_AGENT = "TeamCtrlAltElite/1.0 (contact@example.com)";
 
@@ -50,19 +53,20 @@ public class MainActivity extends BaseActivity {
         EdgeToEdge.enable(this);
         setActivityContent(R.layout.activity_main);
 
-        // Initialize Weather Views with your updated XML IDs
+        // Initialize Weather Views
         tempText = findViewById(R.id.weather_temp);
         weatherDesc = findViewById(R.id.weather_desc);
         rainInfo = findViewById(R.id.RainInfo);
         weatherIcon = findViewById(R.id.weather_icon);
         linkToNoaa = findViewById(R.id.LinkToNOAA);
-
+        // Initialize Firebase Auth
+        mAuth = FirebaseAuth.getInstance();
         // Initialize FusedLocationProviderClient
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         // Fetch weather using coordinates and finding location
         getLastLocation();
 
-        // Set up the link to Map Activity
+        // Link to Map Activity
         mapView = findViewById(R.id.MapView);
         if (mapView != null){
             mapView.setOnClickListener(v -> {
@@ -146,14 +150,19 @@ public class MainActivity extends BaseActivity {
                     notificationText.setText(String.format("ALERT: %s", alertEvent));
                     notificationText.setTextColor(android.graphics.Color.RED);
                 } else {
-                    notificationText.setText("No Alerts");
-                    notificationText.setTextColor(android.graphics.Color.BLACK);
+                    FirebaseUser user = mAuth.getCurrentUser();
+                    if (user != null) {
+                        notificationText.setText(user.getEmail());
+                    }else {
+                        notificationText.setText("No Alerts");
+                    }
+                    notificationText.setTextColor(android.graphics.Color.WHITE);
                 }
             }
 
             @Override
             public void onFailure(Call<WAlertsResponse> call, Throwable t) {
-                notificationText.setText("Hello User!");
+                notificationText.setText("Notifications Error");
             }
         });
     }
