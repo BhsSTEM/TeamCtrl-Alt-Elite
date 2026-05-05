@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
-
     <uses-feature
         android:name="android.hardware.camera"
         android:required="false" />
@@ -32,7 +31,7 @@
         <activity
             android:name=".SettingsActivity"
             android:exported="false" />
-        <!-- this is the line that changes the main page on boot -->
+        <!-- this is the line that changes the main page on boot blah -->
         <activity
             android:name=".BaseActivity"
             android:exported="false" />
