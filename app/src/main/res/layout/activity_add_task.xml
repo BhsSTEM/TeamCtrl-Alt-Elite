@@ -94,6 +94,52 @@
                     android:minLines="3" />
             </com.google.android.material.textfield.TextInputLayout>
 
+            <!-- Checklist Toggle -->
+            <com.google.android.material.materialswitch.MaterialSwitch
+                android:id="@+id/enableChecklistSwitch"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:text="@string/label_include_checklist"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                app:thumbTint="@color/accent_green" />
+
+            <!-- Checklist Section (Hidden by default) -->
+            <LinearLayout
+                android:id="@+id/checklistSection"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:text="Checklist Items"
+                    android:textColor="@color/white"
+                    android:textSize="20sp"
+                    android:fontFamily="sans-serif-medium" />
+
+                <!-- Container for dynamic checklist item inputs -->
+                <LinearLayout
+                    android:id="@+id/checklistInputContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginBottom="8dp" />
+
+                <Button
+                    android:id="@+id/addChecklistItemButton"
+                    style="@style/Widget.Material3.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:text="+ Add Item"
+                    android:textColor="@color/accent_green" />
+            </LinearLayout>
+
             <!-- Due Date (Split into Day, Month, Year) -->
             <TextView
                 android:layout_width="wrap_content"

@@ -1,20 +1,28 @@
 package com.example.ctrl_alt_elite;
 
+import com.google.firebase.firestore.PropertyName;
+import java.util.List;
+import java.util.Map;
+
 public class Task {
     private String id;
+    private String companyId;
     private String title;
     private String description;
     private String dueDate;
     private String assignedTo;
     private String repeatInterval;
     private String tractorId;
+    private List<Map<String, Object>> checklist;
+    private boolean completed;
 
     public Task() {
         // Required for Firestore
     }
 
-    public Task(String id, String title, String description, String dueDate, String assignedTo, String repeatInterval, String tractorId) {
+    public Task(String id, String companyId, String title, String description, String dueDate, String assignedTo, String repeatInterval, String tractorId) {
         this.id = id;
+        this.companyId = companyId;
         this.title = title;
         this.description = description;
         this.dueDate = dueDate;
@@ -25,6 +33,12 @@ public class Task {
 
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
+
+    @PropertyName("CompanyId")
+    public String getCompanyId() { return companyId; }
+    
+    @PropertyName("CompanyId")
+    public void setCompanyId(String companyId) { this.companyId = companyId; }
 
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
@@ -43,4 +57,10 @@ public class Task {
 
     public String getTractorId() { return tractorId; }
     public void setTractorId(String tractorId) { this.tractorId = tractorId; }
+
+    public List<Map<String, Object>> getChecklist() { return checklist; }
+    public void setChecklist(List<Map<String, Object>> checklist) { this.checklist = checklist; }
+
+    public boolean isCompleted() { return completed; }
+    public void setCompleted(boolean completed) { this.completed = completed; }
 }

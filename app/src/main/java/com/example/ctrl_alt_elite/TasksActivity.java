@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
@@ -23,7 +24,10 @@ public class TasksActivity extends BaseActivity {
     private TaskAdapter adapter;
     private List<Task> taskList;
     private FirebaseFirestore db;
+    private FirebaseFirestore userdb;
+    private FirebaseAuth mAuth;
     private ProgressBar progressBar;
+    private String userCompanyId = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,6 +36,9 @@ public class TasksActivity extends BaseActivity {
 
         // Pointing to the specific 'tasks' database
         db = FirebaseFirestore.getInstance("tasks");
+        userdb = FirebaseFirestore.getInstance("sign-up");
+        mAuth = FirebaseAuth.getInstance();
+        
         taskList = new ArrayList<>();
 
         recyclerView = findViewById(R.id.tasksRecyclerView);
@@ -41,7 +48,7 @@ public class TasksActivity extends BaseActivity {
         adapter = new TaskAdapter(taskList, this::showTaskMenu);
         recyclerView.setAdapter(adapter);
 
-        fetchTasks();
+        fetchUserCompanyIdAndTasks();
 
         FloatingActionButton addTaskFab = findViewById(R.id.addTaskFab);
         if (addTaskFab != null) {
@@ -53,26 +60,47 @@ public class TasksActivity extends BaseActivity {
         }
     }
 
-    private void fetchTasks() {
+    private void fetchUserCompanyIdAndTasks() {
         if (progressBar != null) progressBar.setVisibility(View.VISIBLE);
         
-        db.collection("tasks").addSnapshotListener((value, error) -> {
-            if (progressBar != null) progressBar.setVisibility(View.GONE);
+        String uid = mAuth.getCurrentUser().getUid();
+        userdb.collection("users").document(uid).get().addOnCompleteListener(task -> {
+            if (task.isSuccessful() && task.getResult() != null) {
+                userCompanyId = task.getResult().getString("companyId");
 
-            if (error != null) {
-                Toast.makeText(this, "Error fetching tasks", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            if (value != null) {
-                taskList.clear();
-                for (QueryDocumentSnapshot doc : value) {
-                    Task task = doc.toObject(Task.class);
-                    taskList.add(task);
+                // If companyId is null or empty, use the shared default company ID
+                if (userCompanyId == null || userCompanyId.trim().isEmpty()) {
+                    userCompanyId = "";
                 }
-                adapter.notifyDataSetChanged();
+                
+                fetchTasksForCompany(userCompanyId);
+            } else {
+                if (progressBar != null) progressBar.setVisibility(View.GONE);
+                Toast.makeText(this, "Error fetching user data.", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void fetchTasksForCompany(String companyId) {
+        db.collection("tasks")
+            .whereEqualTo("companyId", companyId)
+            .addSnapshotListener((value, error) -> {
+                if (progressBar != null) progressBar.setVisibility(View.GONE);
+
+                if (error != null) {
+                    Toast.makeText(this, "Error fetching tasks", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                if (value != null) {
+                    taskList.clear();
+                    for (QueryDocumentSnapshot doc : value) {
+                        Task task = doc.toObject(Task.class);
+                        taskList.add(task);
+                    }
+                    adapter.notifyDataSetChanged();
+                }
+            });
     }
 
     private void showTaskMenu(View view, Task task) {
