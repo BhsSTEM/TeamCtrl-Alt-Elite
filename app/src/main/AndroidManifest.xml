@@ -31,7 +31,7 @@
         <activity
             android:name=".SettingsActivity"
             android:exported="false" />
-        <!-- this is the line that changes the main page on boot blah -->
+
         <activity
             android:name=".BaseActivity"
             android:exported="false" />
@@ -72,13 +72,11 @@
 
         <activity
             android:name=".evansMapActivity"
-            android:exported="false">
-        </activity>
+            android:exported="false"/>
 
         <activity
             android:name=".signUpPage"
-            android:exported="false">
-        </activity>
+            android:exported="false"/>
 
     </application>
 
