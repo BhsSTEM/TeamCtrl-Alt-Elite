@@ -2,8 +2,409 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#FBFBFB"
     tools:context=".EditTractorActivity">
+
+    <!-- Header / Toolbar -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:background="@android:color/white"
+        android:elevation="2dp"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/btnBack"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="8dp"
+            android:padding="14dp"
+            android:src="@drawable/abc_ic_ab_back_material"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="@android:color/black" />
+
+        <TextView
+            android:id="@+id/txtTractorTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="John Deere 5075E"
+            android:textColor="@android:color/black"
+            android:textSize="18sp"
+            android:fontFamily="sans-serif-medium"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/btnChangeInfo"
+            app:layout_constraintStart_toEndOf="@+id/btnBack"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/btnChangeInfo"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginEnd="16dp"
+            android:gravity="center"
+            android:text="Change Info"
+            android:textColor="#2E7D32"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:clipToPadding="false"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <!-- Tractor Image -->
+            <ImageView
+                android:id="@+id/imgTractorLarge"
+                android:layout_width="match_parent"
+                android:layout_height="240dp"
+                android:layout_marginBottom="12dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/pngimg_com___tractor_png101303_removebg_preview" />
+
+            <!-- Status Badge (Needs Attention) -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/abc_cab_background_internal_bg"
+                android:backgroundTint="#E8F5E9"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="6dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@android:drawable/ic_dialog_info"
+                    app:tint="#2E7D32" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="6dp"
+                    android:text="Needs Attention"
+                    android:textColor="#2E7D32"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <!-- Details Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:strokeColor="#E0E0E0"
+                app:strokeWidth="1dp">
+
+                <TableLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="16dp"
+                    android:stretchColumns="1">
+
+                    <!-- Year -->
+                    <TableRow android:paddingVertical="14dp">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:drawablePadding="16dp"
+                            android:text="Year"
+                            android:textColor="#616161"
+                            android:textSize="15sp"
+                            app:drawableStartCompat="@android:drawable/ic_menu_today"
+                            app:drawableTint="#757575"/>
+                        <TextView
+                            android:id="@+id/txtYear"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="end"
+                            android:text="2021"
+                            android:textColor="@android:color/black"
+                            android:textSize="15sp"
+                            android:fontFamily="sans-serif-medium" />
+                    </TableRow>
+
+                    <View android:layout_height="1dp" android:background="#F1F1F1" />
+
+                    <!-- Model Number -->
+                    <TableRow android:paddingVertical="14dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:drawablePadding="16dp"
+                            android:text="Model Number"
+                            android:textColor="#616161"
+                            android:textSize="15sp"
+                            app:drawableStartCompat="?attr/actionModePasteDrawable"
+                            app:drawableTint="#757575" />
+                        <TextView
+                            android:id="@+id/txtModelNumber"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="end"
+                            android:text="5075E"
+                            android:textColor="@android:color/black"
+                            android:textSize="15sp"
+                            android:fontFamily="sans-serif-medium" />
+                    </TableRow>
+
+                    <View android:layout_height="1dp" android:background="#F1F1F1" />
+
+                    <!-- PIN -->
+                    <TableRow android:paddingVertical="14dp">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:drawablePadding="16dp"
+                            android:text="Pin"
+                            android:textColor="#616161"
+                            android:textSize="15sp"
+                            app:drawableStartCompat="@android:drawable/ic_lock_lock"
+                            app:drawableTint="#757575" />
+                        <TextView
+                            android:id="@+id/txtPin"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="end"
+                            android:ellipsize="end"
+                            android:singleLine="true"
+                            android:text="1PY5075EKM123..."
+                            android:textColor="@android:color/black"
+                            android:textSize="15sp"
+                            android:fontFamily="sans-serif-medium" />
+                    </TableRow>
+
+                    <View android:layout_height="1dp" android:background="#F1F1F1" />
+
+                    <!-- Fuel -->
+                    <TableRow android:paddingVertical="14dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:drawablePadding="16dp"
+                            android:text="Fuel"
+                            android:textColor="#616161"
+                            android:textSize="15sp"
+                            app:drawableStartCompat="@drawable/gs_ev_station_vd_24"
+                            app:drawableTint="#757575" />
+                        <TextView
+                            android:id="@+id/txtFuel"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="end"
+                            android:text="65% (52/80 gal)"
+                            android:textColor="@android:color/black"
+                            android:textSize="15sp"
+                            android:fontFamily="sans-serif-medium" />
+                    </TableRow>
+
+                </TableLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Maintenance Section -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="28dp"
+                android:layout_marginBottom="12dp"
+                android:text="Maintenance Overview"
+                android:textColor="@android:color/black"
+                android:textSize="17sp"
+                android:fontFamily="sans-serif-bold" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:strokeColor="#E0E0E0"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="16dp">
+                        <ImageView
+                            android:id="@+id/iconWarn"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:src="@android:drawable/stat_sys_warning"
+                            app:tint="#F57C00"/>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_toEndOf="@id/iconWarn"
+                            android:layout_marginStart="16dp"
+                            android:text="2 items need attention"
+                            android:textColor="@android:color/black"
+                            android:fontFamily="sans-serif-medium"/>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_below="@id/iconWarn"
+                            android:layout_alignStart="@id/iconWarn"
+                            android:layout_marginStart="40dp"
+                            android:layout_marginTop="-4dp"
+                            android:text="Address soon to avoid issues"
+                            android:textSize="12sp"
+                            android:textColor="#757575"/>
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true"
+                            android:src="@android:drawable/ic_media_next"
+                            app:tint="#BDBDBD"/>
+                    </RelativeLayout>
+
+                    <View android:layout_height="1dp" android:background="#F1F1F1" android:layout_marginHorizontal="16dp"/>
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="16dp">
+
+                        <ImageView
+                            android:id="@+id/iconOk"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:src="@android:drawable/star_big_on"
+                            app:tint="#2E7D32" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_toEndOf="@id/iconOk"
+                            android:layout_marginStart="16dp"
+                            android:text="5 items are good"
+                            android:textColor="@android:color/black"
+                            android:fontFamily="sans-serif-medium"/>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_below="@id/iconOk"
+                            android:layout_alignStart="@id/iconOk"
+                            android:layout_marginStart="40dp"
+                            android:layout_marginTop="-4dp"
+                            android:text="Keep it up!"
+                            android:textSize="12sp"
+                            android:textColor="#757575"/>
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true"
+                            android:src="@android:drawable/ic_media_next"
+                            app:tint="#BDBDBD"/>
+                    </RelativeLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Guide Box -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:cardBackgroundColor="#F1F8E9"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:strokeColor="#C8E6C9"
+                app:strokeWidth="1dp">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="16dp"
+                    android:gravity="center_vertical">
+
+                    <ImageView
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:src="@android:drawable/ic_menu_manage"
+                        app:tint="#2E7D32" />
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="16dp"
+                        android:orientation="vertical">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Inspection &amp; Repair Guide"
+                            android:textStyle="bold"
+                            android:textColor="#1B5E20"
+                            android:textSize="14sp"/>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Step-by-step guides from John Deere"
+                            android:textSize="12sp"
+                            android:textColor="#388E3C"/>
+                    </LinearLayout>
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@android:drawable/ic_menu_send"
+                        app:tint="#2E7D32"/>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Tasks -->
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="32dp"
+                android:layout_marginBottom="8dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Tasks"
+                    android:textColor="@android:color/black"
+                    android:textSize="17sp"
+                    android:fontFamily="sans-serif-bold" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:text="View all"
+                    android:textColor="#2E7D32"
+                    android:textStyle="bold" />
+            </RelativeLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvTasks"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"
+                tools:itemCount="2"
+                tools:listitem="@layout/item_task" />
+
+        </LinearLayout>
+    </ScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>
