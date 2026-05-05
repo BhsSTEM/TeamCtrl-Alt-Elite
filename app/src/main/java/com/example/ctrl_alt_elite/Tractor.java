@@ -16,6 +16,7 @@ public class Tractor implements Serializable {
     private String location;
     private String imageUrl;
     private String userId;
+    private double engineHours;
 
     public Tractor() {}
 
@@ -64,4 +65,7 @@ public class Tractor implements Serializable {
     
     @PropertyName("user")
     public void setUser(String userId) { this.userId = userId; }
+
+    public double getEngineHours() { return engineHours; }
+    public void setEngineHours(double engineHours) { this.engineHours = engineHours; }
 }

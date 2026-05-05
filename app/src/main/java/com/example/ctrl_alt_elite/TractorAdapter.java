@@ -61,7 +61,7 @@ public class TractorAdapter extends RecyclerView.Adapter<TractorAdapter.TractorV
         // Edit button is always visible
         holder.btnEdit.setVisibility(View.VISIBLE);
         holder.btnEdit.setOnClickListener(v -> {
-            Intent intent = new Intent(context, AddTractorActivity.class);
+            Intent intent = new Intent(context, EditTractorActivity.class);
             intent.putExtra("TRACTOR_DATA", tractor);
             context.startActivity(intent);
         });

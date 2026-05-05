@@ -123,21 +123,15 @@ public class AddTractorActivity extends BaseActivity {
 
         setupYearSpinner();
 
-        //asks to autofill data when pin entered
         getPin.addTextChangedListener(new android.text.TextWatcher() {
-            //ignore this but keep
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
             @Override
-            //this one too, ignore it but keeep
             public void onTextChanged(CharSequence s, int start, int before, int count) {}
 
-
             @Override
-            //this is the thing i care about, the other two were just needed to have this
             public void afterTextChanged(android.text.Editable s) {
-                // number can be anything, just however long pins should be
                 if (s.length() >= 8 && titleAddTractor.getText().equals("Add Tractor")) {
                     pinEntered();
                 }

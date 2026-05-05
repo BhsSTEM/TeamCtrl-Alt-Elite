@@ -89,9 +89,9 @@
                         android:layout_height="44dp"
                         android:layout_marginTop="8dp"
                         android:background="@android:drawable/editbox_background"
-                        android:hint="•••••••"
+                        android:hint="00000000"
                         android:importantForAutofill="no"
-                        android:inputType="numberPassword"
+                        android:inputType="textCapCharacters"
                         android:paddingHorizontal="12dp"
                         android:textSize="14sp" />
 
