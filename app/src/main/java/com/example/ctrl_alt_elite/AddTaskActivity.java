@@ -41,7 +41,7 @@ public class AddTaskActivity extends BaseActivity {
     private MaterialSwitch enableChecklistSwitch;
     private LinearLayout checklistSection, checklistInputContainer;
     private Button addChecklistItemButton;
-    
+
     private String existingTaskId = null; // Used if we are in Edit mode
     private boolean existingTaskCompleted = false;
     private String userCompanyId = null;
@@ -191,7 +191,7 @@ public class AddTaskActivity extends BaseActivity {
         View itemView = LayoutInflater.from(this).inflate(R.layout.item_checklist_input, checklistInputContainer, false);
         TextInputEditText itemInput = itemView.findViewById(R.id.checklistItemInput);
         ImageButton removeButton = itemView.findViewById(R.id.removeChecklistItemButton);
-        
+
         if (itemInput != null) {
             itemInput.setText(initialText);
         }
@@ -273,7 +273,7 @@ public class AddTaskActivity extends BaseActivity {
                     } else {
                         userCompanyId = cid;
                     }
-                    
+
                     List<Map<String, Object>> checklist = (List<Map<String, Object>>) documentSnapshot.get("checklist");
                     if (checklist != null && !checklist.isEmpty()) {
                         enableChecklistSwitch.setChecked(true);

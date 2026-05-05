@@ -35,11 +35,12 @@
         android:text="Add Tractor"
         android:textAllCaps="false"
         android:textColor="@color/white"
-        android:textSize="18sp"
+        android:textSize="12sp"
         app:cornerRadius="8dp"
         app:icon="@drawable/ic_add"
         app:layout_constraintBottom_toBottomOf="@+id/header_bg"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/title_manage_tractors"
         app:layout_constraintTop_toTopOf="@id/header_bg" />
 
     <TextView

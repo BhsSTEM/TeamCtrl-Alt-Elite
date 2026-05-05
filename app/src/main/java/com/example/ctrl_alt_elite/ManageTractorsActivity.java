@@ -5,11 +5,6 @@ import android.os.Bundle;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.button.MaterialButton;
-import com.google.firebase.Firebase;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -18,6 +13,8 @@ import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.QuerySnapshot;
 import android.util.Log;
 import androidx.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ManageTractorsActivity extends BaseActivity {
 
@@ -38,15 +35,13 @@ public class ManageTractorsActivity extends BaseActivity {
             });
         }
 
-        // Setup RecyclerView
         RecyclerView recyclerView = findViewById(R.id.tracters);
         if (recyclerView != null) {
             recyclerView.setLayoutManager(new LinearLayoutManager(this));
-            adapter = new TractorAdapter(tractorList);
+            adapter = new TractorAdapter(tractorList, false); // explicit false for isMapContext
             recyclerView.setAdapter(adapter);
         }
         listenToFirestore();
-
     }
 
     private void listenToFirestore() {
@@ -55,10 +50,10 @@ public class ManageTractorsActivity extends BaseActivity {
             return;
         }
 
-        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
         db.collection("tractors")
-                .whereEqualTo("user", userId)
+                .whereEqualTo("user", currentUserId)
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
                     public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
@@ -71,6 +66,7 @@ public class ManageTractorsActivity extends BaseActivity {
                             tractorList.clear();
                             for (QueryDocumentSnapshot doc : value) {
                                 Tractor tractor = doc.toObject(Tractor.class);
+                                tractor.setDocumentId(doc.getId()); // Store ID for editing
                                 tractorList.add(tractor);
                             }
                             adapter.notifyDataSetChanged();
@@ -80,4 +76,9 @@ public class ManageTractorsActivity extends BaseActivity {
                 });
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        setupNavigation();
+    }
 }
