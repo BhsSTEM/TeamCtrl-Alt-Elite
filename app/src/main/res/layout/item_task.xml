@@ -58,7 +58,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:textColor="@color/accent_green"
+                    android:textColor="@color/text_grey"
                     android:textSize="11sp"
                     android:visibility="gone"
                     tools:text="Assigned to: John | Tractor: 8R"
@@ -85,7 +85,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textSize="11sp"
-                    android:textColor="@color/accent_green"
+                    android:textColor="@color/text_grey"
                     android:textStyle="italic"
                     android:visibility="gone"
                     tools:text="Weekly"
@@ -140,7 +140,7 @@
                     android:layout_height="wrap_content"
                     android:text="Mark All Done"
                     android:textColor="@color/accent_green"
-                    android:textSize="12sp" />
+                    android:textSize="18sp" />
 
             </LinearLayout>
 

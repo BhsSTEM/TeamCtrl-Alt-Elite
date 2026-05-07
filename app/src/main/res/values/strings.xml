@@ -126,4 +126,14 @@
     <string name="fuel_percent_format">%1$d%%</string>
     <string name="error_machine_data">Error: Machine data not found</string>
     <string name="no_recent_service">No recent service</string>
+
+    <!-- Settings Company ID -->
+    <string name="settings_change">Change</string>
+    <string name="settings_change_company_id_title">Change Company ID</string>
+    <string name="settings_new_company_id_hint">Enter 6-digit Company ID</string>
+    <string name="settings_save">Save</string>
+    <string name="settings_id_empty_error">ID cannot be empty</string>
+    <string name="settings_id_update_success">Company ID updated successfully</string>
+    <string name="settings_id_update_error">Failed to update Company ID</string>
+    <string name="settings_id_length_error">ID must be exactly 6 digits</string>
 </resources>
