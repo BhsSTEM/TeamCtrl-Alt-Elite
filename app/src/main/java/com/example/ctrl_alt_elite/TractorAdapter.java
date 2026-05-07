@@ -58,10 +58,10 @@ public class TractorAdapter extends RecyclerView.Adapter<TractorAdapter.TractorV
             holder.imgTractor.setImageResource(R.drawable.pngimg_com___tractor_png101303_removebg_preview);
         }
 
-        // Edit button is always visible
+        // Edit button now opens the EditTractorActivity
         holder.btnEdit.setVisibility(View.VISIBLE);
         holder.btnEdit.setOnClickListener(v -> {
-            Intent intent = new Intent(context, AddTractorActivity.class);
+            Intent intent = new Intent(context, EditTractorActivity.class);
             intent.putExtra("TRACTOR_DATA", tractor);
             context.startActivity(intent);
         });
@@ -85,6 +85,13 @@ public class TractorAdapter extends RecyclerView.Adapter<TractorAdapter.TractorV
                 showDeleteConfirmationDialog(context, tractor);
             });
         }
+
+        // Click on the whole item can also open EditTractorActivity
+        holder.itemView.setOnClickListener(v -> {
+            Intent intent = new Intent(context, EditTractorActivity.class);
+            intent.putExtra("TRACTOR_DATA", tractor);
+            context.startActivity(intent);
+        });
     }
 
     private void showDeleteConfirmationDialog(Context context, Tractor tractor) {

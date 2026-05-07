@@ -97,10 +97,11 @@
                     app:tint="#2E7D32" />
 
                 <TextView
+                    android:id="@+id/txtStatus"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="6dp"
-                    android:text="Needs Attention"
+                    android:text="Active"
                     android:textColor="#2E7D32"
                     android:textSize="13sp"
                     android:textStyle="bold" />
@@ -214,7 +215,55 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:gravity="end"
-                            android:text="65% (52/80 gal)"
+                            android:text="65%"
+                            android:textColor="@android:color/black"
+                            android:textSize="15sp"
+                            android:fontFamily="sans-serif-medium" />
+                    </TableRow>
+
+                    <View android:layout_height="1dp" android:background="#F1F1F1" />
+
+                    <!-- Software -->
+                    <TableRow android:paddingVertical="14dp">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:drawablePadding="16dp"
+                            android:text="Software"
+                            android:textColor="#616161"
+                            android:textSize="15sp"
+                            app:drawableStartCompat="@android:drawable/ic_menu_info_details"
+                            app:drawableTint="#757575" />
+                        <TextView
+                            android:id="@+id/txtSoftwareStatus"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="end"
+                            android:text="Up to date"
+                            android:textColor="@android:color/black"
+                            android:textSize="15sp"
+                            android:fontFamily="sans-serif-medium" />
+                    </TableRow>
+
+                    <View android:layout_height="1dp" android:background="#F1F1F1" />
+
+                    <!-- Firmware -->
+                    <TableRow android:paddingVertical="14dp">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:drawablePadding="16dp"
+                            android:text="Firmware"
+                            android:textColor="#616161"
+                            android:textSize="15sp"
+                            app:drawableStartCompat="@android:drawable/ic_menu_save"
+                            app:drawableTint="#757575" />
+                        <TextView
+                            android:id="@+id/txtFirmwareStatus"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="end"
+                            android:text="Up to date"
                             android:textColor="@android:color/black"
                             android:textSize="15sp"
                             android:fontFamily="sans-serif-medium" />
@@ -328,9 +377,13 @@
 
             <!-- Guide Box -->
             <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardGuide"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
                 app:cardBackgroundColor="#F1F8E9"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="0dp"

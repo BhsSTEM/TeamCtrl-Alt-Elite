@@ -9,6 +9,8 @@ import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -38,7 +40,9 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 
@@ -47,9 +51,7 @@ public class AddTractorActivity extends BaseActivity {
     private ImageView ivTractorImage;
     private Spinner spinnerYear;
     
-    private EditText getTractorName;
-    private EditText getModelNumber;
-    private EditText getPin;
+    private EditText getTractorName, getModelNumber, getPin, getFuel, getMaintenanceStatus, getSoftwareStatus, getFirmwareStatus;
     private TextView titleAddTractor;
 
     private FirebaseFirestore db;
@@ -59,6 +61,17 @@ public class AddTractorActivity extends BaseActivity {
 
     private Uri selectedImageUri;
     private Bitmap selectedBitmap;
+
+    private static final String BASE_GUIDE_URL = "https://www.deere.com/en/parts-and-service/manuals-and-training/quick-reference-guides/";
+    
+    private static final Map<String, String> GUIDE_MAPPING = new HashMap<String, String>() {{
+        put("Row Crop", "row-crop-tractors.html");
+        put("Compact Utility", "compact-utility-tractors.html");
+        put("Utility Task", "utility-tractors.html");
+        put("Scraper Special", "scraper-special-tractors.html");
+        put("Two-Track", "track-tractors.html");
+        put("Small Frame", "small-frame-tractors.html");
+    }};
 
     private final ActivityResultLauncher<Intent> pickImageLauncher =
             registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
@@ -106,7 +119,6 @@ public class AddTractorActivity extends BaseActivity {
         setActivityContent(R.layout.add_add_tractor);
 
         db = FirebaseFirestore.getInstance();
-        // Initialize with explicit bucket URL from your google-services.json to prevent "not found" errors
         storage = FirebaseStorage.getInstance("gs://team-ctrl-alt-elite.appspot.com");
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
@@ -115,6 +127,10 @@ public class AddTractorActivity extends BaseActivity {
         getTractorName = findViewById(R.id.getTractorName);
         getModelNumber = findViewById(R.id.getModelNumber);
         getPin = findViewById(R.id.getPin);
+        getFuel = findViewById(R.id.getFuel);
+        getMaintenanceStatus = findViewById(R.id.getMaintenanceStatus);
+        getSoftwareStatus = findViewById(R.id.getSoftwareStatus);
+        getFirmwareStatus = findViewById(R.id.getFirmwareStatus);
         titleAddTractor = findViewById(R.id.titleAddTractor);
 
         View btnUploadImage = findViewById(R.id.btnUploadImage);
@@ -123,15 +139,13 @@ public class AddTractorActivity extends BaseActivity {
 
         setupYearSpinner();
 
-        getPin.addTextChangedListener(new android.text.TextWatcher() {
+        getPin.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {}
-
             @Override
-            public void afterTextChanged(android.text.Editable s) {
+            public void afterTextChanged(Editable s) {
                 if (s.length() >= 8 && titleAddTractor.getText().equals("Add Tractor")) {
                     pinEntered();
                 }
@@ -168,25 +182,35 @@ public class AddTractorActivity extends BaseActivity {
                 .show();
     }
     private void autoFill(){
-        List<String> tractorNames = Arrays.asList(
-                "Composter", "Row Crop", "Scraper Special", "Utility Task", "Compact Utility", "Two-Track", "Small Frame", "Legacy Series", "Harvester", "PowerTech"
-        );
-        Random rando = new Random();
-        getTractorName.setText(tractorNames.get(rando.nextInt(tractorNames.size())));
-        getModelNumber.setText(String.valueOf(rando.nextInt(9000)+1000));
+        List<String> tractorNames = new ArrayList<>(GUIDE_MAPPING.keySet());
+        tractorNames.addAll(Arrays.asList("Legacy Series", "Harvester", "PowerTech"));
+        
+        Random random = new Random();
+        getTractorName.setText(tractorNames.get(random.nextInt(tractorNames.size())));
+        getModelNumber.setText(String.valueOf(random.nextInt(9000)+1000));
         if (spinnerYear.getAdapter() != null){
             ArrayAdapter adapter = (ArrayAdapter) spinnerYear.getAdapter();
-            int position = adapter.getPosition(String.valueOf(rando.nextInt(37) + 1990));
+            int position = adapter.getPosition(String.valueOf(random.nextInt(37) + 1990));
             if (position >= 0) spinnerYear.setSelection(position);
         }
+        
+        getFuel.setText(String.valueOf(random.nextInt(101)));
+        getMaintenanceStatus.setText(random.nextBoolean() ? "Active" : "Needs Attention");
+        getSoftwareStatus.setText(random.nextInt(10) < 8 ? "Up to date" : "Update Required");
+        getFirmwareStatus.setText(random.nextInt(10) < 8 ? "Up to date" : "Update Required");
+
         Toast.makeText(this, "Tractor details auto-filled!", Toast.LENGTH_SHORT).show();
     }
 
     private void populateFields(Tractor tractor) {
-        if (titleAddTractor != null) titleAddTractor.setText("Edit Tractor");
+        if (titleAddTractor != null) titleAddTractor.setText("Edit Tractor Details");
         getTractorName.setText(tractor.getName());
         getModelNumber.setText(tractor.getModel());
         getPin.setText(tractor.getPin());
+        getFuel.setText(String.valueOf(tractor.getFuel()));
+        getMaintenanceStatus.setText(tractor.getStatus());
+        getSoftwareStatus.setText(tractor.getSoftwareStatus());
+        getFirmwareStatus.setText(tractor.getFirmwareStatus());
         
         ArrayAdapter adapter = (ArrayAdapter) spinnerYear.getAdapter();
         int position = adapter.getPosition(String.valueOf(tractor.getYear()));
@@ -285,7 +309,6 @@ public class AddTractorActivity extends BaseActivity {
     }
 
     private void uploadBitmap(Bitmap bitmap, String locationStr) {
-        // Explicit path in the default bucket
         StorageReference ref = storage.getReference().child("tractor_images/" + UUID.randomUUID().toString() + ".jpg");
         
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -306,20 +329,34 @@ public class AddTractorActivity extends BaseActivity {
         });
     }
 
+    private String generateGuideUrl(String name) {
+        for (Map.Entry<String, String> entry : GUIDE_MAPPING.entrySet()) {
+            if (name.toLowerCase().contains(entry.getKey().toLowerCase())) {
+                return BASE_GUIDE_URL + entry.getValue();
+            }
+        }
+        return BASE_GUIDE_URL;
+    }
+
     private void saveTractorToFirebase(String locationStr, String imageUrl) {
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
         String uid = mAuth.getUid();
         String name = getTractorName.getText().toString().trim();
         String model = getModelNumber.getText().toString().trim();
         String pin = getPin.getText().toString().trim();
+        String fuelStr = getFuel.getText().toString().trim();
+        String status = getMaintenanceStatus.getText().toString().trim();
+        String software = getSoftwareStatus.getText().toString().trim();
+        String firmware = getFirmwareStatus.getText().toString().trim();
         String yearStr = spinnerYear.getSelectedItem().toString();
 
         if (name.isEmpty() || model.isEmpty() || pin.isEmpty()) {
-            Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Please fill in required fields", Toast.LENGTH_SHORT).show();
             return;
         }
 
         int year = Integer.parseInt(yearStr);
+        int fuel = fuelStr.isEmpty() ? 0 : Integer.parseInt(fuelStr);
 
         Tractor tractor = (existingTractor != null) ? existingTractor : new Tractor();
         tractor.setUser(uid);
@@ -327,6 +364,12 @@ public class AddTractorActivity extends BaseActivity {
         tractor.setModel(model);
         tractor.setPin(pin);
         tractor.setYear(year);
+        tractor.setFuel(fuel);
+        tractor.setStatus(status.isEmpty() ? "Active" : status);
+        tractor.setSoftwareStatus(software.isEmpty() ? "Up to date" : software);
+        tractor.setFirmwareStatus(firmware.isEmpty() ? "Up to date" : firmware);
+        
+        tractor.setGuideUrl(generateGuideUrl(name));
 
         if (imageUrl != null) {
             tractor.setImageUrl(imageUrl);
@@ -336,10 +379,6 @@ public class AddTractorActivity extends BaseActivity {
             tractor.setLocation(locationStr);
         }
 
-        if (existingTractor == null) {
-            tractor.setStatus("Active");
-            tractor.setFuel(100);
-        }
         tractor.setLastUpdated(java.text.DateFormat.getDateTimeInstance().format(new java.util.Date()));
 
         if (existingTractor != null && existingTractor.getDocumentId() != null) {

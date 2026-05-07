@@ -16,6 +16,9 @@ public class Tractor implements Serializable {
     private String location;
     private String imageUrl;
     private String userId;
+    private String guideUrl;
+    private String softwareStatus;
+    private String firmwareStatus;
 
     public Tractor() {}
 
@@ -64,4 +67,13 @@ public class Tractor implements Serializable {
     
     @PropertyName("user")
     public void setUser(String userId) { this.userId = userId; }
+
+    public String getGuideUrl() { return guideUrl; }
+    public void setGuideUrl(String guideUrl) { this.guideUrl = guideUrl; }
+
+    public String getSoftwareStatus() { return softwareStatus; }
+    public void setSoftwareStatus(String softwareStatus) { this.softwareStatus = softwareStatus; }
+
+    public String getFirmwareStatus() { return firmwareStatus; }
+    public void setFirmwareStatus(String firmwareStatus) { this.firmwareStatus = firmwareStatus; }
 }

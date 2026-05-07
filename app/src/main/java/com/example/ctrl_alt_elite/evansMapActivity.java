@@ -1,7 +1,6 @@
 package com.example.ctrl_alt_elite;
 
 import android.animation.ValueAnimator;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
@@ -17,8 +16,6 @@ import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -44,19 +41,15 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 public class evansMapActivity extends BaseActivity implements OnMapReadyCallback {
 
@@ -64,7 +57,6 @@ public class evansMapActivity extends BaseActivity implements OnMapReadyCallback
     private GoogleMap map;
     private FusedLocationProviderClient fusedLocationProviderClient;
 
-    private final LatLng defaultLocation = new LatLng(41.5245, -90.5157);
     private static final int DEFAULT_ZOOM = 15;
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     private boolean locationPermissionGranted;
@@ -72,7 +64,7 @@ public class evansMapActivity extends BaseActivity implements OnMapReadyCallback
 
     private int collapsedHeight = 0;
     private FirebaseFirestore db;
-    private List<Tractor> tractorList = new ArrayList<>();
+    private final List<Tractor> tractorList = new ArrayList<>();
     private TractorAdapter adapter;
     private ListenerRegistration tractorListener;
 
@@ -186,7 +178,7 @@ public class evansMapActivity extends BaseActivity implements OnMapReadyCallback
     }
 
     @Override
-    public void onMapReady(GoogleMap googleMap) {
+    public void onMapReady(@NonNull GoogleMap googleMap) {
         this.map = googleMap;
 
         this.map.setOnMapClickListener(latLng -> {
@@ -214,39 +206,36 @@ public class evansMapActivity extends BaseActivity implements OnMapReadyCallback
 
         tractorListener = db.collection("tractors")
                 .whereEqualTo("user", FirebaseAuth.getInstance().getCurrentUser().getUid())
-                .addSnapshotListener(new EventListener<QuerySnapshot>() {
-                    @Override
-                    public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
-                        if (error != null) {
-                            Log.e(TAG, "Listen failed.", error);
-                            return;
-                        }
+                .addSnapshotListener((value, error) -> {
+                    if (error != null) {
+                        Log.e(TAG, "Listen failed.", error);
+                        return;
+                    }
 
-                        if (value != null) {
-                            tractorList.clear();
-                            if (map != null) map.clear(); // Clear existing markers
+                    if (value != null) {
+                        tractorList.clear();
+                        if (map != null) map.clear(); // Clear existing markers
 
-                            for (QueryDocumentSnapshot document : value) {
-                                try {
-                                    Tractor tractor = document.toObject(Tractor.class);
-                                    tractor.setDocumentId(document.getId());
+                        for (QueryDocumentSnapshot document : value) {
+                            try {
+                                Tractor tractor = document.toObject(Tractor.class);
+                                tractor.setDocumentId(document.getId());
 
-                                    Object locObj = document.get("location");
-                                    if (locObj instanceof GeoPoint) {
-                                        GeoPoint gp = (GeoPoint) locObj;
-                                        tractor.setLocation(gp.getLatitude() + "," + gp.getLongitude());
-                                    } else if (locObj instanceof String) {
-                                        tractor.setLocation((String) locObj);
-                                    }
-
-                                    tractorList.add(tractor);
-                                    addTractorMarker(tractor);
-                                } catch (Exception e) {
-                                    Log.e(TAG, "Error parsing tractor: " + document.getId(), e);
+                                Object locObj = document.get("location");
+                                if (locObj instanceof GeoPoint) {
+                                    GeoPoint gp = (GeoPoint) locObj;
+                                    tractor.setLocation(gp.getLatitude() + "," + gp.getLongitude());
+                                } else if (locObj instanceof String) {
+                                    tractor.setLocation((String) locObj);
                                 }
+
+                                tractorList.add(tractor);
+                                addTractorMarker(tractor);
+                            } catch (Exception e) {
+                                Log.e(TAG, "Error parsing tractor: " + document.getId(), e);
                             }
-                            if (adapter != null) adapter.notifyDataSetChanged();
                         }
+                        if (adapter != null) adapter.notifyDataSetChanged();
                     }
                 });
     }
@@ -401,11 +390,7 @@ public class evansMapActivity extends BaseActivity implements OnMapReadyCallback
     private void updateLocationUI() {
         if (map == null) return;
         try {
-            if (locationPermissionGranted) {
-                map.setMyLocationEnabled(true);
-            } else {
-                map.setMyLocationEnabled(false);
-            }
+            map.setMyLocationEnabled(locationPermissionGranted);
         } catch (SecurityException e) {
             Log.e(TAG, "Exception: " + e.getMessage());
         }
