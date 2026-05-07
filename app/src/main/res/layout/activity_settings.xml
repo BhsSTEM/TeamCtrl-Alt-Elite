@@ -78,13 +78,31 @@
                     android:textColor="@color/white"
                     android:textSize="14sp" />
 
-                <TextView
-                    android:id="@+id/settingsFarmPin"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Company ID: "
-                    android:textColor="@color/white"
-                    android:textSize="14sp" />
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="8dp">
+
+                    <TextView
+                        android:id="@+id/settingsFarmPin"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Company ID: "
+                        android:textColor="@color/white"
+                        android:textSize="14sp" />
+
+                    <Button
+                        android:id="@+id/changeCompanyIdButton"
+                        style="@style/Widget.Material3.Button.TextButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/settings_change"
+                        android:textColor="@color/accent_green"
+                        android:textSize="18sp" />
+                </LinearLayout>
 
                 <Button
                     android:id="@+id/signOutButton"
