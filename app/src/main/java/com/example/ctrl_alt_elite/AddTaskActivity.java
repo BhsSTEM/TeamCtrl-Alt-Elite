@@ -31,6 +31,7 @@ public class AddTaskActivity extends BaseActivity {
 
     private FirebaseFirestore db;
     private FirebaseFirestore userdb;
+    private FirebaseFirestore taskdb;
     private FirebaseAuth mAuth;
 
     private TextInputEditText titleInput, descriptionInput, dayInput, monthInput, yearInput;
@@ -57,7 +58,8 @@ public class AddTaskActivity extends BaseActivity {
         setActivityContent(R.layout.activity_add_task);
 
         // Pointing to the specific 'tasks' database
-        db = FirebaseFirestore.getInstance("tasks");
+        taskdb = FirebaseFirestore.getInstance("tasks");
+        db = FirebaseFirestore.getInstance();
         userdb = FirebaseFirestore.getInstance("sign-up");
         mAuth = FirebaseAuth.getInstance();
 
@@ -150,14 +152,13 @@ public class AddTaskActivity extends BaseActivity {
     }
 
     private void fetchCompanyTractors() {
-        // Assuming tractors are also company specific. If not, remove the whereEqualTo
         db.collection("tractors")
                 .get()
                 .addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 List<String> tractorNames = new ArrayList<>();
                 for (QueryDocumentSnapshot document : task.getResult()) {
-                    tractorNames.add(document.getString("name"));
+                    tractorNames.add(document.getString("tracterName"));
                 }
                 ArrayAdapter<String> tractorAdapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, tractorNames);
                 tractorDropdown.setAdapter(tractorAdapter);
@@ -264,7 +265,7 @@ public class AddTaskActivity extends BaseActivity {
 
         // Load checklist and completion status from Firestore
         if (existingTaskId != null) {
-            db.collection("tasks").document(existingTaskId).get().addOnSuccessListener(documentSnapshot -> {
+            taskdb.collection("tasks").document(existingTaskId).get().addOnSuccessListener(documentSnapshot -> {
                 if (documentSnapshot.exists()) {
                     existingTaskCompleted = documentSnapshot.getBoolean("completed") != null && documentSnapshot.getBoolean("completed");
                     String cid = documentSnapshot.getString("companyId");
@@ -383,7 +384,7 @@ public class AddTaskActivity extends BaseActivity {
         task.put("checklist", checklistItems);
         task.put("completed", existingTaskCompleted); // Preserve completion status on edit
 
-        db.collection("tasks").document(taskId).set(task)
+        taskdb.collection("tasks").document(taskId).set(task)
                 .addOnSuccessListener(aVoid -> {
                     String message = (existingTaskId != null) ? "Task Updated!" : "Task Created!";
                     Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
