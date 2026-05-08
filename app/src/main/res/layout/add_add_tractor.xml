@@ -2,295 +2,325 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F8F8F8">
+    android:background="@color/background_dark">
 
     <!-- Header / Navigation Bar -->
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/toolbar"
+    <View
+        android:id="@+id/header_bg"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:background="@android:color/white"
-        app:layout_constraintTop_toTopOf="parent">
+        android:layout_height="70dp"
+        android:background="@color/header_green"
+        app:layout_constraintTop_toTopOf="parent" />
 
-        <TextView
-            android:id="@+id/btnBack"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:drawableStart="@android:drawable/ic_menu_revert"
-            android:drawablePadding="4dp"
-            android:gravity="center_vertical"
-            android:text="@string/back"
-            android:textColor="@android:color/black"
-            android:textSize="17sp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:ignore="UseCompatTextViewDrawableXml" />
+    <ImageButton
+        android:id="@+id/btnBack"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="8dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/back"
+        android:src="?attr/homeAsUpIndicator"
+        app:layout_constraintBottom_toBottomOf="@id/header_bg"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/header_bg"
+        app:tint="@color/white" />
 
-        <TextView
-            android:id="@+id/titleAddTractor"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/add_tractor"
-            android:textColor="@android:color/black"
-            android:textSize="17sp"
-            android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    <TextView
+        android:id="@+id/titleAddTractor"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="@string/add_tractor"
+        android:textColor="@color/white"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@id/header_bg"
+        app:layout_constraintStart_toEndOf="@id/btnBack"
+        app:layout_constraintTop_toTopOf="@id/header_bg" />
 
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:fillViewport="true"
         app:layout_constraintBottom_toTopOf="@+id/btnSaveTractor"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar">
+        app:layout_constraintTop_toBottomOf="@+id/header_bg">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:padding="20dp">
 
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="0dp"
-                app:strokeColor="#E0E0E0"
-                app:strokeWidth="1dp">
+                app:cardBackgroundColor="@color/card_background"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="4dp"
+                app:strokeWidth="0dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="24dp">
 
-                    <TextView
+                    <!-- PIN -->
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/pin"
-                        android:textColor="@android:color/black"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
+                        android:layout_marginBottom="16dp"
+                        android:hint="@string/pin"
+                        android:textColorHint="@color/text_grey"
+                        app:hintTextColor="@color/accent_green"
+                        app:boxStrokeColor="@color/accent_green"
+                        app:boxCornerRadiusTopStart="12dp"
+                        app:boxCornerRadiusTopEnd="12dp"
+                        app:boxCornerRadiusBottomStart="12dp"
+                        app:boxCornerRadiusBottomEnd="12dp">
 
-                    <EditText
-                        android:id="@+id/getPin"
-                        android:layout_width="match_parent"
-                        android:layout_height="44dp"
-                        android:layout_marginTop="8dp"
-                        android:background="@android:drawable/editbox_background"
-                        android:hint="•••••••"
-                        android:importantForAutofill="no"
-                        android:inputType="numberPassword"
-                        android:paddingHorizontal="12dp"
-                        android:textSize="14sp" />
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/getPin"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/white"
+                            android:inputType="numberPassword" />
+                    </com.google.android.material.textfield.TextInputLayout>
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:text="@string/tractor_name"
-                        android:textColor="@android:color/black"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
-
-                    <EditText
-                        android:id="@+id/getTractorName"
-                        android:layout_width="match_parent"
-                        android:layout_height="44dp"
-                        android:layout_marginTop="8dp"
-                        android:background="@android:drawable/editbox_background"
-                        android:hint="@string/enter_tractor_name"
-                        android:importantForAutofill="no"
-                        android:inputType="textCapWords"
-                        android:paddingHorizontal="12dp"
-                        android:textSize="14sp" />
-
-                    <TextView
+                    <!-- Tractor Name -->
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:text="@string/year"
-                        android:textColor="@android:color/black"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
+                        android:layout_marginBottom="16dp"
+                        android:hint="@string/tractor_name"
+                        android:textColorHint="@color/text_grey"
+                        app:hintTextColor="@color/accent_green"
+                        app:boxStrokeColor="@color/accent_green"
+                        app:boxCornerRadiusTopStart="12dp"
+                        app:boxCornerRadiusTopEnd="12dp"
+                        app:boxCornerRadiusBottomStart="12dp"
+                        app:boxCornerRadiusBottomEnd="12dp">
 
-                    <Spinner
-                        android:id="@+id/spinnerYear"
-                        android:layout_width="match_parent"
-                        android:layout_height="44dp"
-                        android:layout_marginTop="8dp"
-                        android:background="@android:drawable/btn_dropdown"
-                        android:paddingHorizontal="8dp" />
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/getTractorName"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/white"
+                            android:inputType="textCapWords" />
+                    </com.google.android.material.textfield.TextInputLayout>
 
-                    <TextView
+                    <!-- Modern Year Dropdown -->
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:text="@string/model_number"
-                        android:textColor="@android:color/black"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
+                        android:layout_marginBottom="16dp"
+                        android:hint="@string/year"
+                        android:textColorHint="@color/text_grey"
+                        app:hintTextColor="@color/accent_green"
+                        app:boxStrokeColor="@color/accent_green"
+                        app:endIconTint="@color/white"
+                        app:boxCornerRadiusTopStart="12dp"
+                        app:boxCornerRadiusTopEnd="12dp"
+                        app:boxCornerRadiusBottomStart="12dp"
+                        app:boxCornerRadiusBottomEnd="12dp">
 
-                    <EditText
-                        android:id="@+id/getModelNumber"
+                        <AutoCompleteTextView
+                            android:id="@+id/spinnerYear"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:focusable="false"
+                            android:clickable="true"
+                            android:inputType="none"
+                            android:textColor="@color/white"
+                            android:paddingTop="16dp"
+                            android:paddingBottom="16dp"
+                            tools:ignore="LabelFor" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <!-- Model Number -->
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                         android:layout_width="match_parent"
-                        android:layout_height="44dp"
-                        android:layout_marginTop="8dp"
-                        android:background="@android:drawable/editbox_background"
-                        android:hint="@string/enter_model_number"
-                        android:importantForAutofill="no"
-                        android:inputType="textCapCharacters"
-                        android:paddingHorizontal="12dp"
-                        android:textSize="14sp" />
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="16dp"
+                        android:hint="@string/model_number"
+                        android:textColorHint="@color/text_grey"
+                        app:hintTextColor="@color/accent_green"
+                        app:boxStrokeColor="@color/accent_green"
+                        app:boxCornerRadiusTopStart="12dp"
+                        app:boxCornerRadiusTopEnd="12dp"
+                        app:boxCornerRadiusBottomStart="12dp"
+                        app:boxCornerRadiusBottomEnd="12dp">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/getModelNumber"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/white"
+                            android:inputType="textCapCharacters" />
+                    </com.google.android.material.textfield.TextInputLayout>
 
                     <!-- Engine Hours -->
-                    <TextView
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:text="Engine Hours"
-                        android:textColor="@android:color/black"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
+                        android:layout_marginBottom="16dp"
+                        android:hint="Engine Hours"
+                        android:textColorHint="@color/text_grey"
+                        app:hintTextColor="@color/accent_green"
+                        app:boxStrokeColor="@color/accent_green"
+                        app:boxCornerRadiusTopStart="12dp"
+                        app:boxCornerRadiusTopEnd="12dp"
+                        app:boxCornerRadiusBottomStart="12dp"
+                        app:boxCornerRadiusBottomEnd="12dp">
 
-                    <EditText
-                        android:id="@+id/getEngineHours"
-                        android:layout_width="match_parent"
-                        android:layout_height="44dp"
-                        android:layout_marginTop="8dp"
-                        android:background="@android:drawable/editbox_background"
-                        android:hint="e.g. 1245.5"
-                        android:inputType="numberDecimal"
-                        android:paddingHorizontal="12dp"
-                        android:textSize="14sp" />
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/getEngineHours"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/white"
+                            android:inputType="numberDecimal" />
+                    </com.google.android.material.textfield.TextInputLayout>
 
-                    <!-- Status Fields -->
-                    <TextView
+                    <!-- Fuel Level -->
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:text="Fuel Level (%)"
-                        android:textColor="@android:color/black"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
+                        android:layout_marginBottom="16dp"
+                        android:hint="Fuel Level (%)"
+                        android:textColorHint="@color/text_grey"
+                        app:hintTextColor="@color/accent_green"
+                        app:boxStrokeColor="@color/accent_green"
+                        app:boxCornerRadiusTopStart="12dp"
+                        app:boxCornerRadiusTopEnd="12dp"
+                        app:boxCornerRadiusBottomStart="12dp"
+                        app:boxCornerRadiusBottomEnd="12dp">
 
-                    <EditText
-                        android:id="@+id/getFuel"
-                        android:layout_width="match_parent"
-                        android:layout_height="44dp"
-                        android:layout_marginTop="8dp"
-                        android:background="@android:drawable/editbox_background"
-                        android:hint="Enter fuel percentage"
-                        android:inputType="number"
-                        android:paddingHorizontal="12dp"
-                        android:textSize="14sp" />
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/getFuel"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/white"
+                            android:inputType="number" />
+                    </com.google.android.material.textfield.TextInputLayout>
 
+                    <!-- Maintenance Status -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
                         android:gravity="center_vertical"
                         android:orientation="horizontal">
-                        <TextView
+                        <com.google.android.material.textfield.TextInputLayout
+                            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Maintenance Status"
-                            android:textColor="@android:color/black"
-                            android:textSize="14sp"
-                            android:textStyle="bold" />
+                            android:hint="Maintenance Status"
+                            android:textColorHint="@color/text_grey"
+                            app:hintTextColor="@color/accent_green"
+                            app:boxStrokeColor="@color/accent_green"
+                            app:boxCornerRadiusTopStart="12dp"
+                            app:boxCornerRadiusTopEnd="12dp"
+                            app:boxCornerRadiusBottomStart="12dp"
+                            app:boxCornerRadiusBottomEnd="12dp">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/getMaintenanceStatus"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:textColor="@color/white"
+                                android:inputType="text" />
+                        </com.google.android.material.textfield.TextInputLayout>
                         <CheckBox
                             android:id="@+id/cbMaintenanceWarning"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Warning"
-                            android:textSize="12sp" />
+                            android:textColor="@color/white"
+                            android:buttonTint="@color/accent_green" />
                     </LinearLayout>
 
-                    <EditText
-                        android:id="@+id/getMaintenanceStatus"
-                        android:layout_width="match_parent"
-                        android:layout_height="44dp"
-                        android:layout_marginTop="4dp"
-                        android:background="@android:drawable/editbox_background"
-                        android:hint="e.g. Active, Needs Attention"
-                        android:inputType="text"
-                        android:paddingHorizontal="12dp"
-                        android:textSize="14sp" />
-
+                    <!-- Software Status -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
+                        android:layout_marginTop="8dp"
                         android:gravity="center_vertical"
                         android:orientation="horizontal">
-                        <TextView
+                        <com.google.android.material.textfield.TextInputLayout
+                            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Software Status"
-                            android:textColor="@android:color/black"
-                            android:textSize="14sp"
-                            android:textStyle="bold" />
+                            android:hint="Software Status"
+                            android:textColorHint="@color/text_grey"
+                            app:hintTextColor="@color/accent_green"
+                            app:boxStrokeColor="@color/accent_green"
+                            app:boxCornerRadiusTopStart="12dp"
+                            app:boxCornerRadiusTopEnd="12dp"
+                            app:boxCornerRadiusBottomStart="12dp"
+                            app:boxCornerRadiusBottomEnd="12dp">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/getSoftwareStatus"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:textColor="@color/white"
+                                android:inputType="text" />
+                        </com.google.android.material.textfield.TextInputLayout>
                         <CheckBox
                             android:id="@+id/cbSoftwareWarning"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Warning"
-                            android:textSize="12sp" />
+                            android:textColor="@color/white"
+                            android:buttonTint="@color/accent_green" />
                     </LinearLayout>
 
-                    <EditText
-                        android:id="@+id/getSoftwareStatus"
-                        android:layout_width="match_parent"
-                        android:layout_height="44dp"
-                        android:layout_marginTop="4dp"
-                        android:background="@android:drawable/editbox_background"
-                        android:hint="e.g. Up to date"
-                        android:inputType="text"
-                        android:paddingHorizontal="12dp"
-                        android:textSize="14sp" />
-
+                    <!-- Firmware Status -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
+                        android:layout_marginTop="8dp"
                         android:gravity="center_vertical"
                         android:orientation="horizontal">
-                        <TextView
+                        <com.google.android.material.textfield.TextInputLayout
+                            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Firmware Status"
-                            android:textColor="@android:color/black"
-                            android:textSize="14sp"
-                            android:textStyle="bold" />
+                            android:hint="Firmware Status"
+                            android:textColorHint="@color/text_grey"
+                            app:hintTextColor="@color/accent_green"
+                            app:boxStrokeColor="@color/accent_green"
+                            app:boxCornerRadiusTopStart="12dp"
+                            app:boxCornerRadiusTopEnd="12dp"
+                            app:boxCornerRadiusBottomStart="12dp"
+                            app:boxCornerRadiusBottomEnd="12dp">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/getFirmwareStatus"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:textColor="@color/white"
+                                android:inputType="text" />
+                        </com.google.android.material.textfield.TextInputLayout>
                         <CheckBox
                             android:id="@+id/cbFirmwareWarning"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Warning"
-                            android:textSize="12sp" />
+                            android:textColor="@color/white"
+                            android:buttonTint="@color/accent_green" />
                     </LinearLayout>
-
-                    <EditText
-                        android:id="@+id/getFirmwareStatus"
-                        android:layout_width="match_parent"
-                        android:layout_height="44dp"
-                        android:layout_marginTop="4dp"
-                        android:background="@android:drawable/editbox_background"
-                        android:hint="e.g. Up to date"
-                        android:inputType="text"
-                        android:paddingHorizontal="12dp"
-                        android:textSize="14sp" />
 
                     <!-- Image Section -->
                     <TextView
@@ -298,19 +328,19 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
                         android:text="@string/tractor_image"
-                        android:textColor="@android:color/black"
+                        android:textColor="@color/white"
                         android:textSize="14sp"
                         android:textStyle="bold" />
 
                     <com.google.android.material.card.MaterialCardView
                         android:id="@+id/btnUploadImage"
                         android:layout_width="match_parent"
-                        android:layout_height="120dp"
+                        android:layout_height="140dp"
                         android:layout_marginTop="8dp"
                         android:clickable="true"
                         android:focusable="true"
-                        app:cardBackgroundColor="#F0F0F0"
-                        app:cardCornerRadius="8dp"
+                        app:cardBackgroundColor="@color/dark_grey_input"
+                        app:cardCornerRadius="16dp"
                         app:cardElevation="0dp">
 
                         <ImageView
@@ -319,7 +349,8 @@
                             android:layout_height="match_parent"
                             android:contentDescription="@string/tractor_image"
                             android:scaleType="centerInside"
-                            android:src="@android:drawable/ic_menu_camera" />
+                            android:src="@android:drawable/ic_menu_camera"
+                            app:tint="@color/text_grey" />
 
                     </com.google.android.material.card.MaterialCardView>
 
@@ -331,17 +362,16 @@
     <Button
         android:id="@+id/btnSaveTractor"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_margin="16dp"
-        android:backgroundTint="@android:color/black"
-        android:insetTop="0dp"
-        android:insetBottom="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="24dp"
         android:text="@string/save_tractor"
+        android:textColor="@color/white"
         android:textAllCaps="false"
-        android:textColor="@android:color/white"
-        android:textSize="17sp"
         android:textStyle="bold"
-        app:cornerRadius="10dp"
+        android:textSize="18sp"
+        android:padding="12dp"
+        app:backgroundTint="@color/add_button_green"
+        app:cornerRadius="12dp"
         app:layout_constraintBottom_toBottomOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

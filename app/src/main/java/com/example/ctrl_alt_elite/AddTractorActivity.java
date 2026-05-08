@@ -14,11 +14,11 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -49,7 +49,7 @@ import java.util.UUID;
 public class AddTractorActivity extends BaseActivity {
 
     private ImageView ivTractorImage;
-    private Spinner spinnerYear;
+    private AutoCompleteTextView spinnerYear;
     
     private EditText getTractorName, getModelNumber, getPin, getFuel, getMaintenanceStatus, getSoftwareStatus, getFirmwareStatus, getEngineHours;
     private CheckBox cbMaintenanceWarning, cbSoftwareWarning, cbFirmwareWarning;
@@ -130,7 +130,7 @@ public class AddTractorActivity extends BaseActivity {
         titleAddTractor = findViewById(R.id.titleAddTractor);
 
         View btnUploadImage = findViewById(R.id.btnUploadImage);
-        TextView btnBack = findViewById(R.id.btnBack);
+        View btnBack = findViewById(R.id.btnBack);
         Button btnSaveTractor = findViewById(R.id.btnSaveTractor);
 
         setupYearSpinner();
@@ -197,11 +197,8 @@ public class AddTractorActivity extends BaseActivity {
         getTractorName.setText(selectedName);
         getModelNumber.setText(String.valueOf(random.nextInt(9000)+1000));
         
-        if (spinnerYear.getAdapter() != null){
-            ArrayAdapter adapter = (ArrayAdapter) spinnerYear.getAdapter();
-            int position = adapter.getPosition(String.valueOf(random.nextInt(37) + 1990));
-            if (position >= 0) spinnerYear.setSelection(position);
-        }
+        String yearVal = String.valueOf(random.nextInt(37) + 1990);
+        spinnerYear.setText(yearVal, false);
         
         getFuel.setText(String.valueOf(random.nextInt(101)));
         
@@ -237,9 +234,7 @@ public class AddTractorActivity extends BaseActivity {
         cbSoftwareWarning.setChecked(tractor.isSoftwareWarning());
         cbFirmwareWarning.setChecked(tractor.isFirmwareWarning());
         
-        ArrayAdapter adapter = (ArrayAdapter) spinnerYear.getAdapter();
-        int position = adapter.getPosition(String.valueOf(tractor.getYear()));
-        if (position >= 0) spinnerYear.setSelection(position);
+        spinnerYear.setText(String.valueOf(tractor.getYear()), false);
 
         if (tractor.getImageUrl() != null && !tractor.getImageUrl().isEmpty() && !tractor.getImageUrl().equals("link")) {
             Glide.with(this).load(tractor.getImageUrl()).into(ivTractorImage);
@@ -253,7 +248,6 @@ public class AddTractorActivity extends BaseActivity {
             years.add(String.valueOf(i));
         }
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, years);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerYear.setAdapter(adapter);
     }
 
@@ -392,7 +386,7 @@ public class AddTractorActivity extends BaseActivity {
         String software = getSoftwareStatus.getText().toString().trim();
         String firmware = getFirmwareStatus.getText().toString().trim();
         String engineHoursStr = getEngineHours.getText().toString().trim();
-        String yearStr = spinnerYear.getSelectedItem().toString();
+        String yearStr = spinnerYear.getText().toString();
 
         if (name.isEmpty() || model.isEmpty() || pin.isEmpty()) {
             Toast.makeText(this, "Please fill in required fields", Toast.LENGTH_SHORT).show();
@@ -406,7 +400,14 @@ public class AddTractorActivity extends BaseActivity {
             return;
         }
 
-        int year = Integer.parseInt(yearStr);
+        int year = 0;
+        try {
+            year = Integer.parseInt(yearStr);
+        } catch (NumberFormatException e) {
+             Toast.makeText(this, "Please select a year", Toast.LENGTH_SHORT).show();
+             return;
+        }
+
         int fuel = fuelStr.isEmpty() ? 0 : Integer.parseInt(fuelStr);
         double engineHours = engineHoursStr.isEmpty() ? 0.0 : Double.parseDouble(engineHoursStr);
 
