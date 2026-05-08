@@ -1,37 +1,24 @@
 package com.example.ctrl_alt_elite;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.widget.Toolbar;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import com.bumptech.glide.Glide;
+import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.Query;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class EditTractorActivity extends BaseActivity {
 
-    private TextView txtTractorName, txtTractorStatus, txtFuelValue, txtEngineHours, txtLastService;
-    private TextView txtYear, txtModel, txtPIN;
-    private ImageView imgTractorLarge;
-    private ProgressBar progressFuel;
-    private TaskAdapter taskAdapter;
-    private List<Task> taskList;
-    private Tractor currentTractor;
+    private Tractor tractor;
+    private TextView txtTractorName, txtTractorStatus, txtFuelValue, txtEngineHours, txtSoftware, txtFirmware, txtYear, txtModel, txtLastUpdated, txtPIN;
+    private ImageView imgTractorLarge, imgStatusWarning, imgSoftwareWarning, imgFirmwareWarning;
+    private LinearProgressIndicator progressFuel;
     private FirebaseFirestore db;
-    private boolean alertShown = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,155 +26,141 @@ public class EditTractorActivity extends BaseActivity {
         setActivityContent(R.layout.activity_edit_tractor);
 
         db = FirebaseFirestore.getInstance();
-        currentTractor = (Tractor) getIntent().getSerializableExtra("TRACTOR_DATA");
 
-        initViews();
-        setupListeners();
-
-        if (currentTractor != null) {
-            populateTractorData();
-            fetchMaintenanceTasks();
-            checkMaintenanceStatus();
-        } else {
-            Toast.makeText(this, getString(R.string.error_machine_data), Toast.LENGTH_SHORT).show();
-            finish();
-        }
-    }
-
-    private void initViews() {
+        // Initialize Views
         txtTractorName = findViewById(R.id.txtTractorName);
         txtTractorStatus = findViewById(R.id.txtTractorStatus);
         txtFuelValue = findViewById(R.id.txtFuelValue);
         txtEngineHours = findViewById(R.id.txtEngineHours);
-        txtLastService = findViewById(R.id.txtLastService);
+        txtSoftware = findViewById(R.id.txtSoftware);
+        txtFirmware = findViewById(R.id.txtFirmware);
         txtYear = findViewById(R.id.txtYear);
         txtModel = findViewById(R.id.txtModel);
+        txtLastUpdated = findViewById(R.id.txtLastUpdated);
         txtPIN = findViewById(R.id.txtPIN);
         imgTractorLarge = findViewById(R.id.imgTractorLarge);
         progressFuel = findViewById(R.id.progressFuel);
-        RecyclerView rvTasks = findViewById(R.id.rvTasks);
+        
+        imgStatusWarning = findViewById(R.id.imgStatusWarning);
+        imgSoftwareWarning = findViewById(R.id.imgSoftwareWarning);
+        imgFirmwareWarning = findViewById(R.id.imgFirmwareWarning);
 
-        taskList = new ArrayList<>();
-        taskAdapter = new TaskAdapter(taskList, (view, task) -> {
-            // Task menu logic
+        // Get Tractor Data
+        if (getIntent().hasExtra("TRACTOR_DATA")) {
+            tractor = (Tractor) getIntent().getSerializableExtra("TRACTOR_DATA");
+            displayTractorDetails();
+            checkUpdateAlerts();
+        }
+
+        // Click Listeners
+        findViewById(R.id.btnEditMachine).setOnClickListener(v -> {
+            Intent intent = new Intent(EditTractorActivity.this, AddTractorActivity.class);
+            intent.putExtra("TRACTOR_DATA", tractor);
+            startActivity(intent);
         });
-        rvTasks.setLayoutManager(new LinearLayoutManager(this));
-        rvTasks.setAdapter(taskAdapter);
-    }
 
-    private void setupListeners() {
-        // Operator Guide Link
         findViewById(R.id.btnGuide).setOnClickListener(v -> {
-            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.deere.com/en/parts-and-service/manuals-and-training/quick-reference-guides/"));
+            String url = (tractor != null && tractor.getGuideUrl() != null) 
+                    ? tractor.getGuideUrl() 
+                    : "https://www.deere.com/en/parts-and-service/manuals-and-training/quick-reference-guides/";
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
             startActivity(intent);
         });
-
-        // Main Edit Button in the card - Takes you to the detailed Editor form
-        findViewById(R.id.btnEditMachine).setOnClickListener(v -> navigateToEditForm());
-
-        // View All Tasks
-        findViewById(R.id.btnViewAllTasks).setOnClickListener(v -> {
-            Intent intent = new Intent(this, TasksActivity.class);
-            startActivity(intent);
-        });
-
-        // Set up toolbar
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        
+        androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);
         if (toolbar != null) {
-            toolbar.setNavigationOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
+            toolbar.setNavigationOnClickListener(v -> finish());
         }
     }
 
-    /**
-     * Navigates to AddTractorActivity in Edit Mode.
-     */
-    private void navigateToEditForm() {
-        if (currentTractor != null) {
-            Intent intent = new Intent(this, AddTractorActivity.class);
-            intent.putExtra("TRACTOR_DATA", currentTractor);
-            startActivity(intent);
+    private void checkUpdateAlerts() {
+        if (tractor == null) return;
+        boolean needsSoftware = tractor.isSoftwareWarning();
+        boolean needsFirmware = tractor.isFirmwareWarning();
+
+        if (needsSoftware || needsFirmware) {
+            String msg = "Notice: " + (needsSoftware ? "Software " : "") + 
+                         (needsSoftware && needsFirmware ? "& " : "") + 
+                         (needsFirmware ? "Firmware " : "") + "update required!";
+            Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
         }
     }
 
-    private void populateTractorData() {
-        txtTractorName.setText(currentTractor.getName());
-        txtTractorStatus.setText(getString(R.string.status_format,
-                currentTractor.getStatus() != null ? currentTractor.getStatus() : "Operational"));
+    private void refreshTractorData() {
+        if (tractor == null || tractor.getDocumentId() == null) return;
 
-        int fuel = currentTractor.getFuel();
-        txtFuelValue.setText(getString(R.string.fuel_percent_format, fuel));
-        progressFuel.setProgress(fuel);
-
-        txtYear.setText(String.valueOf(currentTractor.getYear()));
-        txtModel.setText(currentTractor.getModel());
-        txtPIN.setText(currentTractor.getPin() != null ? currentTractor.getPin() : "N/A");
-
-        txtLastService.setText(currentTractor.getLastUpdated() != null ? currentTractor.getLastUpdated() : getString(R.string.no_recent_service));
-
-        // Show real engine hours from Firebase
-        txtEngineHours.setText(getString(R.string.hours_format, String.valueOf(currentTractor.getEngineHours())));
-
-        if (currentTractor.getImageUrl() != null && !currentTractor.getImageUrl().isEmpty() && !currentTractor.getImageUrl().equals("link")) {
-            Glide.with(this)
-                    .load(currentTractor.getImageUrl())
-                    .placeholder(R.drawable.pngimg_com___tractor_png101303_removebg_preview)
-                    .into(imgTractorLarge);
-        }
+        db.collection("tractors").document(tractor.getDocumentId())
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        tractor = documentSnapshot.toObject(Tractor.class);
+                        if (tractor != null) {
+                            tractor.setDocumentId(documentSnapshot.getId());
+                            displayTractorDetails();
+                        }
+                    }
+                });
     }
 
-    private void checkMaintenanceStatus() {
-        if ("Maintenance Required".equals(currentTractor.getStatus()) && !alertShown) {
-            new AlertDialog.Builder(this)
-                    .setTitle("Maintenance Required")
-                    .setMessage("This tractor requires immediate maintenance. Please check the schedule.")
-                    .setPositiveButton("OK", null)
-                    .show();
-            alertShown = true;
+    private void displayTractorDetails() {
+        if (tractor == null) return;
+
+        if (txtTractorName != null) txtTractorName.setText(tractor.getName());
+        
+        // Status Warning Logic
+        if (txtTractorStatus != null) {
+            txtTractorStatus.setText(tractor.getStatus());
+            if (tractor.isMaintenanceWarning()) {
+                txtTractorStatus.setTextColor(Color.parseColor("#FFD600")); // Yellow
+                if (imgStatusWarning != null) imgStatusWarning.setVisibility(View.VISIBLE);
+            } else {
+                txtTractorStatus.setTextColor(Color.parseColor("#4CAF50")); // Default Green
+                if (imgStatusWarning != null) imgStatusWarning.setVisibility(View.GONE);
+            }
+        }
+
+        if (txtFuelValue != null) txtFuelValue.setText(tractor.getFuel() + "%");
+        if (progressFuel != null) progressFuel.setProgress(tractor.getFuel());
+        if (txtEngineHours != null) txtEngineHours.setText(String.format("%.1f hrs", tractor.getEngineHours()));
+        
+        // Software Warning Logic
+        if (txtSoftware != null) {
+            txtSoftware.setText(tractor.getSoftwareStatus() != null ? tractor.getSoftwareStatus() : "Up to date");
+            if (tractor.isSoftwareWarning()) {
+                txtSoftware.setTextColor(Color.parseColor("#FFD600"));
+                if (imgSoftwareWarning != null) imgSoftwareWarning.setVisibility(View.VISIBLE);
+            } else {
+                txtSoftware.setTextColor(Color.WHITE);
+                if (imgSoftwareWarning != null) imgSoftwareWarning.setVisibility(View.GONE);
+            }
+        }
+
+        // Firmware Warning Logic
+        if (txtFirmware != null) {
+            txtFirmware.setText(tractor.getFirmwareStatus() != null ? tractor.getFirmwareStatus() : "Up to date");
+            if (tractor.isFirmwareWarning()) {
+                txtFirmware.setTextColor(Color.parseColor("#FFD600"));
+                if (imgFirmwareWarning != null) imgFirmwareWarning.setVisibility(View.VISIBLE);
+            } else {
+                txtFirmware.setTextColor(Color.WHITE);
+                if (imgFirmwareWarning != null) imgFirmwareWarning.setVisibility(View.GONE);
+            }
+        }
+
+        if (txtYear != null) txtYear.setText(String.valueOf(tractor.getYear()));
+        if (txtModel != null) txtModel.setText(tractor.getModel());
+        if (txtLastUpdated != null) txtLastUpdated.setText(tractor.getLastUpdated());
+        if (txtPIN != null) txtPIN.setText(tractor.getPin());
+
+        if (imgTractorLarge != null && tractor.getImageUrl() != null && !tractor.getImageUrl().isEmpty() && !tractor.getImageUrl().equals("link")) {
+            Glide.with(this).load(tractor.getImageUrl()).into(imgTractorLarge);
         }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        if (currentTractor != null && currentTractor.getDocumentId() != null) {
-            refreshTractorData();
-        }
-    }
-
-    private void refreshTractorData() {
-        db.collection("tractors").document(currentTractor.getDocumentId())
-                .get()
-                .addOnSuccessListener(documentSnapshot -> {
-                    if (documentSnapshot.exists()) {
-                        Tractor updatedTractor = documentSnapshot.toObject(Tractor.class);
-                        if (updatedTractor != null) {
-                            updatedTractor.setDocumentId(documentSnapshot.getId());
-                            currentTractor = updatedTractor;
-                            populateTractorData();
-                            checkMaintenanceStatus();
-                        }
-                    }
-                });
-    }
-
-    private void fetchMaintenanceTasks() {
-        if (currentTractor == null || currentTractor.getDocumentId() == null) return;
-
-        db.collection("tasks")
-                .whereEqualTo("tractorId", currentTractor.getDocumentId())
-                .orderBy("dueDate", Query.Direction.ASCENDING)
-                .limit(5)
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful() && task.getResult() != null) {
-                        taskList.clear();
-                        for (QueryDocumentSnapshot document : task.getResult()) {
-                            Task maintenanceTask = document.toObject(Task.class);
-                            maintenanceTask.setId(document.getId());
-                            taskList.add(maintenanceTask);
-                        }
-                        taskAdapter.notifyDataSetChanged();
-                    }
-                });
+        setupNavigation();
+        refreshTractorData(); // Auto-update info every time page is opened
     }
 }

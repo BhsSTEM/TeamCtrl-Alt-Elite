@@ -1,32 +1,56 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background_dark">
+    android:background="#F8F8F8">
 
-    <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/appBarLayout"
+    <!-- Header / Navigation Bar -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/header_green"
-        android:theme="@style/ThemeOverlay.MaterialComponents.Dark.ActionBar">
+        android:layout_height="56dp"
+        android:background="@android:color/white"
+        app:layout_constraintTop_toTopOf="parent">
 
-        <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            app:navigationIcon="@drawable/back_arrow_icon"
-            app:title="@string/add_tractor"
-            app:titleTextColor="@color/white" />
+        <TextView
+            android:id="@+id/btnBack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:drawableStart="@android:drawable/ic_menu_revert"
+            android:drawablePadding="4dp"
+            android:gravity="center_vertical"
+            android:text="@string/back"
+            android:textColor="@android:color/black"
+            android:textSize="17sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:ignore="UseCompatTextViewDrawableXml" />
 
-    </com.google.android.material.appbar.AppBarLayout>
+        <TextView
+            android:id="@+id/titleAddTractor"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/add_tractor"
+            android:textColor="@android:color/black"
+            android:textSize="17sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-    <androidx.core.widget.NestedScrollView
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        app:layout_constraintBottom_toTopOf="@+id/btnSaveTractor"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -37,10 +61,10 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardBackgroundColor="@color/card_background"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="6dp"
-                app:strokeWidth="0dp">
+                app:cardCornerRadius="12dp"
+                app:cardElevation="0dp"
+                app:strokeColor="#E0E0E0"
+                app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -49,123 +73,244 @@
                     android:padding="16dp">
 
                     <TextView
-                        android:id="@+id/titleAddTractor"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="16dp"
-                        android:text="@string/add_tractor"
-                        android:textColor="@color/white"
-                        android:textSize="22sp"
-                        android:textStyle="bold" />
-
-                    <!-- PIN -->
-                    <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@string/pin"
-                        android:textColor="@color/text_grey"
+                        android:textColor="@android:color/black"
                         android:textSize="14sp"
                         android:textStyle="bold" />
 
                     <EditText
                         android:id="@+id/getPin"
                         android:layout_width="match_parent"
-                        android:layout_height="50dp"
+                        android:layout_height="44dp"
                         android:layout_marginTop="8dp"
-                        android:layout_marginBottom="16dp"
-                        android:background="@drawable/edit_text_background"
-                        android:hint="00000000"
-                        android:textColorHint="#66FFFFFF"
+                        android:background="@android:drawable/editbox_background"
+                        android:hint="•••••••"
                         android:importantForAutofill="no"
-                        android:inputType="textCapCharacters"
+                        android:inputType="numberPassword"
                         android:paddingHorizontal="12dp"
-                        android:textColor="@color/white"
                         android:textSize="14sp" />
 
-                    <!-- Tractor Name -->
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
                         android:text="@string/tractor_name"
-                        android:textColor="@color/text_grey"
+                        android:textColor="@android:color/black"
                         android:textSize="14sp"
                         android:textStyle="bold" />
 
                     <EditText
                         android:id="@+id/getTractorName"
                         android:layout_width="match_parent"
-                        android:layout_height="50dp"
+                        android:layout_height="44dp"
                         android:layout_marginTop="8dp"
-                        android:layout_marginBottom="16dp"
-                        android:background="@drawable/edit_text_background"
+                        android:background="@android:drawable/editbox_background"
                         android:hint="@string/enter_tractor_name"
-                        android:textColorHint="#66FFFFFF"
                         android:importantForAutofill="no"
                         android:inputType="textCapWords"
                         android:paddingHorizontal="12dp"
-                        android:textColor="@color/white"
                         android:textSize="14sp" />
 
-                    <!-- Year -->
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
                         android:text="@string/year"
-                        android:textColor="@color/text_grey"
+                        android:textColor="@android:color/black"
                         android:textSize="14sp"
                         android:textStyle="bold" />
 
                     <Spinner
                         android:id="@+id/spinnerYear"
                         android:layout_width="match_parent"
-                        android:layout_height="50dp"
+                        android:layout_height="44dp"
                         android:layout_marginTop="8dp"
-                        android:layout_marginBottom="16dp"
-                        android:background="@drawable/edit_text_background"
+                        android:background="@android:drawable/btn_dropdown"
                         android:paddingHorizontal="8dp" />
 
-                    <!-- Model Number -->
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
                         android:text="@string/model_number"
-                        android:textColor="@color/text_grey"
+                        android:textColor="@android:color/black"
                         android:textSize="14sp"
                         android:textStyle="bold" />
 
                     <EditText
                         android:id="@+id/getModelNumber"
                         android:layout_width="match_parent"
-                        android:layout_height="50dp"
+                        android:layout_height="44dp"
                         android:layout_marginTop="8dp"
-                        android:layout_marginBottom="16dp"
-                        android:background="@drawable/edit_text_background"
+                        android:background="@android:drawable/editbox_background"
                         android:hint="@string/enter_model_number"
-                        android:textColorHint="#66FFFFFF"
                         android:importantForAutofill="no"
                         android:inputType="textCapCharacters"
                         android:paddingHorizontal="12dp"
-                        android:textColor="@color/white"
                         android:textSize="14sp" />
 
-                    <!-- Image -->
+                    <!-- Engine Hours -->
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:text="Engine Hours"
+                        android:textColor="@android:color/black"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+
+                    <EditText
+                        android:id="@+id/getEngineHours"
+                        android:layout_width="match_parent"
+                        android:layout_height="44dp"
+                        android:layout_marginTop="8dp"
+                        android:background="@android:drawable/editbox_background"
+                        android:hint="e.g. 1245.5"
+                        android:inputType="numberDecimal"
+                        android:paddingHorizontal="12dp"
+                        android:textSize="14sp" />
+
+                    <!-- Status Fields -->
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:text="Fuel Level (%)"
+                        android:textColor="@android:color/black"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+
+                    <EditText
+                        android:id="@+id/getFuel"
+                        android:layout_width="match_parent"
+                        android:layout_height="44dp"
+                        android:layout_marginTop="8dp"
+                        android:background="@android:drawable/editbox_background"
+                        android:hint="Enter fuel percentage"
+                        android:inputType="number"
+                        android:paddingHorizontal="12dp"
+                        android:textSize="14sp" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Maintenance Status"
+                            android:textColor="@android:color/black"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
+                        <CheckBox
+                            android:id="@+id/cbMaintenanceWarning"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Warning"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+
+                    <EditText
+                        android:id="@+id/getMaintenanceStatus"
+                        android:layout_width="match_parent"
+                        android:layout_height="44dp"
+                        android:layout_marginTop="4dp"
+                        android:background="@android:drawable/editbox_background"
+                        android:hint="e.g. Active, Needs Attention"
+                        android:inputType="text"
+                        android:paddingHorizontal="12dp"
+                        android:textSize="14sp" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Software Status"
+                            android:textColor="@android:color/black"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
+                        <CheckBox
+                            android:id="@+id/cbSoftwareWarning"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Warning"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+
+                    <EditText
+                        android:id="@+id/getSoftwareStatus"
+                        android:layout_width="match_parent"
+                        android:layout_height="44dp"
+                        android:layout_marginTop="4dp"
+                        android:background="@android:drawable/editbox_background"
+                        android:hint="e.g. Up to date"
+                        android:inputType="text"
+                        android:paddingHorizontal="12dp"
+                        android:textSize="14sp" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Firmware Status"
+                            android:textColor="@android:color/black"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
+                        <CheckBox
+                            android:id="@+id/cbFirmwareWarning"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Warning"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+
+                    <EditText
+                        android:id="@+id/getFirmwareStatus"
+                        android:layout_width="match_parent"
+                        android:layout_height="44dp"
+                        android:layout_marginTop="4dp"
+                        android:background="@android:drawable/editbox_background"
+                        android:hint="e.g. Up to date"
+                        android:inputType="text"
+                        android:paddingHorizontal="12dp"
+                        android:textSize="14sp" />
+
+                    <!-- Image Section -->
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
                         android:text="@string/tractor_image"
-                        android:textColor="@color/text_grey"
+                        android:textColor="@android:color/black"
                         android:textSize="14sp"
                         android:textStyle="bold" />
 
                     <com.google.android.material.card.MaterialCardView
                         android:id="@+id/btnUploadImage"
                         android:layout_width="match_parent"
-                        android:layout_height="180dp"
+                        android:layout_height="120dp"
                         android:layout_marginTop="8dp"
                         android:clickable="true"
                         android:focusable="true"
-                        app:cardBackgroundColor="#444444"
-                        app:cardCornerRadius="12dp"
+                        app:cardBackgroundColor="#F0F0F0"
+                        app:cardCornerRadius="8dp"
                         app:cardElevation="0dp">
 
                         <ImageView
@@ -174,32 +319,29 @@
                             android:layout_height="match_parent"
                             android:contentDescription="@string/tractor_image"
                             android:scaleType="centerInside"
-                            android:src="@android:drawable/ic_menu_camera"
-                            app:tint="@color/white" />
+                            android:src="@android:drawable/ic_menu_camera" />
 
                     </com.google.android.material.card.MaterialCardView>
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnSaveTractor"
-                        android:layout_width="match_parent"
-                        android:layout_height="60dp"
-                        android:layout_marginTop="24dp"
-                        android:backgroundTint="#FFDE00"
-                        android:text="@string/save_tractor"
-                        android:textColor="@color/black"
-                        android:textSize="18sp"
-                        android:textStyle="bold"
-                        app:cornerRadius="12dp" />
-
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
-
-            <!-- Bottom spacing -->
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="80dp" />
-
         </LinearLayout>
-    </androidx.core.widget.NestedScrollView>
+    </ScrollView>
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+    <Button
+        android:id="@+id/btnSaveTractor"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_margin="16dp"
+        android:backgroundTint="@android:color/black"
+        android:insetTop="0dp"
+        android:insetBottom="0dp"
+        android:text="@string/save_tractor"
+        android:textAllCaps="false"
+        android:textColor="@android:color/white"
+        android:textSize="17sp"
+        android:textStyle="bold"
+        app:cornerRadius="10dp"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

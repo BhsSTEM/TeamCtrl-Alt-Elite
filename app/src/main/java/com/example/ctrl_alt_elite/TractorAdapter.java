@@ -58,7 +58,14 @@ public class TractorAdapter extends RecyclerView.Adapter<TractorAdapter.TractorV
             holder.imgTractor.setImageResource(R.drawable.pngimg_com___tractor_png101303_removebg_preview);
         }
 
-        // Edit button is always visible
+        // Show warning icon if any status has a warning
+        if (tractor.isMaintenanceWarning() || tractor.isSoftwareWarning() || tractor.isFirmwareWarning()) {
+            holder.imgListWarning.setVisibility(View.VISIBLE);
+        } else {
+            holder.imgListWarning.setVisibility(View.GONE);
+        }
+
+        // Edit button opens the EditTractorActivity
         holder.btnEdit.setVisibility(View.VISIBLE);
         holder.btnEdit.setOnClickListener(v -> {
             Intent intent = new Intent(context, EditTractorActivity.class);
@@ -85,6 +92,13 @@ public class TractorAdapter extends RecyclerView.Adapter<TractorAdapter.TractorV
                 showDeleteConfirmationDialog(context, tractor);
             });
         }
+
+        // Click on the whole item can also open EditTractorActivity
+        holder.itemView.setOnClickListener(v -> {
+            Intent intent = new Intent(context, EditTractorActivity.class);
+            intent.putExtra("TRACTOR_DATA", tractor);
+            context.startActivity(intent);
+        });
     }
 
     private void showDeleteConfirmationDialog(Context context, Tractor tractor) {
@@ -122,7 +136,7 @@ public class TractorAdapter extends RecyclerView.Adapter<TractorAdapter.TractorV
 
     public static class TractorViewHolder extends RecyclerView.ViewHolder {
         TextView txtName, txtYear, txtModel;
-        ImageView imgTractor;
+        ImageView imgTractor, imgListWarning;
         MaterialButton btnEdit, btnRemove, btnMap;
 
         public TractorViewHolder(@NonNull View itemView) {
@@ -131,6 +145,7 @@ public class TractorAdapter extends RecyclerView.Adapter<TractorAdapter.TractorV
             txtYear = itemView.findViewById(R.id.txt_tractor_year);
             txtModel = itemView.findViewById(R.id.txt_tractor_model);
             imgTractor = itemView.findViewById(R.id.img_tractor);
+            imgListWarning = itemView.findViewById(R.id.img_list_warning);
             btnEdit = itemView.findViewById(R.id.btn_edit);
             btnRemove = itemView.findViewById(R.id.btn_remove);
             btnMap = itemView.findViewById(R.id.btn_map);
