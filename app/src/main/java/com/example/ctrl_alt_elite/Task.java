@@ -34,10 +34,10 @@ public class Task {
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
 
-    @PropertyName("CompanyId")
+    @PropertyName("companyId")
     public String getCompanyId() { return companyId; }
     
-    @PropertyName("CompanyId")
+    @PropertyName("companyId")
     public void setCompanyId(String companyId) { this.companyId = companyId; }
 
     public String getTitle() { return title; }
