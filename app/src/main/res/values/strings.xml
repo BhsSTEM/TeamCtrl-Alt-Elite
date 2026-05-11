@@ -128,6 +128,7 @@
     <string name="no_recent_service">No recent service</string>
 
     <!-- Settings Company ID -->
+    <string name="company_id">Company ID</string>
     <string name="settings_change">Change</string>
     <string name="settings_change_company_id_title">Change Company ID</string>
     <string name="settings_new_company_id_hint">Enter 6-digit Company ID</string>

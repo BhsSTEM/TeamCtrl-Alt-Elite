@@ -51,17 +51,19 @@ public class AddTractorActivity extends BaseActivity {
     private ImageView ivTractorImage;
     private AutoCompleteTextView spinnerYear;
     
-    private EditText getTractorName, getModelNumber, getPin, getFuel, getMaintenanceStatus, getSoftwareStatus, getFirmwareStatus, getEngineHours;
+    private EditText getTractorName, getModelNumber, getPin, getCompanyId, getFuel, getMaintenanceStatus, getSoftwareStatus, getFirmwareStatus, getEngineHours;
     private CheckBox cbMaintenanceWarning, cbSoftwareWarning, cbFirmwareWarning;
     private TextView titleAddTractor;
 
     private FirebaseFirestore db;
+    private FirebaseFirestore userDb;
     private FirebaseStorage storage;
     private FusedLocationProviderClient fusedLocationClient;
     private Tractor existingTractor;
 
     private Uri selectedImageUri;
     private Bitmap selectedBitmap;
+    private String userCompanyId = null;
 
     private final ActivityResultLauncher<Intent> pickImageLauncher =
             registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
@@ -109,6 +111,7 @@ public class AddTractorActivity extends BaseActivity {
         setActivityContent(R.layout.add_add_tractor);
 
         db = FirebaseFirestore.getInstance();
+        userDb = FirebaseFirestore.getInstance("sign-up");
         storage = FirebaseStorage.getInstance("gs://team-ctrl-alt-elite.appspot.com");
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
@@ -117,6 +120,7 @@ public class AddTractorActivity extends BaseActivity {
         getTractorName = findViewById(R.id.getTractorName);
         getModelNumber = findViewById(R.id.getModelNumber);
         getPin = findViewById(R.id.getPin);
+        getCompanyId = findViewById(R.id.getCompanyId);
         getFuel = findViewById(R.id.getFuel);
         getMaintenanceStatus = findViewById(R.id.getMaintenanceStatus);
         getSoftwareStatus = findViewById(R.id.getSoftwareStatus);
@@ -134,6 +138,7 @@ public class AddTractorActivity extends BaseActivity {
         Button btnSaveTractor = findViewById(R.id.btnSaveTractor);
 
         setupYearSpinner();
+        fetchUserCompanyId();
 
         getPin.addTextChangedListener(new TextWatcher() {
             @Override
@@ -166,6 +171,24 @@ public class AddTractorActivity extends BaseActivity {
         }
     }
 
+    private void fetchUserCompanyId() {
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
+        if (mAuth.getCurrentUser() != null) {
+            String uid = mAuth.getCurrentUser().getUid();
+            userDb.collection("users").document(uid).get().addOnSuccessListener(documentSnapshot -> {
+                if (documentSnapshot.exists()) {
+                    userCompanyId = documentSnapshot.getString("companyId");
+                    // Pre-fill if not editing existing tractor
+                    if (existingTractor == null && getCompanyId != null && userCompanyId != null) {
+                        getCompanyId.setText(userCompanyId);
+                    }
+                }
+            }).addOnFailureListener(e -> {
+                userCompanyId = "";
+            });
+        }
+    }
+
 
     private void pinEntered(){
         new AlertDialog.Builder(this )
@@ -178,7 +201,7 @@ public class AddTractorActivity extends BaseActivity {
                 .show();
     }
     private void autoFill(){
-        // ONLY include names that have a corresponding guide URL in generateGuideUrl()
+        // ONLY include names that have a corresponding guide URL in Tractor.java
         List<String> validTractorTypes = Arrays.asList(
             "Compact Utility", 
             "Row Crop", 
@@ -201,7 +224,6 @@ public class AddTractorActivity extends BaseActivity {
         spinnerYear.setText(yearVal, false);
         
         getFuel.setText(String.valueOf(random.nextInt(101)));
-        
         boolean mWarn = random.nextBoolean();
         getMaintenanceStatus.setText(mWarn ? "Needs Attention" : "Active");
         cbMaintenanceWarning.setChecked(mWarn);
@@ -216,6 +238,7 @@ public class AddTractorActivity extends BaseActivity {
         
         getEngineHours.setText(String.format(Locale.US, "%.1f", 100 + (random.nextDouble() * 2000)));
 
+
         Toast.makeText(this, "Tractor details auto-filled with valid guide type!", Toast.LENGTH_SHORT).show();
     }
 
@@ -229,7 +252,10 @@ public class AddTractorActivity extends BaseActivity {
         getSoftwareStatus.setText(tractor.getSoftwareStatus());
         getFirmwareStatus.setText(tractor.getFirmwareStatus());
         getEngineHours.setText(String.valueOf(tractor.getEngineHours()));
-        
+        if (getCompanyId != null) {
+            getCompanyId.setText(tractor.getCompanyId());
+        }
+
         cbMaintenanceWarning.setChecked(tractor.isMaintenanceWarning());
         cbSoftwareWarning.setChecked(tractor.isSoftwareWarning());
         cbFirmwareWarning.setChecked(tractor.isFirmwareWarning());
@@ -348,35 +374,10 @@ public class AddTractorActivity extends BaseActivity {
         });
     }
 
-    private String generateGuideUrl(String name) {
-        String baseUrl = "https://www.deere.com/en/parts-and-service/manuals-and-training/quick-reference-guides/";
-        if (name == null || name.isEmpty()) return null;
-        
-        String lowerName = name.toLowerCase();
-        
-        if (lowerName.contains("compact utility")) {
-            return baseUrl + "compact-utility-tractors.html";
-        } else if (lowerName.contains("row crop")) {
-            return baseUrl + "row-crop-tractors.html";
-        } else if (lowerName.contains("scraper special")) {
-            return baseUrl + "scraper-special-tractors.html";
-        } else if (lowerName.contains("4wd") || lowerName.contains("track")) {
-            return baseUrl + "4wd-and-track-tractors.html";
-        } else if (lowerName.contains("specialty")) {
-            return baseUrl + "specialty-tractors.html";
-        } else if (lowerName.contains("utility")) {
-            return baseUrl + "utility-tractors.html";
-        } else if (lowerName.contains("harvester") || lowerName.contains("combine")) {
-            return baseUrl + "combines.html";
-        } else if (lowerName.contains("engine") || lowerName.contains("powertech")) {
-            return baseUrl + "engines.html";
-        }
-        
-        return null;
-    }
-
     private void saveTractorToFirebase(String locationStr, String imageUrl) {
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
+        if (mAuth.getCurrentUser() == null) return;
+        
         String uid = mAuth.getUid();
         String name = getTractorName.getText().toString().trim();
         String model = getModelNumber.getText().toString().trim();
@@ -387,16 +388,10 @@ public class AddTractorActivity extends BaseActivity {
         String firmware = getFirmwareStatus.getText().toString().trim();
         String engineHoursStr = getEngineHours.getText().toString().trim();
         String yearStr = spinnerYear.getText().toString();
+        String companyId = getCompanyId != null ? getCompanyId.getText().toString().trim() : "";
 
         if (name.isEmpty() || model.isEmpty() || pin.isEmpty()) {
             Toast.makeText(this, "Please fill in required fields", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        // REQUIRE name to have a valid manual URL
-        String guideUrl = generateGuideUrl(name);
-        if (guideUrl == null) {
-            Toast.makeText(this, "Invalid tractor type. Name must contain: Row Crop, Utility, Harvester, Compact Utility, Scraper Special, 4WD/Track, Specialty, or PowerTech.", Toast.LENGTH_LONG).show();
             return;
         }
 
@@ -423,11 +418,15 @@ public class AddTractorActivity extends BaseActivity {
         tractor.setSoftwareStatus(software.isEmpty() ? "Up to date" : software);
         tractor.setFirmwareStatus(firmware.isEmpty() ? "Up to date" : firmware);
         
+        // Save the Company ID from the field
+        tractor.setCompanyId(companyId);
+
         tractor.setMaintenanceWarning(cbMaintenanceWarning.isChecked());
         tractor.setSoftwareWarning(cbSoftwareWarning.isChecked());
         tractor.setFirmwareWarning(cbFirmwareWarning.isChecked());
         
-        tractor.setGuideUrl(guideUrl);
+        // Use Tractor's own logic to generate the guide URL based on the name
+        tractor.setGuideUrl(tractor.getGuideUrl());
 
         if (imageUrl != null) {
             tractor.setImageUrl(imageUrl);
