@@ -4,7 +4,7 @@
     <item
         android:id="@+id/nav_home"
         android:title="@string/nav_home"
-        android:icon="@drawable/ic_more_vert"/>
+        android:icon="@drawable/download_removebg_preview"/>
 
     <item
         android:id="@+id/nav_map"
@@ -14,7 +14,8 @@
     <item
         android:id="@+id/nav_machines"
         android:title="@string/machines"
-        android:icon="@android:drawable/ic_menu_manage"/>
+        android:icon="@drawable/tractor_13248"/>
+
 
     <item
         android:id="@+id/nav_tasks"
