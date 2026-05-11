@@ -15,6 +15,10 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.SetOptions;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class SettingsActivity extends BaseActivity {
 
@@ -22,6 +26,7 @@ public class SettingsActivity extends BaseActivity {
     private FirebaseFirestore db;
     private Button logoutButton;
     private Button changeCompanyIdButton;
+    private Button changeRoleButton;
     private TextView usernameText;
     private TextView roleText;
     private TextView farmPinText;
@@ -32,10 +37,12 @@ public class SettingsActivity extends BaseActivity {
         setActivityContent(R.layout.activity_settings);
 
         mAuth = FirebaseAuth.getInstance();
+        // Ensure this matches the instance name used in signUpPage
         db = FirebaseFirestore.getInstance("sign-up");
         
         logoutButton = findViewById(R.id.signOutButton);
         changeCompanyIdButton = findViewById(R.id.changeCompanyIdButton);
+        changeRoleButton = findViewById(R.id.changeRoleButton);
         usernameText = findViewById(R.id.textView3);
         roleText = findViewById(R.id.textView4);
         farmPinText = findViewById(R.id.settingsFarmPin);
@@ -48,6 +55,13 @@ public class SettingsActivity extends BaseActivity {
             }
             
             loadUserData(user.getUid());
+        }
+
+        // Handle change role button
+        if (changeRoleButton != null) {
+            changeRoleButton.setOnClickListener(v -> {
+                showChangeRoleDialog();
+            });
         }
 
         // Handle change company id button
@@ -99,16 +113,45 @@ public class SettingsActivity extends BaseActivity {
             });
     }
 
+    private void showChangeRoleDialog() {
+        String[] roles = {getString(R.string.role_owner), getString(R.string.role_operator)};
+        
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.settings_change_role_title);
+        builder.setItems(roles, (dialog, which) -> {
+            String selectedRole = roles[which];
+            updateRole(selectedRole);
+        });
+        builder.setNegativeButton(R.string.cancel, (dialog, which) -> dialog.cancel());
+        builder.show();
+    }
+
+    private void updateRole(String newRole) {
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user != null) {
+            Map<String, Object> data = new HashMap<>();
+            data.put("role", newRole);
+
+            // Using set with SetOptions.merge() so it works even if the document doesn't exist
+            db.collection("users").document(user.getUid())
+                .set(data, SetOptions.merge())
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(SettingsActivity.this, R.string.settings_role_update_success, Toast.LENGTH_SHORT).show();
+                    loadUserData(user.getUid());
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(SettingsActivity.this, R.string.settings_role_update_error, Toast.LENGTH_SHORT).show();
+                });
+        }
+    }
+
     private void showChangeCompanyIdDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(R.string.settings_change_company_id_title);
 
         final EditText input = new EditText(this);
-        // Only allow numbers
         input.setInputType(InputType.TYPE_CLASS_NUMBER);
         input.setHint(R.string.settings_new_company_id_hint);
-        
-        // Limit input to 6 characters
         input.setFilters(new InputFilter[] { new InputFilter.LengthFilter(6) });
         
         builder.setView(input);
@@ -118,7 +161,6 @@ public class SettingsActivity extends BaseActivity {
             if (newCompanyId.isEmpty()) {
                 Toast.makeText(SettingsActivity.this, R.string.settings_id_empty_error, Toast.LENGTH_SHORT).show();
             } else if (newCompanyId.length() != 6) {
-                // Enforce exactly 6 digits
                 Toast.makeText(SettingsActivity.this, R.string.settings_id_length_error, Toast.LENGTH_SHORT).show();
             } else {
                 updateCompanyId(newCompanyId);
@@ -132,8 +174,11 @@ public class SettingsActivity extends BaseActivity {
     private void updateCompanyId(String newCompanyId) {
         FirebaseUser user = mAuth.getCurrentUser();
         if (user != null) {
+            Map<String, Object> data = new HashMap<>();
+            data.put("companyId", newCompanyId);
+
             db.collection("users").document(user.getUid())
-                .update("companyId", newCompanyId)
+                .set(data, SetOptions.merge())
                 .addOnSuccessListener(aVoid -> {
                     Toast.makeText(SettingsActivity.this, R.string.settings_id_update_success, Toast.LENGTH_SHORT).show();
                     loadUserData(user.getUid());
