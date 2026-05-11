@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.PopupMenu;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -27,7 +28,10 @@ public class TasksActivity extends BaseActivity {
     private FirebaseFirestore userdb;
     private FirebaseAuth mAuth;
     private ProgressBar progressBar;
+    private TextView noTasksTextView;
     private String userCompanyId = null;
+    private String userRole = null;
+    private String userName = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +47,7 @@ public class TasksActivity extends BaseActivity {
 
         recyclerView = findViewById(R.id.tasksRecyclerView);
         progressBar = findViewById(R.id.tasksProgressBar);
+        noTasksTextView = findViewById(R.id.noTasksTextView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         adapter = new TaskAdapter(taskList, this::showTaskMenu);
@@ -67,10 +72,20 @@ public class TasksActivity extends BaseActivity {
         userdb.collection("users").document(uid).get().addOnCompleteListener(task -> {
             if (task.isSuccessful() && task.getResult() != null) {
                 userCompanyId = task.getResult().getString("companyId");
+                userRole = task.getResult().getString("role");
+                userName = task.getResult().getString("name");
 
                 // If companyId is null or empty, use the shared default company ID
                 if (userCompanyId == null || userCompanyId.trim().isEmpty()) {
                     userCompanyId = "";
+                }
+
+                // Hide Add Task button for Operators
+                FloatingActionButton addTaskFab = findViewById(R.id.addTaskFab);
+                if ("Operator".equalsIgnoreCase(userRole)) {
+                    if (addTaskFab != null) addTaskFab.setVisibility(View.GONE);
+                } else {
+                    if (addTaskFab != null) addTaskFab.setVisibility(View.VISIBLE);
                 }
                 
                 fetchTasksForCompany(userCompanyId);
@@ -96,14 +111,48 @@ public class TasksActivity extends BaseActivity {
                     taskList.clear();
                     for (QueryDocumentSnapshot doc : value) {
                         Task task = doc.toObject(Task.class);
-                        taskList.add(task);
+                        
+                        if ("Operator".equalsIgnoreCase(userRole)) {
+                            // Filter tasks: Operators only see tasks assigned to them
+                            String assigned = task.getAssignedTo();
+                            if (assigned != null && userName != null) {
+                                // assignedTo can be a comma-separated list of names
+                                String[] names = assigned.split(", ");
+                                boolean isAssignedToMe = false;
+                                for (String name : names) {
+                                    if (name.trim().equalsIgnoreCase(userName.trim())) {
+                                        isAssignedToMe = true;
+                                        break;
+                                    }
+                                }
+                                if (isAssignedToMe) {
+                                    taskList.add(task);
+                                }
+                            }
+                        } else {
+                            // Owners and others see all company tasks
+                            taskList.add(task);
+                        }
                     }
+
+                    // Update visibility based on whether tasks were found
+                    if (taskList.isEmpty()) {
+                        if (noTasksTextView != null) noTasksTextView.setVisibility(View.VISIBLE);
+                    } else {
+                        if (noTasksTextView != null) noTasksTextView.setVisibility(View.GONE);
+                    }
+
                     adapter.notifyDataSetChanged();
                 }
             });
     }
 
     private void showTaskMenu(View view, Task task) {
+        // Operators shouldn't be able to edit or delete tasks
+        if ("Operator".equalsIgnoreCase(userRole)) {
+            return;
+        }
+
         PopupMenu popup = new PopupMenu(this, view);
         popup.getMenu().add("Edit");
         popup.getMenu().add("Delete");
