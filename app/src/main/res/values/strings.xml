@@ -136,4 +136,11 @@
     <string name="settings_id_update_success">Company ID updated successfully</string>
     <string name="settings_id_update_error">Failed to update Company ID</string>
     <string name="settings_id_length_error">ID must be exactly 6 digits</string>
+
+    <!-- Settings Role -->
+    <string name="settings_change_role_title">Change Role</string>
+    <string name="role_owner">Owner</string>
+    <string name="role_operator">Operator</string>
+    <string name="settings_role_update_success">Role updated successfully</string>
+    <string name="settings_role_update_error">Failed to update role</string>
 </resources>
