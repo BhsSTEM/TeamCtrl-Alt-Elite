@@ -80,8 +80,7 @@ public class ManageTractorsActivity extends BaseActivity {
                     Log.d("FirestoreData", "User is Owner: Fetching all tractors for company: " + companyId);
                 } else {
                     query = db.collection("tractors")
-                            .whereEqualTo("CompanyId", companyId)
-                            .whereEqualTo("user", currentUserId);
+                            .whereEqualTo("CompanyId", companyId);
                     Log.d("FirestoreData", "User is Operator: Fetching personal tractors for company: " + companyId);
                 }
 

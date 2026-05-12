@@ -1,5 +1,6 @@
 package com.example.ctrl_alt_elite;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.InputFilter;
@@ -30,6 +31,7 @@ public class SettingsActivity extends BaseActivity {
     private TextView usernameText;
     private TextView roleText;
     private TextView farmPinText;
+    private TextView deleteButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +48,7 @@ public class SettingsActivity extends BaseActivity {
         usernameText = findViewById(R.id.textView3);
         roleText = findViewById(R.id.textView4);
         farmPinText = findViewById(R.id.settingsFarmPin);
+        deleteButton = findViewById(R.id.removeButton);
 
         // Load current user info
         FirebaseUser user = mAuth.getCurrentUser();
@@ -77,6 +80,12 @@ public class SettingsActivity extends BaseActivity {
                 mAuth.signOut();
                 startActivity(new Intent(SettingsActivity.this, LoginPage.class));
                 finish();
+            });
+        }
+        
+        if (deleteButton != null) {
+            deleteButton.setOnClickListener(v -> {
+                showDeleteConfirmationDialog(this, user);
             });
         }
     }
@@ -187,5 +196,56 @@ public class SettingsActivity extends BaseActivity {
                     Toast.makeText(SettingsActivity.this, R.string.settings_id_update_error, Toast.LENGTH_SHORT).show();
                 });
         }
+    }
+
+    private void showDeleteConfirmationDialog(Context context, FirebaseUser user) {
+        if (user == null) return;
+        new AlertDialog.Builder(context)
+                .setTitle("Remove User")
+                .setMessage("Are you sure you want to DELETE the account permanently? This action cannot be undone.")
+                .setPositiveButton("Remove", (dialog, which) -> {
+                    deleteUserFromFirestore(context, user);
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    private void deleteUserFromFirestore(Context context, FirebaseUser user) {
+        if (user == null) {
+            Toast.makeText(context, "Error: User not found", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        user.delete().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                db.collection("users")
+                        .document(user.getUid())
+                        .delete()
+                        .addOnSuccessListener(aVoid -> {
+                            Toast.makeText(context, "Account permanently deleted", Toast.LENGTH_SHORT).show();
+                            redirectToLogin();
+                        })
+                        .addOnFailureListener(e -> {
+                            redirectToLogin();
+                        });
+            } else {
+                if (task.getException() instanceof com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException) {
+                    new AlertDialog.Builder(context)
+                            .setTitle("Action Required")
+                            .setMessage("For your security, deleting an account is a sensitive operation that requires a recent login. \n\nPlease log out and sign back in to confirm your identity, then you will be able to delete your account.")
+                            .setPositiveButton("OK", null)
+                            .show();
+                } else {
+                    Toast.makeText(context, "Error: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+    }
+
+    private void redirectToLogin() {
+        Intent intent = new Intent(SettingsActivity.this, LoginPage.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
     }
 }
