@@ -47,6 +47,7 @@
     <string name="settings_role">No Role Assigned</string>
     <string name="settings_change_password">Change Password</string>
     <string name="settings_logout">Logout</string>
+    <string name="settings_remove">Delete Account</string>
     <string name="tasks_header">Tasks</string>
     <string name="tasks_add_task_content_desc">Add Task</string>
     <string name="tasks_options_content_desc">Task Options</string>
