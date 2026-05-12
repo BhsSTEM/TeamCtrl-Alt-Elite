@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
+
     <uses-feature
         android:name="android.hardware.camera"
         android:required="false" />
@@ -12,6 +13,9 @@
 
     <queries>
         <package android:name="com.google.android.gms" />
+        <intent>
+            <action android:name="com.google.android.gms.settings.GOOGLE_SETTINGS" />
+        </intent>
     </queries>
 
     <application
@@ -24,59 +28,74 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.CtrlAltElite">
 
+        <!-- Google Play Services version metadata -->
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="${MAPS_API_KEY}" />
 
         <activity
             android:name=".SettingsActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:screenOrientation="portrait"/>
 
         <activity
             android:name=".BaseActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:screenOrientation="portrait"/>
 
         <activity
             android:name=".MainActivity"
-            android:exported="false"/>
+            android:exported="false"
+            android:screenOrientation="portrait"/>
 
         <activity
             android:name=".TasksActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:screenOrientation="portrait"/>
 
         <activity
             android:name=".AddTaskActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:screenOrientation="portrait"/>
 
         <activity
             android:name=".AddTractorActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:screenOrientation="portrait"/>
 
         <activity
             android:name=".EditTractorActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:screenOrientation="portrait"/>
 
         <activity
             android:name=".ManageTractorsActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:screenOrientation="portrait"/>
 
         <activity
             android:name=".LoginPage"
-            android:exported="true">
+            android:exported="true"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
         <activity
             android:name=".evansMapActivity"
-            android:exported="false"/>
+            android:exported="false"
+            android:screenOrientation="portrait"/>
 
         <activity
             android:name=".signUpPage"
-            android:exported="false"/>
+            android:exported="false"
+            android:screenOrientation="portrait"/>
 
     </application>
 

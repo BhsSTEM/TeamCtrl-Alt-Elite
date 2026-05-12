@@ -297,8 +297,8 @@
         app:layout_constraintEnd_toEndOf="@id/WeatherBoxRight"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="@id/WeatherBoxLeft"
-        app:layout_constraintTop_toBottomOf="@+id/NotificationUnderline"
-        app:layout_constraintVertical_bias="0.008"
+        app:layout_constraintTop_toBottomOf="@+id/header_bg2"
+        app:layout_constraintVertical_bias="0.013"
         app:srcCompat="@drawable/line" />
 
     <ImageView
@@ -318,7 +318,7 @@
         app:tint="#00066CB6" />
 
     <ImageView
-        android:id="@+id/MapView"
+        android:id="@+id/mapViewBackground"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:clickable="true"
@@ -332,6 +332,34 @@
         app:layout_constraintTop_toBottomOf="@+id/MapBoxTop"
         app:layout_constraintVertical_bias="1.0"
         app:srcCompat="@drawable/screenshot_2026_03_27_143012" />
+
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/map2"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/MapBoxBottom"
+        app:layout_constraintEnd_toEndOf="@+id/MapView"
+        app:layout_constraintHorizontal_bias="0.361"
+        app:layout_constraintStart_toStartOf="@+id/MapView"
+        app:layout_constraintTop_toBottomOf="@+id/MapBoxTop"
+        app:layout_constraintVertical_bias="1.0" />
+
+    <ImageView
+        android:id="@+id/MapView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?attr/selectableItemBackground"
+        android:scaleType="centerCrop"
+        app:layout_constraintBottom_toTopOf="@+id/MapBoxBottom"
+        app:layout_constraintEnd_toStartOf="@+id/MapBoxRight"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toEndOf="@+id/MapBoxLeft"
+        app:layout_constraintTop_toBottomOf="@+id/MapBoxTop"
+        app:layout_constraintVertical_bias="1.0"
+        app:srcCompat="?attr/selectableItemBackgroundBorderless" />
 
     <ImageView
         android:id="@+id/MapBoxLeft"
