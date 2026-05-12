@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
@@ -32,6 +33,9 @@ public class TasksActivity extends BaseActivity {
     private String userCompanyId = null;
     private String userRole = null;
     private String userName = null;
+
+    private ListenerRegistration userListener;
+    private ListenerRegistration tasksListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,7 +57,7 @@ public class TasksActivity extends BaseActivity {
         adapter = new TaskAdapter(taskList, this::showTaskMenu);
         recyclerView.setAdapter(adapter);
 
-        fetchUserCompanyIdAndTasks();
+        startListeningToUserChanges();
 
         FloatingActionButton addTaskFab = findViewById(R.id.addTaskFab);
         if (addTaskFab != null) {
@@ -65,22 +69,31 @@ public class TasksActivity extends BaseActivity {
         }
     }
 
-    private void fetchUserCompanyIdAndTasks() {
+    private void startListeningToUserChanges() {
         if (progressBar != null) progressBar.setVisibility(View.VISIBLE);
         
+        if (mAuth.getCurrentUser() == null) return;
         String uid = mAuth.getCurrentUser().getUid();
-        userdb.collection("users").document(uid).get().addOnCompleteListener(task -> {
-            if (task.isSuccessful() && task.getResult() != null) {
-                userCompanyId = task.getResult().getString("companyId");
-                userRole = task.getResult().getString("role");
-                userName = task.getResult().getString("name");
+
+        // Real-time listener for user document to detect role/company changes
+        userListener = userdb.collection("users").document(uid).addSnapshotListener((documentSnapshot, error) -> {
+            if (error != null) {
+                if (progressBar != null) progressBar.setVisibility(View.GONE);
+                Toast.makeText(this, "Error listening to user data.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if (documentSnapshot != null && documentSnapshot.exists()) {
+                userCompanyId = documentSnapshot.getString("companyId");
+                userRole = documentSnapshot.getString("role");
+                userName = documentSnapshot.getString("name");
 
                 // If companyId is null or empty, use the shared default company ID
                 if (userCompanyId == null || userCompanyId.trim().isEmpty()) {
                     userCompanyId = "";
                 }
 
-                // Hide Add Task button for Operators
+                // UI adjustments based on role - updates instantly if the role changes in the DB
                 FloatingActionButton addTaskFab = findViewById(R.id.addTaskFab);
                 if ("Operator".equalsIgnoreCase(userRole)) {
                     if (addTaskFab != null) addTaskFab.setVisibility(View.GONE);
@@ -88,16 +101,21 @@ public class TasksActivity extends BaseActivity {
                     if (addTaskFab != null) addTaskFab.setVisibility(View.VISIBLE);
                 }
                 
-                fetchTasksForCompany(userCompanyId);
+                // Refresh task listener for the current company and role
+                startListeningToTasks(userCompanyId);
             } else {
                 if (progressBar != null) progressBar.setVisibility(View.GONE);
-                Toast.makeText(this, "Error fetching user data.", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
-    private void fetchTasksForCompany(String companyId) {
-        db.collection("tasks")
+    private void startListeningToTasks(String companyId) {
+        // Remove existing listener to avoid leaks or multiple triggers
+        if (tasksListener != null) {
+            tasksListener.remove();
+        }
+
+        tasksListener = db.collection("tasks")
             .whereEqualTo("companyId", companyId)
             .addSnapshotListener((value, error) -> {
                 if (progressBar != null) progressBar.setVisibility(View.GONE);
@@ -130,16 +148,18 @@ public class TasksActivity extends BaseActivity {
                                 }
                             }
                         } else {
-                            // Owners and others see all company tasks
+                            // "Owner" or other roles see all tasks for the company
                             taskList.add(task);
                         }
                     }
 
-                    // Update visibility based on whether tasks were found
+                    // Update empty state visibility
                     if (taskList.isEmpty()) {
                         if (noTasksTextView != null) noTasksTextView.setVisibility(View.VISIBLE);
+                        if (recyclerView != null) recyclerView.setVisibility(View.GONE);
                     } else {
                         if (noTasksTextView != null) noTasksTextView.setVisibility(View.GONE);
+                        if (recyclerView != null) recyclerView.setVisibility(View.VISIBLE);
                     }
 
                     adapter.notifyDataSetChanged();
@@ -185,6 +205,14 @@ public class TasksActivity extends BaseActivity {
         db.collection("tasks").document(task.getId()).delete()
                 .addOnSuccessListener(aVoid -> Toast.makeText(this, "Task Deleted", Toast.LENGTH_SHORT).show())
                 .addOnFailureListener(e -> Toast.makeText(this, "Error deleting task", Toast.LENGTH_SHORT).show());
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Clean up listeners when activity is destroyed to prevent memory leaks
+        if (userListener != null) userListener.remove();
+        if (tasksListener != null) tasksListener.remove();
     }
 
     @Override
