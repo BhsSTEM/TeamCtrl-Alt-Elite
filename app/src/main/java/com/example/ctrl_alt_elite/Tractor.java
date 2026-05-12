@@ -24,7 +24,7 @@ public class Tractor implements Serializable {
     private String softwareStatus;
     private String firmwareStatus;
     private String guideUrl;
-    
+    private String compId;
     // Warning flags
     private boolean maintenanceWarning;
     private boolean softwareWarning;
@@ -87,6 +87,12 @@ public class Tractor implements Serializable {
     public String getFirmwareStatus() { return firmwareStatus; }
     public void setFirmwareStatus(String firmwareStatus) { this.firmwareStatus = firmwareStatus; }
 
+    @PropertyName("CompanyId")
+    public String getCompanyId() {return compId;}
+    
+    @PropertyName("CompanyId")
+    public void setCompanyId(String compId) {this.compId = compId;}
+
     public String getGuideUrl() { 
         // Always try to generate the most accurate URL based on current name first
         String dynamic = generateDynamicGuideUrl();
@@ -115,15 +121,15 @@ public class Tractor implements Serializable {
         Map<String, String> mapping = new LinkedHashMap<>();
         // Use directory paths as they are the reliable canonical links on the JD site
         mapping.put("Compact Utility", "compact-utility-tractors/");
-        mapping.put("Row Crop", "row-crop-tractors/");
-        mapping.put("Scraper Special", "scraper-special-tractors/");
-        mapping.put("4WD", "4wd-and-track-tractors/");
-        mapping.put("Track", "4wd-and-track-tractors/");
-        mapping.put("Specialty", "specialty-tractors/");
+        mapping.put("Row Crop", "crop-care/");
+        mapping.put("Scraper Special", "utvs/");
+        mapping.put("4WD", "lawn-garden/");
+        mapping.put("Track", "agriculture/");
+        mapping.put("Specialty", "agriculture/");
         mapping.put("Utility", "utility-tractors/");
-        mapping.put("Harvester", "combines/");
-        mapping.put("Combine", "combines/");
-        mapping.put("PowerTech", "engines/");
+        mapping.put("Harvester", "landscaping-grounds-care/");
+        mapping.put("Combine", "landscaping-grounds-care/");
+        mapping.put("PowerTech", "large-tractors/");
 
         if (name == null || name.isEmpty()) return baseUrl;
         String lowerName = name.toLowerCase();

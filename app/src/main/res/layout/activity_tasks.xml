@@ -41,6 +41,19 @@
         app:layout_constraintTop_toBottomOf="@+id/header_bg"
         tools:listitem="@layout/item_task" />
 
+    <TextView
+        android:id="@+id/noTasksTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="No tasks assigned"
+        android:textColor="@color/white"
+        android:textSize="18sp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <ProgressBar
         android:id="@+id/tasksProgressBar"
         android:layout_width="wrap_content"

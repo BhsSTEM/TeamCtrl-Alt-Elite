@@ -14,6 +14,7 @@ import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.ListenerRegistration;
 import android.util.Log;
+import android.view.View;
 import androidx.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,6 +53,7 @@ public class ManageTractorsActivity extends BaseActivity {
 
     private void listenToFirestore() {
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+
         if (currentUser == null) {
             Log.e("FirestoreError", "User not logged in");
             return;
@@ -59,45 +61,64 @@ public class ManageTractorsActivity extends BaseActivity {
 
         String currentUserId = currentUser.getUid();
 
-        // First, get the user's role from the 'users' collection in the 'sign-up' database
+        // Get the user's role and companyId from the 'users' collection in the 'sign-up' database
         userDb.collection("users").document(currentUserId).get().addOnSuccessListener(documentSnapshot -> {
-            String role = documentSnapshot.getString("role");
+            if (documentSnapshot.exists()) {
+                String role = documentSnapshot.getString("role");
+                String companyId = documentSnapshot.getString("companyId");
 
-            com.google.firebase.firestore.Query query;
+                if (companyId == null || companyId.isEmpty()) {
+                    Log.e("FirestoreError", "User has no companyId");
+                    return;
+                }
 
-            // ROLE LOGIC:
-            // If owner, get all tractors. If operator, only get theirs.
-            if ("owner".equalsIgnoreCase(role)) {
-                query = db.collection("tractors");
-                Log.d("FirestoreData", "User is Owner: Fetching all tractors");
-            } else {
-                query = db.collection("tractors").whereEqualTo("user", currentUserId);
-                Log.d("FirestoreData", "User is Operator: Fetching personal tractors");
-            }
-
-
-            // Apply the listener to the chosen query
-            tractorListener = query.addSnapshotListener(new EventListener<QuerySnapshot>() {
-                @Override
-                public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
-                    if (error != null) {
-                        Log.e("FirestoreError", "Listen failed.", error);
-                        return;
-                    }
-
-                    if (value != null) {
-                        tractorList.clear();
-                        for (QueryDocumentSnapshot doc : value) {
-                            Tractor tractor = doc.toObject(Tractor.class);
-                            tractor.setDocumentId(doc.getId());
-                            tractorList.add(tractor);
-                        }
-                        adapter.notifyDataSetChanged();
+                // ROLE UI LOGIC: Hide Add Tractor button for operators
+                MaterialButton btnAddTractor = findViewById(R.id.btn_add_tractor);
+                if (btnAddTractor != null) {
+                    if ("operator".equalsIgnoreCase(role)) {
+                        btnAddTractor.setVisibility(View.GONE);
+                    } else {
+                        btnAddTractor.setVisibility(View.VISIBLE);
                     }
                 }
-            });
+
+                com.google.firebase.firestore.Query query;
+
+                // ROLE DATA LOGIC: Both owners and operators see all tractors within their company.
+                // Using lowercase "companyId" to match the database field name.
+                query = db.collection("tractors").whereEqualTo("CompanyId", companyId);
+                Log.d("FirestoreData", "Fetching tractors for company: " + companyId + " (Role: " + role + ")");
+
+                // Remove existing listener if any
+                if (tractorListener != null) {
+                    tractorListener.remove();
+                }
+
+                // Apply the listener to the chosen query
+                tractorListener = query.addSnapshotListener(new EventListener<QuerySnapshot>() {
+                    @Override
+                    public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
+                        if (error != null) {
+                            Log.e("FirestoreError", "Listen failed.", error);
+                            return;
+                        }
+
+                        if (value != null) {
+                            tractorList.clear();
+                            for (QueryDocumentSnapshot doc : value) {
+                                Tractor tractor = doc.toObject(Tractor.class);
+                                tractor.setDocumentId(doc.getId());
+                                tractorList.add(tractor);
+                            }
+                            adapter.notifyDataSetChanged();
+                        }
+                    }
+                });
+            } else {
+                Log.e("FirestoreError", "User document does not exist");
+            }
         }).addOnFailureListener(e -> {
-            Log.e("FirestoreError", "Failed to fetch user role", e);
+            Log.e("FirestoreError", "Failed to fetch user data", e);
         });
     }
 
@@ -105,11 +126,6 @@ public class ManageTractorsActivity extends BaseActivity {
     protected void onResume() {
         super.onResume();
         setupNavigation();
-
-        // Stop any existing listener and restart it to catch role changes
-        if (tractorListener != null) {
-            tractorListener.remove();
-        }
         listenToFirestore();
     }
 

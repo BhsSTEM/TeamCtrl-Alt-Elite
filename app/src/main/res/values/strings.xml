@@ -47,6 +47,7 @@
     <string name="settings_role">No Role Assigned</string>
     <string name="settings_change_password">Change Password</string>
     <string name="settings_logout">Logout</string>
+    <string name="settings_remove">Delete Account</string>
     <string name="tasks_header">Tasks</string>
     <string name="tasks_add_task_content_desc">Add Task</string>
     <string name="tasks_options_content_desc">Task Options</string>
@@ -128,6 +129,7 @@
     <string name="no_recent_service">No recent service</string>
 
     <!-- Settings Company ID -->
+    <string name="company_id">Company ID</string>
     <string name="settings_change">Change</string>
     <string name="settings_change_company_id_title">Change Company ID</string>
     <string name="settings_new_company_id_hint">Enter 6-digit Company ID</string>
