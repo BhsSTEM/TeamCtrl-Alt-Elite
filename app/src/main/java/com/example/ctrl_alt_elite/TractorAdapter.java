@@ -20,6 +20,7 @@ public class TractorAdapter extends RecyclerView.Adapter<TractorAdapter.TractorV
 
     private List<Tractor> tractorList;
     private boolean isMapContext;
+    private String userRole = "";
 
     public TractorAdapter(List<Tractor> tractorList) {
         this(tractorList, false);
@@ -28,6 +29,11 @@ public class TractorAdapter extends RecyclerView.Adapter<TractorAdapter.TractorV
     public TractorAdapter(List<Tractor> tractorList, boolean isMapContext) {
         this.tractorList = tractorList;
         this.isMapContext = isMapContext;
+    }
+
+    public void setUserRole(String role) {
+        this.userRole = role;
+        notifyDataSetChanged();
     }
 
     @NonNull
@@ -84,20 +90,25 @@ public class TractorAdapter extends RecyclerView.Adapter<TractorAdapter.TractorV
                 }
             });
         } else {
-            // Manage context: Hide Map button, Show Remove button
+            // Manage context: Hide Map button, Show Remove button for owners only
             holder.btnMap.setVisibility(View.GONE);
-            holder.btnRemove.setVisibility(View.VISIBLE);
+            boolean isOwner = "Owner".equalsIgnoreCase(userRole);
+            holder.btnRemove.setVisibility(isOwner ? View.VISIBLE : View.GONE);
 
             holder.btnRemove.setOnClickListener(v -> {
                 showDeleteConfirmationDialog(context, tractor);
             });
         }
 
-        // Click on the whole item can also open EditTractorActivity
+        // Click on the whole item
         holder.itemView.setOnClickListener(v -> {
-            Intent intent = new Intent(context, EditTractorActivity.class);
-            intent.putExtra("TRACTOR_DATA", tractor);
-            context.startActivity(intent);
+            if (isMapContext && context instanceof evansMapActivity) {
+                ((evansMapActivity) context).showTractorOnMap(tractor);
+            } else {
+                Intent intent = new Intent(context, EditTractorActivity.class);
+                intent.putExtra("TRACTOR_DATA", tractor);
+                context.startActivity(intent);
+            }
         });
     }
 

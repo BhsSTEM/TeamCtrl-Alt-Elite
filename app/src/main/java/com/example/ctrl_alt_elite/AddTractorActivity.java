@@ -53,7 +53,8 @@ public class AddTractorActivity extends BaseActivity {
     
     private EditText getTractorName, getModelNumber, getPin, getCompanyId, getFuel, getMaintenanceStatus, getSoftwareStatus, getFirmwareStatus, getEngineHours;
     private CheckBox cbMaintenanceWarning, cbSoftwareWarning, cbFirmwareWarning;
-    private TextView titleAddTractor;
+    private TextView titleAddTractor, lblTractorImage;
+    private View btnUploadImage;
 
     private FirebaseFirestore db;
     private FirebaseFirestore userDb;
@@ -64,6 +65,7 @@ public class AddTractorActivity extends BaseActivity {
     private Uri selectedImageUri;
     private Bitmap selectedBitmap;
     private String userCompanyId = null;
+    private String userRole = "";
 
     private final ActivityResultLauncher<Intent> pickImageLauncher =
             registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
@@ -132,13 +134,14 @@ public class AddTractorActivity extends BaseActivity {
         cbFirmwareWarning = findViewById(R.id.cbFirmwareWarning);
         
         titleAddTractor = findViewById(R.id.titleAddTractor);
+        lblTractorImage = findViewById(R.id.lblTractorImage);
 
-        View btnUploadImage = findViewById(R.id.btnUploadImage);
+        btnUploadImage = findViewById(R.id.btnUploadImage);
         View btnBack = findViewById(R.id.btnBack);
         Button btnSaveTractor = findViewById(R.id.btnSaveTractor);
 
         setupYearSpinner();
-        fetchUserCompanyId();
+        fetchUserDetails();
 
         getPin.addTextChangedListener(new TextWatcher() {
             @Override
@@ -147,7 +150,7 @@ public class AddTractorActivity extends BaseActivity {
             public void onTextChanged(CharSequence s, int start, int before, int count) {}
             @Override
             public void afterTextChanged(Editable s) {
-                if (s.length() >= 8 && titleAddTractor.getText().toString().equals("Add Tractor")) {
+                if (s.length() >= 8 && titleAddTractor.getText().toString().equals("Add Tractor") && "Owner".equalsIgnoreCase(userRole)) {
                     pinEntered();
                 }
             }
@@ -159,7 +162,13 @@ public class AddTractorActivity extends BaseActivity {
         }
 
         if (btnUploadImage != null) {
-            btnUploadImage.setOnClickListener(v -> checkPermissionsAndShowOptions());
+            btnUploadImage.setOnClickListener(v -> {
+                if ("Owner".equalsIgnoreCase(userRole)) {
+                    checkPermissionsAndShowOptions();
+                } else {
+                    Toast.makeText(this, "Only owners can change tractor photos", Toast.LENGTH_SHORT).show();
+                }
+            });
         }
         
         if (btnBack != null) {
@@ -171,13 +180,19 @@ public class AddTractorActivity extends BaseActivity {
         }
     }
 
-    private void fetchUserCompanyId() {
+    private void fetchUserDetails() {
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
         if (mAuth.getCurrentUser() != null) {
             String uid = mAuth.getCurrentUser().getUid();
             userDb.collection("users").document(uid).get().addOnSuccessListener(documentSnapshot -> {
                 if (documentSnapshot.exists()) {
                     userCompanyId = documentSnapshot.getString("companyId");
+                    String role = documentSnapshot.getString("role");
+                    userRole = (role != null) ? role.trim() : "";
+                    
+                    // Apply role-based restrictions
+                    applyRoleRestrictions();
+
                     // Pre-fill if not editing existing tractor
                     if (existingTractor == null && getCompanyId != null && userCompanyId != null) {
                         getCompanyId.setText(userCompanyId);
@@ -185,7 +200,55 @@ public class AddTractorActivity extends BaseActivity {
                 }
             }).addOnFailureListener(e -> {
                 userCompanyId = "";
+                userRole = "Operator"; // Default to restricted if check fails
+                applyRoleRestrictions();
             });
+        }
+    }
+
+    private void applyRoleRestrictions() {
+        boolean isOwner = "Owner".equalsIgnoreCase(userRole);
+        int ownerVisibility = isOwner ? View.VISIBLE : View.GONE;
+
+        // Hide fields only owners can edit
+        setInputLayoutVisibility(getTractorName, ownerVisibility);
+        setInputLayoutVisibility(getModelNumber, ownerVisibility);
+        setInputLayoutVisibility(getPin, ownerVisibility);
+        setInputLayoutVisibility(getCompanyId, ownerVisibility);
+        setInputLayoutVisibility(spinnerYear, ownerVisibility);
+
+        if (btnUploadImage != null) {
+            btnUploadImage.setVisibility(ownerVisibility);
+        }
+        
+        if (lblTractorImage != null) {
+            lblTractorImage.setVisibility(ownerVisibility);
+        }
+
+        // Ensure fields both can edit are visible and enabled
+        getFuel.setEnabled(true);
+        getEngineHours.setEnabled(true);
+        getMaintenanceStatus.setEnabled(true);
+        getSoftwareStatus.setEnabled(true);
+        getFirmwareStatus.setEnabled(true);
+        cbMaintenanceWarning.setEnabled(true);
+        cbSoftwareWarning.setEnabled(true);
+        cbFirmwareWarning.setEnabled(true);
+
+        if (!isOwner && titleAddTractor != null && existingTractor != null) {
+            titleAddTractor.setText("Update Tractor Status");
+        }
+    }
+
+    private void setInputLayoutVisibility(View view, int visibility) {
+        if (view == null) return;
+        View parent = (View) view.getParent();
+        if (parent instanceof com.google.android.material.textfield.TextInputLayout) {
+            parent.setVisibility(visibility);
+        } else if (parent != null && parent.getParent() instanceof com.google.android.material.textfield.TextInputLayout) {
+            ((View) parent.getParent()).setVisibility(visibility);
+        } else {
+            view.setVisibility(visibility);
         }
     }
 
@@ -383,9 +446,9 @@ public class AddTractorActivity extends BaseActivity {
         String model = getModelNumber.getText().toString().trim();
         String pin = getPin.getText().toString().trim();
         String fuelStr = getFuel.getText().toString().trim();
-        String status = getMaintenanceStatus.getText().toString().trim();
-        String software = getSoftwareStatus.getText().toString().trim();
-        String firmware = getFirmwareStatus.getText().toString().trim();
+        String statusText = getMaintenanceStatus.getText().toString().trim();
+        String softwareText = getSoftwareStatus.getText().toString().trim();
+        String firmwareText = getFirmwareStatus.getText().toString().trim();
         String engineHoursStr = getEngineHours.getText().toString().trim();
         String yearStr = spinnerYear.getText().toString();
         String companyId = getCompanyId != null ? getCompanyId.getText().toString().trim() : "";
@@ -406,6 +469,14 @@ public class AddTractorActivity extends BaseActivity {
         int fuel = fuelStr.isEmpty() ? 0 : Integer.parseInt(fuelStr);
         double engineHours = engineHoursStr.isEmpty() ? 0.0 : Double.parseDouble(engineHoursStr);
 
+        // Capture old values for notification logic BEFORE updating the object
+        String oldStatus = (existingTractor != null) ? existingTractor.getStatus() : "";
+        String oldSoftware = (existingTractor != null) ? existingTractor.getSoftwareStatus() : "";
+        String oldFirmware = (existingTractor != null) ? existingTractor.getFirmwareStatus() : "";
+        boolean oldMW = (existingTractor != null) && existingTractor.isMaintenanceWarning();
+        boolean oldSW = (existingTractor != null) && existingTractor.isSoftwareWarning();
+        boolean oldFW = (existingTractor != null) && existingTractor.isFirmwareWarning();
+
         Tractor tractor = (existingTractor != null) ? existingTractor : new Tractor();
         tractor.setUser(uid);
         tractor.setName(name);
@@ -414,18 +485,15 @@ public class AddTractorActivity extends BaseActivity {
         tractor.setYear(year);
         tractor.setFuel(fuel);
         tractor.setEngineHours(engineHours);
-        tractor.setStatus(status.isEmpty() ? "Active" : status);
-        tractor.setSoftwareStatus(software.isEmpty() ? "Up to date" : software);
-        tractor.setFirmwareStatus(firmware.isEmpty() ? "Up to date" : firmware);
-        
-        // Save the Company ID from the field
+        tractor.setStatus(statusText.isEmpty() ? "Active" : statusText);
+        tractor.setSoftwareStatus(softwareText.isEmpty() ? "Up to date" : softwareText);
+        tractor.setFirmwareStatus(firmwareText.isEmpty() ? "Up to date" : firmwareText);
         tractor.setCompanyId(companyId);
 
         tractor.setMaintenanceWarning(cbMaintenanceWarning.isChecked());
         tractor.setSoftwareWarning(cbSoftwareWarning.isChecked());
         tractor.setFirmwareWarning(cbFirmwareWarning.isChecked());
         
-        // Use Tractor's own logic to generate the guide URL based on the name
         tractor.setGuideUrl(tractor.getGuideUrl());
 
         if (imageUrl != null) {
@@ -437,6 +505,9 @@ public class AddTractorActivity extends BaseActivity {
         }
 
         tractor.setLastUpdated(java.text.DateFormat.getDateTimeInstance().format(new java.util.Date()));
+
+        // Check for new warnings or status updates to notify owner
+        checkAndNotifyNewWarnings(tractor, oldStatus, oldSoftware, oldFirmware, oldMW, oldSW, oldFW);
 
         if (existingTractor != null && existingTractor.getDocumentId() != null) {
             db.collection("tractors").document(existingTractor.getDocumentId())
@@ -457,6 +528,86 @@ public class AddTractorActivity extends BaseActivity {
                         Toast.makeText(AddTractorActivity.this, "Error adding tractor: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     });
         }
+    }
+
+    private void checkAndNotifyNewWarnings(Tractor tractor, String oldStatus, String oldSoftware, String oldFirmware, boolean oldMW, boolean oldSW, boolean oldFW) {
+        // Explicitly block notification if the current user is an Owner
+        // We only want Owners to be notified when an OPERATOR makes changes.
+        if (userRole != null && userRole.trim().equalsIgnoreCase("Owner")) {
+            Log.d("NOTIFICATION", "User is Owner. Skipping notification as requested.");
+            return;
+        }
+
+        StringBuilder warningDetails = new StringBuilder();
+        boolean notify = false;
+
+        String curStatus = tractor.getStatus() != null ? tractor.getStatus() : "";
+        String prevStatus = oldStatus != null ? oldStatus : "";
+        
+        // Maintenance
+        if (tractor.isMaintenanceWarning()) {
+            // Notify if warning is NEW or if status text changed while warning active
+            if (!oldMW || !curStatus.equals(prevStatus)) {
+                warningDetails.append("- Maintenance: ").append(curStatus).append("\n");
+                notify = true;
+            }
+        } else if (oldMW) {
+            // Notify if warning was RESOLVED (turned off)
+            warningDetails.append("- Maintenance Warning Resolved\n");
+            notify = true;
+        }
+
+        // Software
+        String curSoft = tractor.getSoftwareStatus() != null ? tractor.getSoftwareStatus() : "";
+        String prevSoft = oldSoftware != null ? oldSoftware : "";
+        if (tractor.isSoftwareWarning()) {
+            if (!oldSW || !curSoft.equals(prevSoft)) {
+                warningDetails.append("- Software: ").append(curSoft).append("\n");
+                notify = true;
+            }
+        } else if (oldSW) {
+            warningDetails.append("- Software Warning Resolved\n");
+            notify = true;
+        }
+
+        // Firmware
+        String curFirm = tractor.getFirmwareStatus() != null ? tractor.getFirmwareStatus() : "";
+        String prevFirm = oldFirmware != null ? oldFirmware : "";
+        if (tractor.isFirmwareWarning()) {
+            if (!oldFW || !curFirm.equals(prevFirm)) {
+                warningDetails.append("- Firmware: ").append(curFirm).append("\n");
+                notify = true;
+            }
+        } else if (oldFW) {
+            warningDetails.append("- Firmware Warning Resolved\n");
+            notify = true;
+        }
+
+        if (notify) {
+            sendOwnerNotification(tractor, warningDetails.toString());
+        }
+    }
+
+    private void sendOwnerNotification(Tractor tractor, String details) {
+        // Since a real Push Notification requires a server/Cloud Functions, 
+        // we simulate the notification sending logic here. 
+        // In a real app, this would trigger an FCM message to all users in the same CompanyId with the 'Owner' role.
+        
+        String message = "WARNING: Tractor " + tractor.getName() + " (" + tractor.getModel() + ") has reported issues:\n" + details;
+        
+        // Simulating the push notification with a Toast and Log for now
+        Log.d("NOTIFICATION", "Sending Push Notification to Owner(s) of Company " + tractor.getCompanyId() + ":\n" + message);
+        Toast.makeText(this, "Notification sent to Owner: Issues reported for " + tractor.getName(), Toast.LENGTH_LONG).show();
+        
+        // Potential implementation for real FCM:
+        /*
+        Map<String, Object> notification = new HashMap<>();
+        notification.put("toCompanyId", tractor.getCompanyId());
+        notification.put("title", "Tractor Warning!");
+        notification.put("body", "Tractor " + tractor.getName() + " needs attention.");
+        notification.put("details", details);
+        db.collection("notifications").add(notification); 
+        */
     }
 
     @Override
