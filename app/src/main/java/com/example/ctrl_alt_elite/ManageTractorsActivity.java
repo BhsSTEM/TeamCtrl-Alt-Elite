@@ -14,6 +14,7 @@ import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.ListenerRegistration;
 import android.util.Log;
+import android.view.View;
 import androidx.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
@@ -71,19 +72,22 @@ public class ManageTractorsActivity extends BaseActivity {
                     return;
                 }
 
+                // ROLE UI LOGIC: Hide Add Tractor button for operators
+                MaterialButton btnAddTractor = findViewById(R.id.btn_add_tractor);
+                if (btnAddTractor != null) {
+                    if ("operator".equalsIgnoreCase(role)) {
+                        btnAddTractor.setVisibility(View.GONE);
+                    } else {
+                        btnAddTractor.setVisibility(View.VISIBLE);
+                    }
+                }
+
                 com.google.firebase.firestore.Query query;
 
-                // ROLE LOGIC:
-                // If owner, get all tractors in company. If operator (op), only get theirs in the company.
-                if ("owner".equalsIgnoreCase(role)) {
-                    query = db.collection("tractors").whereEqualTo("CompanyId", companyId);
-                    Log.d("FirestoreData", "User is Owner: Fetching all tractors for company: " + companyId);
-                } else {
-                    query = db.collection("tractors")
-                            .whereEqualTo("CompanyId", companyId)
-                            .whereEqualTo("user", currentUserId);
-                    Log.d("FirestoreData", "User is Operator: Fetching personal tractors for company: " + companyId);
-                }
+                // ROLE DATA LOGIC: Both owners and operators see all tractors within their company.
+                // Using lowercase "companyId" to match the database field name.
+                query = db.collection("tractors").whereEqualTo("CompanyId", companyId);
+                Log.d("FirestoreData", "Fetching tractors for company: " + companyId + " (Role: " + role + ")");
 
                 // Remove existing listener if any
                 if (tractorListener != null) {
