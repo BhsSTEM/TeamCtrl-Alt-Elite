@@ -44,6 +44,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
@@ -72,6 +73,7 @@ public class evansMapActivity extends BaseActivity implements OnMapReadyCallback
 
     private int collapsedHeight = 0;
     private FirebaseFirestore db;
+    private FirebaseFirestore userDb;
     private List<Tractor> tractorList = new ArrayList<>();
     private TractorAdapter adapter;
     private ListenerRegistration tractorListener;
@@ -82,6 +84,7 @@ public class evansMapActivity extends BaseActivity implements OnMapReadyCallback
         setActivityContent(R.layout.activity_evans_map);
 
         db = FirebaseFirestore.getInstance();
+        userDb = FirebaseFirestore.getInstance("sign-up");
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -154,7 +157,10 @@ public class evansMapActivity extends BaseActivity implements OnMapReadyCallback
 
     public void showTractorOnMap(Tractor tractor) {
         LatLng pos = parseLocation(tractor.getLocation());
-        if (pos == null) return;
+        if (pos == null) {
+            Toast.makeText(this, "Tractor location not available", Toast.LENGTH_SHORT).show();
+            return;
+        }
         map.animateCamera(CameraUpdateFactory.newLatLngZoom(pos, 17));
 
         // Collapse the search panel if open
@@ -198,57 +204,81 @@ public class evansMapActivity extends BaseActivity implements OnMapReadyCallback
             }
         });
 
-        startTractorListener();
+        fetchUserDetailsAndStartListener();
         setupCustomControls();
         getLocationPermission();
         updateLocationUI();
         getDeviceLocation();
     }
 
-    private void startTractorListener() {
-        if (FirebaseAuth.getInstance().getCurrentUser() == null) return;
+    private void fetchUserDetailsAndStartListener() {
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (currentUser == null) return;
 
+        userDb.collection("users").document(currentUser.getUid()).get().addOnSuccessListener(documentSnapshot -> {
+            if (documentSnapshot.exists()) {
+                String role = documentSnapshot.getString("role");
+                String companyId = documentSnapshot.getString("companyId");
+                
+                if (adapter != null) {
+                    adapter.setUserRole(role);
+                }
+                
+                startTractorListener(companyId);
+            }
+        }).addOnFailureListener(e -> {
+            Log.e(TAG, "Failed to fetch user details", e);
+        });
+    }
+
+    private void startTractorListener(String companyId) {
         if (tractorListener != null) {
             tractorListener.remove();
         }
 
-        tractorListener = db.collection("tractors")
-                .whereEqualTo("user", FirebaseAuth.getInstance().getCurrentUser().getUid())
-                .addSnapshotListener(new EventListener<QuerySnapshot>() {
-                    @Override
-                    public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
-                        if (error != null) {
-                            Log.e(TAG, "Listen failed.", error);
-                            return;
-                        }
+        com.google.firebase.firestore.Query query;
+        if (companyId != null && !companyId.isEmpty()) {
+            query = db.collection("tractors").whereEqualTo("CompanyId", companyId);
+        } else {
+            // Fallback to user-only if no companyId
+            query = db.collection("tractors").whereEqualTo("user", FirebaseAuth.getInstance().getCurrentUser().getUid());
+        }
 
-                        if (value != null) {
-                            tractorList.clear();
-                            if (map != null) map.clear(); // Clear existing markers
+        tractorListener = query.addSnapshotListener(new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
+                if (error != null) {
+                    Log.e(TAG, "Listen failed.", error);
+                    return;
+                }
 
-                            for (QueryDocumentSnapshot document : value) {
-                                try {
-                                    Tractor tractor = document.toObject(Tractor.class);
-                                    tractor.setDocumentId(document.getId());
+                if (value != null) {
+                    tractorList.clear();
+                    if (map != null) map.clear(); // Clear existing markers
 
-                                    Object locObj = document.get("location");
-                                    if (locObj instanceof GeoPoint) {
-                                        GeoPoint gp = (GeoPoint) locObj;
-                                        tractor.setLocation(gp.getLatitude() + "," + gp.getLongitude());
-                                    } else if (locObj instanceof String) {
-                                        tractor.setLocation((String) locObj);
-                                    }
+                    for (QueryDocumentSnapshot document : value) {
+                        try {
+                            Tractor tractor = document.toObject(Tractor.class);
+                            tractor.setDocumentId(document.getId());
 
-                                    tractorList.add(tractor);
-                                    addTractorMarker(tractor);
-                                } catch (Exception e) {
-                                    Log.e(TAG, "Error parsing tractor: " + document.getId(), e);
-                                }
+                            Object locObj = document.get("location");
+                            if (locObj instanceof GeoPoint) {
+                                GeoPoint gp = (GeoPoint) locObj;
+                                tractor.setLocation(gp.getLatitude() + "," + gp.getLongitude());
+                            } else if (locObj instanceof String) {
+                                tractor.setLocation((String) locObj);
                             }
-                            if (adapter != null) adapter.notifyDataSetChanged();
+
+                            tractorList.add(tractor);
+                            addTractorMarker(tractor);
+                        } catch (Exception e) {
+                            Log.e(TAG, "Error parsing tractor: " + document.getId(), e);
                         }
                     }
-                });
+                    if (adapter != null) adapter.notifyDataSetChanged();
+                }
+            }
+        });
     }
 
     private LatLng parseLocation(String locationStr) {
@@ -416,7 +446,7 @@ public class evansMapActivity extends BaseActivity implements OnMapReadyCallback
         super.onResume();
         setupNavigation();
         if (tractorListener == null && map != null) {
-            startTractorListener();
+            fetchUserDetailsAndStartListener();
         }
     }
 

@@ -28,18 +28,21 @@ public class ManageTractorsActivity extends BaseActivity {
     private TractorAdapter adapter;
 
     private ListenerRegistration tractorListener;
+    private MaterialButton btnAddTractor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setActivityContent(R.layout.add_tracter);
 
-        MaterialButton btnAddTractor = findViewById(R.id.btn_add_tractor);
+        btnAddTractor = findViewById(R.id.btn_add_tractor);
         if (btnAddTractor != null) {
             btnAddTractor.setOnClickListener(v -> {
                 Intent intent = new Intent(ManageTractorsActivity.this, AddTractorActivity.class);
                 startActivity(intent);
             });
+            // Initially hide until role is confirmed
+            btnAddTractor.setVisibility(View.GONE);
         }
 
         RecyclerView recyclerView = findViewById(R.id.tracters);
@@ -72,22 +75,27 @@ public class ManageTractorsActivity extends BaseActivity {
                     return;
                 }
 
-                // ROLE UI LOGIC: Hide Add Tractor button for operators
-                MaterialButton btnAddTractor = findViewById(R.id.btn_add_tractor);
+                boolean isOwner = "owner".equalsIgnoreCase(role);
                 if (btnAddTractor != null) {
-                    if ("operator".equalsIgnoreCase(role)) {
-                        btnAddTractor.setVisibility(View.GONE);
-                    } else {
-                        btnAddTractor.setVisibility(View.VISIBLE);
-                    }
+                    btnAddTractor.setVisibility(isOwner ? View.VISIBLE : View.GONE);
+                }
+
+                if (adapter != null) {
+                    adapter.setUserRole(role);
                 }
 
                 com.google.firebase.firestore.Query query;
 
-                // ROLE DATA LOGIC: Both owners and operators see all tractors within their company.
-                // Using lowercase "companyId" to match the database field name.
-                query = db.collection("tractors").whereEqualTo("CompanyId", companyId);
-                Log.d("FirestoreData", "Fetching tractors for company: " + companyId + " (Role: " + role + ")");
+                // ROLE LOGIC:
+                // If owner, get all tractors in company. If operator (op), only get theirs in the company.
+                if (isOwner) {
+                    query = db.collection("tractors").whereEqualTo("CompanyId", companyId);
+                    Log.d("FirestoreData", "User is Owner: Fetching all tractors for company: " + companyId);
+                } else {
+                    query = db.collection("tractors")
+                            .whereEqualTo("CompanyId", companyId);
+                    Log.d("FirestoreData", "User is Operator: Fetching personal tractors for company: " + companyId);
+                }
 
                 // Remove existing listener if any
                 if (tractorListener != null) {
