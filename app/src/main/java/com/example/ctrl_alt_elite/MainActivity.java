@@ -28,6 +28,7 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import android.content.pm.PackageManager;
 import androidx.annotation.NonNull;
@@ -43,7 +44,9 @@ public class MainActivity extends BaseActivity {
     private ImageView weatherIcon;
     private ImageView linkToNoaa;
     private ImageView mapView;
+    private FirebaseFirestore userdb;
     private FirebaseAuth mAuth;
+    private String notifText;
     private FusedLocationProviderClient fusedLocationClient;
     private static final String USER_AGENT = "TeamCtrlAltElite/1.0 (contact@example.com)";
 
@@ -60,6 +63,7 @@ public class MainActivity extends BaseActivity {
         weatherIcon = findViewById(R.id.weather_icon);
         linkToNoaa = findViewById(R.id.LinkToNOAA);
         // Initialize Firebase Auth
+        userdb = FirebaseFirestore.getInstance("sign-up");
         mAuth = FirebaseAuth.getInstance();
         // Initialize FusedLocationProviderClient
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
@@ -152,7 +156,13 @@ public class MainActivity extends BaseActivity {
                 } else {
                     FirebaseUser user = mAuth.getCurrentUser();
                     if (user != null) {
-                        notificationText.setText(user.getEmail());
+                        String uid = user.getUid();
+                        userdb.collection("users").document(uid).get().addOnCompleteListener((task) -> {
+                            if (task.isSuccessful() && task.getResult() != null) {
+                                notifText = task.getResult().getString("name");
+                                notificationText.setText(notifText);
+                            }
+                        });
                     }else {
                         notificationText.setText("No Alerts");
                     }
