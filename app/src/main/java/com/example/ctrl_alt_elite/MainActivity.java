@@ -155,6 +155,7 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
                     new LatLng(location.getLatitude(), location.getLongitude()), 5));
         }
     }
+    /*
     //Add tractor markers to map
     private LatLng parseLocation(String locationStr) {
         if (locationStr == null || locationStr.isEmpty()) return null;
@@ -181,7 +182,6 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
 
         return null;
     }
-    /*
     private void addTractorMarker(Tractor tractor) {
         LatLng position = parseLocation(tractor.getLocation());
         if (position == null) return;
@@ -261,7 +261,7 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
                     }
                 });
     }
-     */
+     //*/
     //Update location
     private void requestFreshLocation() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
@@ -340,7 +340,7 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
 
             @Override
             public void onFailure(Call<WAlertsResponse> call, Throwable t) {
-                notificationText.setText("Notifications Error");
+                notificationText.setText("");
             }
         });
     }
