@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Ctrl-Alt-Elite</string>
     <string name="nav_home">Home</string>
@@ -54,6 +55,8 @@
     <string name="tasks_title_placeholder">Task Title</string>
     <string name="tasks_desc_placeholder">Description of the task goes here</string>
     <string name="tasks_date_placeholder">May 1</string>
+    <string name="tasks_completed_by_format">Completed by %1$s on %2$s</string>
+    <string name="tasks_unknown_user">Unknown</string>
     <string name="machines_header">Machines</string>
     <string name="machines_add_content_desc">Add Machine</string>
     <string name="machines_options_content_desc">Machine Options</string>

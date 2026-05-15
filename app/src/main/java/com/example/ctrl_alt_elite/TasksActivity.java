@@ -88,6 +88,11 @@ public class TasksActivity extends BaseActivity {
                 userRole = documentSnapshot.getString("role");
                 userName = documentSnapshot.getString("name");
 
+                // Update adapter with current user's name for completion tracking
+                if (adapter != null) {
+                    adapter.setCurrentUserName(userName);
+                }
+
                 // If companyId is null or empty, use the shared default company ID
                 if (userCompanyId == null || userCompanyId.trim().isEmpty()) {
                     userCompanyId = "";

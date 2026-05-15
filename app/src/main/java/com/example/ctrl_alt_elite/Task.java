@@ -15,6 +15,8 @@ public class Task {
     private String tractorId;
     private List<Map<String, Object>> checklist;
     private boolean completed;
+    private String completedDate;
+    private String completedBy;
 
     public Task() {
         // Required for Firestore
@@ -63,4 +65,10 @@ public class Task {
 
     public boolean isCompleted() { return completed; }
     public void setCompleted(boolean completed) { this.completed = completed; }
+
+    public String getCompletedDate() { return completedDate; }
+    public void setCompletedDate(String completedDate) { this.completedDate = completedDate; }
+
+    public String getCompletedBy() { return completedBy; }
+    public void setCompletedBy(String completedBy) { this.completedBy = completedBy; }
 }

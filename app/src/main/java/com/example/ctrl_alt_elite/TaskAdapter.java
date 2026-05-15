@@ -9,7 +9,6 @@ import android.widget.CheckBox;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -30,6 +29,8 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
     private OnTaskMenuClickListener menuClickListener;
     private FirebaseFirestore db = FirebaseFirestore.getInstance("tasks");
     private SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+    private SimpleDateFormat completionDateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
+    private String currentUserName;
 
     public interface OnTaskMenuClickListener {
         void onMenuClick(View view, Task task);
@@ -38,6 +39,10 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
     public TaskAdapter(List<Task> taskList, OnTaskMenuClickListener menuClickListener) {
         this.taskList = taskList;
         this.menuClickListener = menuClickListener;
+    }
+
+    public void setCurrentUserName(String userName) {
+        this.currentUserName = userName;
     }
 
     @NonNull
@@ -78,9 +83,18 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         if (task.isCompleted()) {
             holder.titleText.setPaintFlags(holder.titleText.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
             holder.titleText.setAlpha(0.6f);
+            
+            if (task.getCompletedBy() != null && task.getCompletedDate() != null) {
+                String completionInfo = holder.itemView.getContext().getString(R.string.tasks_completed_by_format, task.getCompletedBy(), task.getCompletedDate());
+                holder.completionInfoText.setText(completionInfo);
+                holder.completionInfoText.setVisibility(View.VISIBLE);
+            } else {
+                holder.completionInfoText.setVisibility(View.GONE);
+            }
         } else {
             holder.titleText.setPaintFlags(holder.titleText.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
             holder.titleText.setAlpha(1.0f);
+            holder.completionInfoText.setVisibility(View.GONE);
         }
 
         // Handle whole task completion
@@ -92,6 +106,14 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
                 handleRepeatingTask(task, position);
             } else {
                 task.setCompleted(isChecked);
+                if (isChecked) {
+                    String userName = currentUserName != null ? currentUserName : buttonView.getContext().getString(R.string.tasks_unknown_user);
+                    task.setCompletedBy(userName);
+                    task.setCompletedDate(completionDateFormat.format(new Date()));
+                } else {
+                    task.setCompletedBy(null);
+                    task.setCompletedDate(null);
+                }
                 
                 // If checking off the whole task, optionally mark all checklist items as done
                 List<Map<String, Object>> checklist = task.getChecklist();
@@ -144,11 +166,25 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             }
 
             holder.markAllDoneButton.setOnClickListener(v -> {
+                // Mark all checklist items as done
                 for (Map<String, Object> item : checklist) {
                     item.put("completed", true);
                 }
-                updateTaskInFirestore(task);
-                notifyItemChanged(position);
+                
+                // Mark the task itself as complete as well
+                if (task.getRepeatInterval() != null && !task.getRepeatInterval().equalsIgnoreCase("None") && !task.getRepeatInterval().isEmpty()) {
+                    // If it's a repeating task, trigger the repeat logic (advance date, etc.)
+                    handleRepeatingTask(task, position);
+                } else {
+                    // Regular task completion
+                    task.setCompleted(true);
+                    String userName = currentUserName != null ? currentUserName : v.getContext().getString(R.string.tasks_unknown_user);
+                    task.setCompletedBy(userName);
+                    task.setCompletedDate(completionDateFormat.format(new Date()));
+                    
+                    updateTaskInFirestore(task);
+                    notifyItemChanged(position);
+                }
             });
         } else {
             holder.checklistContainer.setVisibility(View.GONE);
@@ -181,6 +217,8 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             String newDueDate = dateFormat.format(cal.getTime());
             task.setDueDate(newDueDate);
             task.setCompleted(false); // Uncheck it
+            task.setCompletedBy(null);
+            task.setCompletedDate(null);
 
             // Reset checklist
             List<Map<String, Object>> checklist = task.getChecklist();
@@ -197,6 +235,9 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         } catch (ParseException e) {
             // If date parsing fails, just mark it completed as normal
             task.setCompleted(true);
+            String userName = currentUserName != null ? currentUserName : "Unknown";
+            task.setCompletedBy(userName);
+            task.setCompletedDate(completionDateFormat.format(new Date()));
             updateTaskInFirestore(task);
             notifyItemChanged(position);
         }
@@ -212,7 +253,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
     }
 
     public static class TaskViewHolder extends RecyclerView.ViewHolder {
-        TextView titleText, descText, dateText, detailsText, repeatDisplayText;
+        TextView titleText, descText, dateText, detailsText, repeatDisplayText, completionInfoText;
         ImageButton menuButton;
         CheckBox taskCheckbox;
         LinearLayout checklistContainer, checklistItemsList;
@@ -225,6 +266,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             dateText = itemView.findViewById(R.id.taskDueDate);
             detailsText = itemView.findViewById(R.id.taskDetails);
             repeatDisplayText = itemView.findViewById(R.id.taskRepeatDisplay);
+            completionInfoText = itemView.findViewById(R.id.taskCompletionInfo);
             menuButton = itemView.findViewById(R.id.taskMenuButton);
             taskCheckbox = itemView.findViewById(R.id.taskCheckbox);
             checklistContainer = itemView.findViewById(R.id.checklistContainer);

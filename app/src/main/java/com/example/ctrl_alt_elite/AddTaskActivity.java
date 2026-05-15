@@ -11,8 +11,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.materialswitch.MaterialSwitch;
 import com.google.android.material.textfield.TextInputEditText;
@@ -45,6 +43,8 @@ public class AddTaskActivity extends BaseActivity {
 
     private String existingTaskId = null; // Used if we are in Edit mode
     private boolean existingTaskCompleted = false;
+    private String existingCompletedBy = null;
+    private String existingCompletedDate = null;
     private String userCompanyId = null;
 
     // For multi-select Assign To
@@ -158,7 +158,8 @@ public class AddTaskActivity extends BaseActivity {
             if (task.isSuccessful()) {
                 List<String> tractorNames = new ArrayList<>();
                 for (QueryDocumentSnapshot document : task.getResult()) {
-                    tractorNames.add(document.getString("tracterName"));
+                    String name = document.getString("tracterName");
+                    if (name != null) tractorNames.add(name);
                 }
                 ArrayAdapter<String> tractorAdapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, tractorNames);
                 tractorDropdown.setAdapter(tractorAdapter);
@@ -268,6 +269,9 @@ public class AddTaskActivity extends BaseActivity {
             taskdb.collection("tasks").document(existingTaskId).get().addOnSuccessListener(documentSnapshot -> {
                 if (documentSnapshot.exists()) {
                     existingTaskCompleted = documentSnapshot.getBoolean("completed") != null && documentSnapshot.getBoolean("completed");
+                    existingCompletedBy = documentSnapshot.getString("completedBy");
+                    existingCompletedDate = documentSnapshot.getString("completedDate");
+                    
                     String cid = documentSnapshot.getString("companyId");
                     if (cid == null || cid.trim().isEmpty()) {
                         userCompanyId = "";
@@ -383,6 +387,8 @@ public class AddTaskActivity extends BaseActivity {
         task.put("tractorId", tractor);
         task.put("checklist", checklistItems);
         task.put("completed", existingTaskCompleted); // Preserve completion status on edit
+        task.put("completedBy", existingCompletedBy);
+        task.put("completedDate", existingCompletedDate);
 
         taskdb.collection("tasks").document(taskId).set(task)
                 .addOnSuccessListener(aVoid -> {
