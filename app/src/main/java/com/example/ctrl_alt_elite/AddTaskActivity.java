@@ -244,13 +244,13 @@ public class AddTaskActivity extends BaseActivity {
         titleInput.setText(getIntent().getStringExtra("task_title"));
         descriptionInput.setText(getIntent().getStringExtra("task_description"));
         
-        // Handle splitting the saved date back into DD, MM, YY
+        // Handle splitting the saved date back into MM, DD, YYYY
         String fullDate = getIntent().getStringExtra("task_due_date");
         if (fullDate != null && fullDate.contains("/")) {
             String[] parts = fullDate.split("/");
             if (parts.length == 3) {
-                dayInput.setText(parts[0]);
-                monthInput.setText(parts[1]);
+                monthInput.setText(parts[0]);
+                dayInput.setText(parts[1]);
                 yearInput.setText(parts[2]);
             }
         }
@@ -334,10 +334,11 @@ public class AddTaskActivity extends BaseActivity {
 
         String dueDate = "";
         if (!day.isEmpty() && !month.isEmpty() && !year.isEmpty()) {
-            if (day.length() == 1) day = "0" + day;
             if (month.length() == 1) month = "0" + month;
+            if (day.length() == 1) day = "0" + day;
             if (year.length() == 1) year = "0" + year;
-            dueDate = day + "/" + month + "/" + year;
+            // Saving as MM/DD/YYYY
+            dueDate = month + "/" + day + "/" + year;
         }
 
         // assignedTo is now a comma-separated string from the dropdown text

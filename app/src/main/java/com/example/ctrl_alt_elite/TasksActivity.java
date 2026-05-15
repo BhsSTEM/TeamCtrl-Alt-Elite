@@ -17,8 +17,11 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 public class TasksActivity extends BaseActivity {
 
@@ -157,6 +160,27 @@ public class TasksActivity extends BaseActivity {
                             taskList.add(task);
                         }
                     }
+
+                    // Sort tasks: Incomplete first, then by date (soonest first)
+                    Collections.sort(taskList, (t1, t2) -> {
+                        if (t1.isCompleted() != t2.isCompleted()) {
+                            return t1.isCompleted() ? 1 : -1;
+                        }
+
+                        String d1 = t1.getDueDate();
+                        String d2 = t2.getDueDate();
+
+                        if ((d1 == null || d1.isEmpty()) && (d2 == null || d2.isEmpty())) return 0;
+                        if (d1 == null || d1.isEmpty()) return 1;
+                        if (d2 == null || d2.isEmpty()) return -1;
+
+                        try {
+                            SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy", Locale.getDefault());
+                            return sdf.parse(d1).compareTo(sdf.parse(d2));
+                        } catch (Exception e) {
+                            return 0;
+                        }
+                    });
 
                     // Update empty state visibility
                     if (taskList.isEmpty()) {
